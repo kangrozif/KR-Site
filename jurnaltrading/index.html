@@ -205,6 +205,16 @@
   .cal-detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); }
   .cal-detail-row:last-child { border-bottom: none; }
   .cal-detail-row .name { color: var(--text-muted); }
+
+  .eq-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 24px; }
+  .eq-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; flex-wrap: wrap; gap: 8px; }
+  .eq-title { font-size: 13px; font-weight: 600; margin: 0; }
+  .eq-mini-stats { display: flex; gap: 14px; font-size: 11px; color: var(--text-muted); }
+  .eq-mini-stats b { color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .eq-svg-wrap { margin-top: 10px; }
+  .eq-empty { text-align: center; padding: 30px 0; color: var(--text-muted); font-size: 12px; }
+  .eq-detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .eq-detail .name { color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -421,6 +431,116 @@ function CalendarHeatmap({ trades }) {
   );
 }
 
+function computeEquityCurve(trades) {
+  const closed = trades
+    .filter(t => (t.Result === 'Profit' || t.Result === 'Loss' || t.Result === 'Breakeven') && t['Timestamp Exit'])
+    .sort((a, b) => new Date(a['Timestamp Exit']) - new Date(b['Timestamp Exit']));
+
+  let running = 0, peak = 0, maxDrawdown = 0;
+  const points = closed.map(t => {
+    running += parseFloat(t.PL_USD) || 0;
+    if (running > peak) peak = running;
+    const dd = peak > 0 ? ((peak - running) / peak) * 100 : 0;
+    if (dd > maxDrawdown) maxDrawdown = dd;
+    return {
+      id: t.ID, date: new Date(t['Timestamp Exit']), equity: running,
+      pl: parseFloat(t.PL_USD) || 0, arah: t.Arah, pair: t.Pair
+    };
+  });
+  return { points, peak, maxDrawdown, final: running };
+}
+
+function EquityCurveChart({ trades }) {
+  const [selected, setSelected] = useState(null);
+  const { points, peak, maxDrawdown, final } = useMemo(() => computeEquityCurve(trades), [trades]);
+
+  if (points.length === 0) {
+    return (
+      <div className="eq-panel">
+        <div className="eq-head"><h3 className="eq-title">📈 Equity Curve</h3></div>
+        <div className="eq-empty">Belum ada trade closed buat digambar kurvanya.</div>
+      </div>
+    );
+  }
+
+  const W = 600, H = 200;
+  const padL = 46, padR = 10, padT = 14, padB = 24;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const n = points.length;
+
+  const values = points.map(p => p.equity).concat([0]);
+  let minY = Math.min(...values), maxY = Math.max(...values);
+  const range = (maxY - minY) || 1;
+  minY -= range * 0.12; maxY += range * 0.12;
+
+  const x = i => padL + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
+  const y = v => padT + innerH - ((v - minY) / (maxY - minY)) * innerH;
+  const zeroY = y(Math.max(minY, Math.min(0, maxY)));
+  const bottomY = padT + innerH;
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(p.equity).toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L${x(n - 1).toFixed(1)},${bottomY} L${x(0).toFixed(1)},${bottomY} Z`;
+  const isPositive = final >= 0;
+  const lineColor = isPositive ? 'var(--profit)' : 'var(--loss)';
+  const gradId = isPositive ? 'eqGradPos' : 'eqGradNeg';
+
+  return (
+    <div className="eq-panel">
+      <div className="eq-head">
+        <h3 className="eq-title">📈 Equity Curve</h3>
+        <div className="eq-mini-stats">
+          <span>Puncak <b className="mono">${peak.toFixed(0)}</b></span>
+          <span>Max DD <b className="mono">{maxDrawdown.toFixed(1)}%</b></span>
+          <span>Saat ini <b className="mono" style={{color: lineColor}}>${final.toFixed(0)}</b></span>
+        </div>
+      </div>
+
+      <div className="eq-svg-wrap">
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
+          <defs>
+            <linearGradient id="eqGradPos" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3ed598" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#3ed598" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="eqGradNeg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff6b6b" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#ff6b6b" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+
+          <line x1={padL} y1={zeroY} x2={W - padR} y2={zeroY} stroke="#2a2e3d" strokeDasharray="3,3" />
+          <text x={padL - 6} y={zeroY + 3} textAnchor="end" fontSize="9" fill="#565d70" fontFamily="JetBrains Mono, monospace">0</text>
+          <text x={padL - 6} y={y(maxY - range * 0.12) + 3} textAnchor="end" fontSize="9" fill="#565d70" fontFamily="JetBrains Mono, monospace">${Math.round(maxY - range * 0.12)}</text>
+          <text x={padL - 6} y={y(minY + range * 0.12) + 3} textAnchor="end" fontSize="9" fill="#565d70" fontFamily="JetBrains Mono, monospace">${Math.round(minY + range * 0.12)}</text>
+
+          <path d={areaPath} fill={`url(#${gradId})`} stroke="none" />
+          <path d={linePath} fill="none" stroke={lineColor} strokeWidth="2" />
+
+          {points.map((p, i) => (
+            <circle
+              key={p.id} cx={x(i)} cy={y(p.equity)} r={selected === i ? 5 : 3.5}
+              fill="#191c27" stroke={lineColor} strokeWidth="2"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setSelected(selected === i ? null : i)}
+            />
+          ))}
+        </svg>
+      </div>
+
+      {selected !== null && (
+        <div className="eq-detail">
+          <span className="name">
+            {points[selected].id} · {points[selected].date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })} · {points[selected].arah} {points[selected].pair}
+          </span>
+          <span className="mono" style={{ fontWeight: 700, color: points[selected].pl >= 0 ? 'var(--profit)' : 'var(--loss)' }}>
+            {points[selected].pl >= 0 ? '+' : ''}${points[selected].pl} → equity ${points[selected].equity.toFixed(0)}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function StatCard({ label, value, sub, tone }) {
   return (
     <div className="stat-card">
@@ -599,6 +719,8 @@ function App() {
           </div>
 
           <CalendarHeatmap trades={trades} />
+
+          <EquityCurveChart trades={trades} />
 
           <div className="panel-row">
             <SetupPerformancePanel data={setupBreakdown} />
