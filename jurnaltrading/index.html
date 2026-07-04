@@ -168,6 +168,43 @@
   .empty-state .icon { font-size: 28px; margin-bottom: 10px; display: block; }
 
   .footer-note { text-align: center; font-size: 11px; color: var(--text-faint); margin-top: 30px; }
+
+  .cal-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 24px; }
+  .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .cal-nav-btn {
+    background: var(--panel-alt); border: 1px solid var(--border); color: var(--text);
+    width: 28px; height: 28px; border-radius: 7px; cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; transition: border-color 0.15s;
+  }
+  .cal-nav-btn:hover { border-color: var(--gold-dim); }
+  .cal-nav-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .cal-month-label { font-size: 13px; font-weight: 600; }
+
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal-dow { text-align: center; font-size: 10px; color: var(--text-faint); text-transform: uppercase; padding-bottom: 4px; }
+  .cal-cell {
+    aspect-ratio: 1; border-radius: 7px; border: 1px solid var(--border); background: var(--panel-alt);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: default; font-size: 11px; position: relative; padding: 2px;
+  }
+  .cal-cell.empty { border: none; background: transparent; }
+  .cal-cell.has-trade { cursor: pointer; transition: transform 0.1s, outline 0.1s; }
+  .cal-cell.has-trade:hover { transform: scale(1.06); }
+  .cal-cell.has-trade:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .cal-cell.selected { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .cal-cell .cal-date-num { font-size: 10px; color: var(--text-faint); position: absolute; top: 3px; left: 5px; }
+  .cal-cell .cal-pl { font-weight: 700; font-size: 11px; margin-top: 6px; }
+  .cal-cell.today { border-color: var(--gold-dim); }
+
+  .cal-legend { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 10px; font-size: 10px; color: var(--text-faint); }
+  .cal-legend-swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+  .cal-detail { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .cal-detail-head { font-size: 12px; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .cal-detail-close { background: none; border: none; color: var(--text-faint); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 4px; }
+  .cal-detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .cal-detail-row:last-child { border-bottom: none; }
+  .cal-detail-row .name { color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -179,7 +216,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
 // ============================================================
 // GANTI dengan Web App URL GAS kamu (yang sama dipakai di Fase 1-2)
 // ============================================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbyB0fq6nFyWov6AA2_l-J0lrDT-zNRDYkXVxEiFr1Rk6HbDLe2w-kKi4n3WFUt5HblDkw/exec';
+const API_URL = 'PASTE_WEB_APP_URL_GAS_DI_SINI';
 
 function useTrades() {
   const [trades, setTrades] = useState([]);
@@ -257,6 +294,131 @@ function generateInsight(setupBreakdown, emotionBreakdown, stats) {
   if (bestSetup) parts.push(`Win rate tertinggi ada di setup <b>${bestSetup.name}</b> (${bestSetup.winRate.toFixed(0)}%, ${bestSetup.total}x)`);
   if (worstEmo && worstEmo.winRate < 50) parts.push(`saat emosi <b>${worstEmo.name}</b>, win rate cuma ${worstEmo.winRate.toFixed(0)}% — pola ini layak diwaspadai`);
   return parts.length ? parts.join('. ') + '.' : 'Performa relatif merata di semua setup dan kondisi emosi sejauh ini.';
+}
+
+function computeDailyData(trades) {
+  // Kelompokkan trade closed per tanggal (berdasarkan Timestamp Exit), total P/L per hari
+  const map = {};
+  trades
+    .filter(t => (t.Result === 'Profit' || t.Result === 'Loss' || t.Result === 'Breakeven') && t['Timestamp Exit'])
+    .forEach(t => {
+      const d = new Date(t['Timestamp Exit']);
+      if (isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (!map[key]) map[key] = { pl: 0, count: 0, trades: [] };
+      map[key].pl += parseFloat(t.PL_USD) || 0;
+      map[key].count += 1;
+      map[key].trades.push(t);
+    });
+  return map;
+}
+
+function CalendarHeatmap({ trades }) {
+  const [monthOffset, setMonthOffset] = useState(0);
+  const [selectedKey, setSelectedKey] = useState(null);
+
+  const dailyData = useMemo(() => computeDailyData(trades), [trades]);
+
+  const baseDate = new Date();
+  baseDate.setDate(1);
+  baseDate.setMonth(baseDate.getMonth() + monthOffset);
+  const year = baseDate.getFullYear();
+  const month = baseDate.getMonth();
+  const monthLabel = baseDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+  const firstDayOfMonth = new Date(year, month, 1);
+  // Senin = 0 ... Minggu = 6 (kalender Indonesia mulai Senin)
+  const startOffset = (firstDayOfMonth.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const todayKey = (() => {
+    const t = new Date();
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  })();
+
+  const cells = [];
+  for (let i = 0; i < startOffset; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  function keyFor(day) {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+
+  function toneFor(pl) {
+    if (pl > 0) return pl > 100 ? { bg: 'rgba(62,213,152,0.28)', border: 'rgba(62,213,152,0.5)', text: 'var(--profit)' }
+                                  : { bg: 'rgba(62,213,152,0.14)', border: 'rgba(62,213,152,0.3)', text: 'var(--profit)' };
+    if (pl < 0) return pl < -100 ? { bg: 'rgba(255,107,107,0.28)', border: 'rgba(255,107,107,0.5)', text: 'var(--loss)' }
+                                   : { bg: 'rgba(255,107,107,0.14)', border: 'rgba(255,107,107,0.3)', text: 'var(--loss)' };
+    return { bg: 'var(--panel-alt)', border: 'var(--border)', text: 'var(--text-muted)' };
+  }
+
+  const selectedDay = selectedKey ? dailyData[selectedKey] : null;
+
+  return (
+    <div className="cal-panel">
+      <div className="cal-head">
+        <button className="cal-nav-btn" onClick={() => { setMonthOffset(m => m - 1); setSelectedKey(null); }} aria-label="Bulan sebelumnya">‹</button>
+        <span className="cal-month-label">🗓️ {monthLabel}</span>
+        <button className="cal-nav-btn" onClick={() => { setMonthOffset(m => m + 1); setSelectedKey(null); }} aria-label="Bulan berikutnya">›</button>
+      </div>
+
+      <div className="cal-grid">
+        {['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(d => <div className="cal-dow" key={d}>{d}</div>)}
+        {cells.map((day, i) => {
+          if (day === null) return <div className="cal-cell empty" key={'e' + i} />;
+          const key = keyFor(day);
+          const data = dailyData[key];
+          const isToday = key === todayKey;
+          if (!data) {
+            return (
+              <div className={`cal-cell ${isToday ? 'today' : ''}`} key={key}>
+                <span className="cal-date-num">{day}</span>
+              </div>
+            );
+          }
+          const tone = toneFor(data.pl);
+          return (
+            <div
+              className={`cal-cell has-trade ${isToday ? 'today' : ''} ${selectedKey === key ? 'selected' : ''}`}
+              key={key}
+              style={{ background: tone.bg, borderColor: tone.border }}
+              onClick={() => setSelectedKey(selectedKey === key ? null : key)}
+              role="button" tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') setSelectedKey(selectedKey === key ? null : key); }}
+            >
+              <span className="cal-date-num">{day}</span>
+              <span className="cal-pl mono" style={{ color: tone.text }}>
+                {data.pl >= 0 ? '+' : ''}{data.pl.toFixed(0)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="cal-legend">
+        <span><span className="cal-legend-swatch" style={{background: 'rgba(255,107,107,0.28)'}}></span>Loss</span>
+        <span><span className="cal-legend-swatch" style={{background: 'var(--panel-alt)'}}></span>Kosong</span>
+        <span><span className="cal-legend-swatch" style={{background: 'rgba(62,213,152,0.28)'}}></span>Profit</span>
+      </div>
+
+      {selectedDay && (
+        <div className="cal-detail">
+          <div className="cal-detail-head">
+            <span>{selectedKey.split('-').reverse().join('/')} · {selectedDay.count} trade</span>
+            <button className="cal-detail-close" onClick={() => setSelectedKey(null)} aria-label="Tutup detail">✕</button>
+          </div>
+          {selectedDay.trades.map(t => (
+            <div className="cal-detail-row" key={t.ID}>
+              <span className="name">{t.Arah} {t.Pair} · {t['Tipe Setup']}</span>
+              <span className="mono" style={{ color: parseFloat(t.PL_USD) >= 0 ? 'var(--profit)' : 'var(--loss)', fontWeight: 700 }}>
+                {parseFloat(t.PL_USD) >= 0 ? '+' : ''}${t.PL_USD}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function StatCard({ label, value, sub, tone }) {
@@ -435,6 +597,8 @@ function App() {
             <span className="icon">💡</span>
             <span dangerouslySetInnerHTML={{ __html: insight }} />
           </div>
+
+          <CalendarHeatmap trades={trades} />
 
           <div className="panel-row">
             <SetupPerformancePanel data={setupBreakdown} />
