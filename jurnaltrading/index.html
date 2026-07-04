@@ -226,7 +226,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
 // ============================================================
 // GANTI dengan Web App URL GAS kamu (yang sama dipakai di Fase 1-2)
 // ============================================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbyB0fq6nFyWov6AA2_l-J0lrDT-zNRDYkXVxEiFr1Rk6HbDLe2w-kKi4n3WFUt5HblDkw/exec';
+const API_URL = 'PASTE_WEB_APP_URL_GAS_DI_SINI';
 
 function useTrades() {
   const [trades, setTrades] = useState([]);
@@ -270,6 +270,20 @@ function computeSetupBreakdown(trades) {
   const groups = {};
   closed.forEach(t => {
     const key = t['Tipe Setup'] || 'Lainnya';
+    if (!groups[key]) groups[key] = { total: 0, wins: 0 };
+    groups[key].total += 1;
+    if (t.Result === 'Profit') groups[key].wins += 1;
+  });
+  return Object.entries(groups)
+    .map(([name, v]) => ({ name, total: v.total, winRate: v.total ? (v.wins / v.total) * 100 : 0 }))
+    .sort((a, b) => b.total - a.total);
+}
+
+function computeTradingStyleBreakdown(trades) {
+  const closed = trades.filter(t => t.Result === 'Profit' || t.Result === 'Loss' || t.Result === 'Breakeven');
+  const groups = {};
+  closed.forEach(t => {
+    const key = t['Tipe Trading'] || 'Belum diisi';
     if (!groups[key]) groups[key] = { total: 0, wins: 0 };
     groups[key].total += 1;
     if (t.Result === 'Profit') groups[key].wins += 1;
@@ -573,6 +587,28 @@ function SetupPerformancePanel({ data }) {
   );
 }
 
+function TradingStylePanel({ data }) {
+  const colors = { Scalping: '#7aa2f7', Swing: '#e3b341' };
+  return (
+    <div className="panel" style={{ marginBottom: 24 }}>
+      <h3 className="panel-title">🕐 Performa per Gaya Trading</h3>
+      <p className="panel-desc">Win rate Scalping vs Swing — biar tau gaya mana yang lebih works.</p>
+      {data.length === 0 && <p style={{fontSize: 12, color: 'var(--text-muted)'}}>Belum ada trade closed.</p>}
+      {data.map(s => (
+        <div className="setup-row" key={s.name}>
+          <div className="setup-row-head">
+            <span className="setup-row-name">{s.name}</span>
+            <span className="setup-row-meta mono">{s.winRate.toFixed(0)}% · {s.total}x</span>
+          </div>
+          <div className="setup-bar-track">
+            <div className="setup-bar-fill" style={{ width: s.winRate + '%', background: colors[s.name] || '#8890a6' }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function EmotionPanel({ data }) {
   return (
     <div className="panel">
@@ -636,6 +672,8 @@ function TradeCard({ t }) {
 
       <div className="trade-foot">
         <div style={{display: 'flex', gap: 6, flexWrap: 'wrap'}}>
+          {t['Tipe Trading'] && <span className="trade-tag">🕐 {t['Tipe Trading']}</span>}
+          {t['Kombinasi TF'] && <span className="trade-tag">📐 {t['Kombinasi TF']}</span>}
           {t.Emosi && <span className="trade-tag">🧠 {t.Emosi}</span>}
           {t['Sesuai Plan'] && <span className="trade-tag">📋 {t['Sesuai Plan'] === 'Ya' ? 'Sesuai plan' : 'Melenceng'}</span>}
         </div>
@@ -653,6 +691,7 @@ function App() {
 
   const stats = useMemo(() => computeStats(trades), [trades]);
   const setupBreakdown = useMemo(() => computeSetupBreakdown(trades), [trades]);
+  const tradingStyleBreakdown = useMemo(() => computeTradingStyleBreakdown(trades), [trades]);
   const emotionBreakdown = useMemo(() => computeEmotionBreakdown(trades), [trades]);
   const insight = useMemo(() => generateInsight(setupBreakdown, emotionBreakdown, stats), [setupBreakdown, emotionBreakdown, stats]);
 
@@ -721,6 +760,8 @@ function App() {
           <CalendarHeatmap trades={trades} />
 
           <EquityCurveChart trades={trades} />
+
+          <TradingStylePanel data={tradingStyleBreakdown} />
 
           <div className="panel-row">
             <SetupPerformancePanel data={setupBreakdown} />
