@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jurnal Trading — BBMA OA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root {
+    --bg: #12141c;
+    --panel: #191c27;
+    --panel-alt: #1f2330;
+    --border: #2a2e3d;
+    --gold: #e3b341;
+    --gold-dim: #8a6c2c;
+    --profit: #3ed598;
+    --profit-dim: #1e4536;
+    --loss: #ff6b6b;
+    --loss-dim: #4a2323;
+    --open: #6c7a94;
+    --open-dim: #2b3444;
+    --text: #eaecf3;
+    --text-muted: #8890a6;
+    --text-faint: #565d70;
+  }
+
+  * { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 800px 400px at 20% -10%, rgba(227,179,65,0.06), transparent),
+      radial-gradient(ellipse 600px 300px at 90% 0%, rgba(62,213,152,0.04), transparent);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  #root { max-width: 980px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 24px; gap: 12px; flex-wrap: wrap;
+  }
+  .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+  .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .header-sub .gold-dot { color: var(--gold); }
+
+  .btn {
+    background: var(--panel-alt); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn:hover { border-color: var(--gold-dim); background: #232739; }
+  .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .btn-spin { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;
+  }
+  @media (max-width: 640px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .stat-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .stat-value { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .stat-value.pos { color: var(--profit); }
+  .stat-value.neg { color: var(--loss); }
+  .stat-sub { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
+
+  .insight-bar {
+    background: linear-gradient(90deg, rgba(227,179,65,0.08), rgba(227,179,65,0.02));
+    border: 1px solid var(--gold-dim); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 20px; font-size: 13px; color: var(--text);
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.5;
+  }
+  .insight-bar .icon { color: var(--gold); flex-shrink: 0; font-size: 15px; }
+
+  .panel-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; margin-bottom: 24px; }
+  @media (max-width: 720px) { .panel-row { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+  }
+  .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 4px; }
+  .panel-desc { font-size: 11px; color: var(--text-muted); margin: 0 0 14px; }
+
+  .setup-row { margin-bottom: 12px; }
+  .setup-row:last-child { margin-bottom: 0; }
+  .setup-row-head { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+  .setup-row-name { color: var(--text); font-weight: 500; }
+  .setup-row-meta { color: var(--text-muted); }
+  .setup-bar-track { height: 6px; background: var(--panel-alt); border-radius: 4px; overflow: hidden; }
+  .setup-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+  .emo-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .emo-chip {
+    flex: 1 1 calc(50% - 8px); background: var(--panel-alt); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px;
+  }
+  .emo-chip-name { font-size: 11px; color: var(--text-muted); }
+  .emo-chip-rate { font-size: 15px; font-weight: 700; margin-top: 2px; }
+
+  .section-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .section-title { font-size: 14px; font-weight: 600; }
+
+  .tabs { display: flex; gap: 6px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .tab {
+    border: none; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 500;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .tab.active { background: var(--panel-alt); color: var(--text); }
+  .tab:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+  .trade-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 10px;
+  }
+  .trade-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .trade-pair-row { display: flex; align-items: center; gap: 8px; }
+  .trade-arah {
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .trade-arah.buy { background: var(--profit-dim); color: var(--profit); }
+  .trade-arah.sell { background: var(--loss-dim); color: var(--loss); }
+  .trade-pair { font-weight: 600; font-size: 14px; }
+  .trade-id { font-size: 10px; color: var(--text-faint); margin-top: 2px; }
+
+  .trade-result {
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; text-transform: uppercase;
+  }
+  .trade-result.profit { background: var(--profit-dim); color: var(--profit); }
+  .trade-result.loss { background: var(--loss-dim); color: var(--loss); }
+  .trade-result.breakeven { background: var(--panel-alt); color: var(--text-muted); }
+  .trade-result.open { background: var(--open-dim); color: var(--open); }
+
+  .trade-meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+  @media (max-width: 480px) { .trade-meta-grid { grid-template-columns: repeat(2, 1fr); } }
+  .meta-item-label { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+  .meta-item-value { font-size: 13px; font-weight: 500; margin-top: 2px; }
+
+  .trade-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 6px; }
+  .trade-tag { font-size: 11px; color: var(--text-muted); background: var(--panel-alt); padding: 3px 8px; border-radius: 5px; }
+  .trade-pl { font-size: 14px; font-weight: 700; }
+  .trade-pl.pos { color: var(--profit); }
+  .trade-pl.neg { color: var(--loss); }
+  .trade-pl.zero { color: var(--text-muted); }
+
+  .empty-state, .loading-state, .error-state {
+    text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 13px;
+  }
+  .error-state { color: var(--loss); }
+  .empty-state .icon { font-size: 28px; margin-bottom: 10px; display: block; }
+
+  .footer-note { text-align: center; font-size: 11px; color: var(--text-faint); margin-top: 30px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useCallback } = React;
+
+// ============================================================
+// GANTI dengan Web App URL GAS kamu (yang sama dipakai di Fase 1-2)
+// ============================================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbyB0fq6nFyWov6AA2_l-J0lrDT-zNRDYkXVxEiFr1Rk6HbDLe2w-kKi4n3WFUt5HblDkw/exec';
+
+function useTrades() {
+  const [trades, setTrades] = useState([]);
+  const [status, setStatus] = useState('loading'); // loading | ok | error
+  const [lastFetch, setLastFetch] = useState(null);
+
+  const load = useCallback(() => {
+    setStatus('loading');
+    fetch(API_URL + '?action=getTrades')
+      .then(r => r.json())
+      .then(json => {
+        if (!json.success) throw new Error(json.error || 'Gagal ambil data');
+        setTrades(json.data || []);
+        setStatus('ok');
+        setLastFetch(new Date());
+      })
+      .catch(() => setStatus('error'));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+  return { trades, status, lastFetch, reload: load };
+}
+
+function computeStats(trades) {
+  const closed = trades.filter(t => t.Result === 'Profit' || t.Result === 'Loss' || t.Result === 'Breakeven');
+  const open = trades.filter(t => t.Result === 'Open' || t.Result === '');
+  const wins = closed.filter(t => t.Result === 'Profit');
+  const losses = closed.filter(t => t.Result === 'Loss');
+
+  const winRate = closed.length ? (wins.length / closed.length) * 100 : 0;
+  const grossProfit = wins.reduce((s, t) => s + (parseFloat(t.PL_USD) || 0), 0);
+  const grossLoss = Math.abs(losses.reduce((s, t) => s + (parseFloat(t.PL_USD) || 0), 0));
+  const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
+  const totalPL = closed.reduce((s, t) => s + (parseFloat(t.PL_USD) || 0), 0);
+
+  return { closedCount: closed.length, openCount: open.length, winRate, profitFactor, totalPL, wins, losses };
+}
+
+function computeSetupBreakdown(trades) {
+  const closed = trades.filter(t => t.Result === 'Profit' || t.Result === 'Loss' || t.Result === 'Breakeven');
+  const groups = {};
+  closed.forEach(t => {
+    const key = t['Tipe Setup'] || 'Lainnya';
+    if (!groups[key]) groups[key] = { total: 0, wins: 0 };
+    groups[key].total += 1;
+    if (t.Result === 'Profit') groups[key].wins += 1;
+  });
+  return Object.entries(groups)
+    .map(([name, v]) => ({ name, total: v.total, winRate: v.total ? (v.wins / v.total) * 100 : 0 }))
+    .sort((a, b) => b.total - a.total);
+}
+
+function computeEmotionBreakdown(trades) {
+  const closed = trades.filter(t => t.Result === 'Profit' || t.Result === 'Loss' || t.Result === 'Breakeven');
+  const groups = {};
+  closed.forEach(t => {
+    const key = t.Emosi || 'Tanpa label';
+    if (!groups[key]) groups[key] = { total: 0, wins: 0 };
+    groups[key].total += 1;
+    if (t.Result === 'Profit') groups[key].wins += 1;
+  });
+  return Object.entries(groups)
+    .map(([name, v]) => ({ name, total: v.total, winRate: v.total ? (v.wins / v.total) * 100 : 0 }))
+    .sort((a, b) => b.total - a.total);
+}
+
+function generateInsight(setupBreakdown, emotionBreakdown, stats) {
+  if (stats.closedCount < 3) {
+    return 'Belum cukup data trade closed buat analisa pola. Tutup beberapa trade lagi lewat /close di bot.';
+  }
+  const bestSetup = [...setupBreakdown].sort((a, b) => b.winRate - a.winRate)[0];
+  const worstEmo = [...emotionBreakdown].filter(e => e.total >= 2).sort((a, b) => a.winRate - b.winRate)[0];
+
+  let parts = [];
+  if (bestSetup) parts.push(`Win rate tertinggi ada di setup <b>${bestSetup.name}</b> (${bestSetup.winRate.toFixed(0)}%, ${bestSetup.total}x)`);
+  if (worstEmo && worstEmo.winRate < 50) parts.push(`saat emosi <b>${worstEmo.name}</b>, win rate cuma ${worstEmo.winRate.toFixed(0)}% — pola ini layak diwaspadai`);
+  return parts.length ? parts.join('. ') + '.' : 'Performa relatif merata di semua setup dan kondisi emosi sejauh ini.';
+}
+
+function StatCard({ label, value, sub, tone }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-label">{label}</div>
+      <div className={`stat-value mono ${tone || ''}`}>{value}</div>
+      {sub && <div className="stat-sub">{sub}</div>}
+    </div>
+  );
+}
+
+function SetupPerformancePanel({ data }) {
+  const colors = ['#e3b341', '#3ed598', '#7aa2f7', '#c084fc', '#ff6b6b'];
+  return (
+    <div className="panel">
+      <h3 className="panel-title">📊 Performa per Setup</h3>
+      <p className="panel-desc">Win rate tiap tipe setup BBMA OA — biar kelihatan mana yang beneran jalan.</p>
+      {data.length === 0 && <p style={{fontSize: 12, color: 'var(--text-muted)'}}>Belum ada trade closed.</p>}
+      {data.map((s, i) => (
+        <div className="setup-row" key={s.name}>
+          <div className="setup-row-head">
+            <span className="setup-row-name">{s.name}</span>
+            <span className="setup-row-meta mono">{s.winRate.toFixed(0)}% · {s.total}x</span>
+          </div>
+          <div className="setup-bar-track">
+            <div className="setup-bar-fill" style={{ width: s.winRate + '%', background: colors[i % colors.length] }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmotionPanel({ data }) {
+  return (
+    <div className="panel">
+      <h3 className="panel-title">🧠 Emosi vs Hasil</h3>
+      <p className="panel-desc">Win rate per kondisi emosi saat entry.</p>
+      {data.length === 0 && <p style={{fontSize: 12, color: 'var(--text-muted)'}}>Belum ada data.</p>}
+      <div className="emo-chip-row">
+        {data.map(e => (
+          <div className="emo-chip" key={e.name}>
+            <div className="emo-chip-name">{e.name} ({e.total}x)</div>
+            <div className="emo-chip-rate mono" style={{ color: e.winRate >= 50 ? 'var(--profit)' : 'var(--loss)' }}>
+              {e.winRate.toFixed(0)}%
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TradeCard({ t }) {
+  const pl = parseFloat(t.PL_USD);
+  const plTone = isNaN(pl) || pl === 0 ? 'zero' : pl > 0 ? 'pos' : 'neg';
+  const resultClass = (t.Result || 'open').toLowerCase();
+  const arahClass = (t.Arah || '').toLowerCase();
+  const date = t['Timestamp Entry'] ? new Date(t['Timestamp Entry']) : null;
+  const dateStr = date ? date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+  const timeStr = date ? date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
+
+  return (
+    <div className="trade-card">
+      <div className="trade-card-top">
+        <div>
+          <div className="trade-pair-row">
+            <span className={`trade-arah ${arahClass}`}>{t.Arah}</span>
+            <span className="trade-pair">{t.Pair}</span>
+          </div>
+          <div className="trade-id mono">{t.ID} · {dateStr} {timeStr}</div>
+        </div>
+        <span className={`trade-result ${resultClass}`}>{t.Result || 'Open'}</span>
+      </div>
+
+      <div className="trade-meta-grid">
+        <div>
+          <div className="meta-item-label">Setup</div>
+          <div className="meta-item-value">{t['Tipe Setup'] || '-'}</div>
+        </div>
+        <div>
+          <div className="meta-item-label">Sesi</div>
+          <div className="meta-item-value">{t.Sesi || '-'}</div>
+        </div>
+        <div>
+          <div className="meta-item-label">Entry / SL / TP</div>
+          <div className="meta-item-value mono" style={{fontSize: 12}}>{t['Entry Price']} / {t.SL} / {t.TP}</div>
+        </div>
+        <div>
+          <div className="meta-item-label">RRR</div>
+          <div className="meta-item-value mono">{t.RRR || '-'}</div>
+        </div>
+      </div>
+
+      <div className="trade-foot">
+        <div style={{display: 'flex', gap: 6, flexWrap: 'wrap'}}>
+          {t.Emosi && <span className="trade-tag">🧠 {t.Emosi}</span>}
+          {t['Sesuai Plan'] && <span className="trade-tag">📋 {t['Sesuai Plan'] === 'Ya' ? 'Sesuai plan' : 'Melenceng'}</span>}
+        </div>
+        <span className={`trade-pl mono ${plTone}`}>
+          {isNaN(pl) || pl === 0 ? (t.Result === 'Open' ? '—' : '$0') : (pl > 0 ? `+$${pl}` : `-$${Math.abs(pl)}`)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const { trades, status, lastFetch, reload } = useTrades();
+  const [filter, setFilter] = useState('all'); // all | open | closed
+
+  const stats = useMemo(() => computeStats(trades), [trades]);
+  const setupBreakdown = useMemo(() => computeSetupBreakdown(trades), [trades]);
+  const emotionBreakdown = useMemo(() => computeEmotionBreakdown(trades), [trades]);
+  const insight = useMemo(() => generateInsight(setupBreakdown, emotionBreakdown, stats), [setupBreakdown, emotionBreakdown, stats]);
+
+  const filteredTrades = useMemo(() => {
+    if (filter === 'open') return trades.filter(t => t.Result === 'Open' || t.Result === '');
+    if (filter === 'closed') return trades.filter(t => t.Result && t.Result !== 'Open');
+    return trades;
+  }, [trades, filter]);
+
+  return (
+    <div>
+      <div className="header">
+        <div>
+          <h1 className="header-title">Jurnal Trading — BBMA OA</h1>
+          <div className="header-sub">
+            <span className="gold-dot">●</span> XAUUSD · {stats.closedCount} closed, {stats.openCount} open
+            {lastFetch && ` · update ${lastFetch.toLocaleTimeString('id-ID')}`}
+          </div>
+        </div>
+        <button className="btn" onClick={reload} disabled={status === 'loading'}>
+          <span className={status === 'loading' ? 'btn-spin' : ''}>⟳</span> Refresh
+        </button>
+      </div>
+
+      {status === 'loading' && trades.length === 0 && (
+        <div className="loading-state">Mengambil data trade…</div>
+      )}
+
+      {status === 'error' && (
+        <div className="error-state">
+          Gagal ambil data. Cek apakah API_URL di kode sudah diganti dengan Web App URL yang benar, dan deployment access-nya "Anyone".
+        </div>
+      )}
+
+      {status === 'ok' && (
+        <React.Fragment>
+          <div className="stat-grid">
+            <StatCard
+              label="Total P/L"
+              value={`${stats.totalPL >= 0 ? '+' : '-'}$${Math.abs(stats.totalPL).toFixed(0)}`}
+              tone={stats.totalPL >= 0 ? 'pos' : 'neg'}
+              sub={`dari ${stats.closedCount} trade closed`}
+            />
+            <StatCard
+              label="Win Rate"
+              value={`${stats.winRate.toFixed(0)}%`}
+              sub={`${stats.wins.length}W / ${stats.losses.length}L`}
+            />
+            <StatCard
+              label="Profit Factor"
+              value={stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}
+              sub={stats.profitFactor >= 1.5 ? 'sehat' : stats.profitFactor >= 1 ? 'tipis' : 'perlu dievaluasi'}
+            />
+            <StatCard
+              label="Trade Open"
+              value={stats.openCount}
+              sub="menunggu /close"
+            />
+          </div>
+
+          <div className="insight-bar">
+            <span className="icon">💡</span>
+            <span dangerouslySetInnerHTML={{ __html: insight }} />
+          </div>
+
+          <div className="panel-row">
+            <SetupPerformancePanel data={setupBreakdown} />
+            <EmotionPanel data={emotionBreakdown} />
+          </div>
+
+          <div className="section-title-row">
+            <h2 className="section-title">Trade Log</h2>
+            <div className="tabs">
+              <button className={`tab ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>Semua</button>
+              <button className={`tab ${filter === 'open' ? 'active' : ''}`} onClick={() => setFilter('open')}>Open</button>
+              <button className={`tab ${filter === 'closed' ? 'active' : ''}`} onClick={() => setFilter('closed')}>Closed</button>
+            </div>
+          </div>
+
+          {filteredTrades.length === 0 ? (
+            <div className="empty-state">
+              <span className="icon">📭</span>
+              Belum ada trade di kategori ini. Kirim /trade ke bot buat mulai catat.
+            </div>
+          ) : (
+            filteredTrades.map(t => <TradeCard key={t.ID} t={t} />)
+          )}
+
+          <div className="footer-note">Jurnal Trading BBMA OA · KR Trade</div>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
