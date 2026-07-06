@@ -32,7 +32,6 @@
 
   .mono{font-family:'IBM Plex Mono',monospace;letter-spacing:0.04em;}
 
-  /* Header */
   header{
     position:sticky;top:0;z-index:50;
     display:flex;align-items:center;justify-content:space-between;
@@ -58,7 +57,6 @@
   }
   nav a:hover, nav a:focus-visible{color:var(--gold-300);}
 
-  /* Hero */
   .hero{
     padding:9vw 6vw 6vw;
     display:grid;
@@ -118,7 +116,6 @@
   .ledger-row:last-child{border-bottom:none;}
   .ledger-row .up{color:#7FB88C;}
 
-  /* Ticker */
   .ticker-wrap{
     border-bottom:1px solid var(--rule);
     background:var(--navy-800);
@@ -145,7 +142,6 @@
     .ticker{animation:none;}
   }
 
-  /* Sections */
   section{padding:6vw;}
   .section-head{
     display:flex;
@@ -198,6 +194,102 @@
   }
   .service-card p{color:var(--slate);font-size:0.92rem;}
 
+  /* Paket Saldo */
+  .packages{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--rule);
+    border:1px solid var(--rule);
+  }
+  .package-card{
+    background:var(--navy-900);
+    padding:30px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .package-card .nominal{
+    font-family:'Fraunces',serif;
+    font-size:1.6rem;
+    font-weight:600;
+    color:var(--gold-300);
+  }
+  .package-card .est{
+    color:var(--slate);
+    font-size:0.82rem;
+  }
+  .package-card button{
+    margin-top:auto;
+    background:transparent;
+    border:1px solid var(--gold-500);
+    color:var(--gold-300);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    padding:12px 0;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .package-card button:hover{
+    background:var(--gold-500);
+    color:var(--navy-900);
+  }
+
+  /* Checkout */
+  .checkout-box{
+    max-width:480px;
+    background:var(--navy-800);
+    border:1px solid var(--rule);
+    padding:32px;
+  }
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;
+    font-size:0.78rem;
+    color:var(--slate);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:8px;
+  }
+  .field input{
+    width:100%;
+    background:var(--navy-900);
+    border:1px solid var(--rule);
+    color:var(--ivory);
+    padding:12px 14px;
+    font-family:'Inter',sans-serif;
+    font-size:0.95rem;
+  }
+  .field input:focus{outline:none;border-color:var(--gold-500);}
+  .field small{
+    display:block;
+    color:var(--slate);
+    font-size:0.75rem;
+    margin-top:6px;
+  }
+  .checkout-submit{
+    width:100%;
+    background:var(--gold-500);
+    color:var(--navy-900);
+    border:none;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:500;
+    font-size:0.85rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    padding:15px 0;
+    cursor:pointer;
+    transition:background .2s ease;
+  }
+  .checkout-submit:hover{background:var(--gold-300);}
+  .checkout-note{
+    color:var(--slate);
+    font-size:0.8rem;
+    margin-top:14px;
+  }
+
   footer{
     padding:5vw 6vw;
     border-top:1px solid var(--rule);
@@ -215,9 +307,11 @@
     .hero{grid-template-columns:1fr;}
     .about-grid{grid-template-columns:1fr;}
     .services{grid-template-columns:1fr;}
+    .packages{grid-template-columns:repeat(2,1fr);}
     nav{display:none;}
     footer{flex-direction:column;align-items:flex-start;}
     .foot-meta{text-align:left;}
+    .checkout-box{padding:24px;max-width:100%;}
   }
 </style>
 </head>
@@ -228,6 +322,8 @@
   <nav>
     <a href="#tentang">Tentang</a>
     <a href="#layanan">Layanan</a>
+    <a href="#paket">Paket Saldo</a>
+    <a href="#checkout">Checkout</a>
     <a href="#kontak">Kontak</a>
   </nav>
 </header>
@@ -301,13 +397,91 @@
   </div>
 </section>
 
+<section id="paket">
+  <div class="section-head">
+    <h2>Paket Saldo</h2>
+    <span class="num mono">03 — Harga</span>
+  </div>
+  <p style="color:var(--slate);max-width:60ch;margin-bottom:32px;">
+    Saldo digunakan untuk proses generate konten, Rp1.500 per generate. Isi saldo sesuai kebutuhan — tanpa langganan, tanpa masa berlaku.
+  </p>
+  <div class="packages">
+    <div class="package-card">
+      <div class="nominal mono">Rp10.000</div>
+      <div class="est">± 6 kali generate</div>
+      <button onclick="pilihPaket(10000)">Top Up</button>
+    </div>
+    <div class="package-card">
+      <div class="nominal mono">Rp25.000</div>
+      <div class="est">± 16 kali generate</div>
+      <button onclick="pilihPaket(25000)">Top Up</button>
+    </div>
+    <div class="package-card">
+      <div class="nominal mono">Rp50.000</div>
+      <div class="est">± 33 kali generate</div>
+      <button onclick="pilihPaket(50000)">Top Up</button>
+    </div>
+    <div class="package-card">
+      <div class="nominal mono">Rp100.000</div>
+      <div class="est">± 66 kali generate</div>
+      <button onclick="pilihPaket(100000)">Top Up</button>
+    </div>
+  </div>
+</section>
+
+<section id="checkout">
+  <div class="section-head">
+    <h2>Checkout</h2>
+    <span class="num mono">04 — Pembayaran</span>
+  </div>
+  <form class="checkout-box" id="checkoutForm" onsubmit="return prosesCheckout(event)">
+    <div class="field">
+      <label for="telegramId">Telegram User ID</label>
+      <input type="text" id="telegramId" required placeholder="Contoh: 223598609">
+      <small>Cek ID kamu lewat command /saldo di bot Telegram.</small>
+    </div>
+    <div class="field">
+      <label for="nominal">Nominal Top Up (Rp)</label>
+      <input type="number" id="nominal" min="10000" step="1000" required value="10000">
+      <small>Minimal top up Rp10.000.</small>
+    </div>
+    <button type="submit" class="checkout-submit">Lanjutkan Pembayaran</button>
+    <p class="checkout-note">Kamu akan diarahkan ke halaman pembayaran resmi Duitku (sandbox) setelah submit.</p>
+  </form>
+</section>
+
 <footer id="kontak">
   <div class="wordmark">KR <span style="color:var(--gold-500);">TRADE</span></div>
   <div class="foot-meta">
-    Kontak usaha: <a href="mailto:kangrozif@gmail.com">kangrozif@gmail.com</a><br>
+    Kontak usaha: <a href="mailto:kangrozif@gmail.com">kangrozif@gmail.com</a> ·
+    <a href="tel:+6285183073560">+62 851-8307-3560</a><br>
+    Desa Nglanduk, Kecamatan Wungu, Kabupaten Madiun<br>
     © 2026 KR Trade. Usaha perorangan — perangkat lunak digital.
   </div>
 </footer>
+
+<script>
+  // GAS Web App deployment (endpoint checkout akan ditambahkan di Langkah 4)
+  const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwyBryphufxwGeKvXP_hn8NZi7KG886eo7fmrP14acJz1sGjPXFDrVbfhadJLVk5TzP-g/exec";
+
+  function pilihPaket(nominal){
+    document.getElementById('nominal').value = nominal;
+    document.getElementById('checkout').scrollIntoView({behavior:'smooth'});
+  }
+
+  function prosesCheckout(e){
+    e.preventDefault();
+    const userId = document.getElementById('telegramId').value.trim();
+    const nominal = document.getElementById('nominal').value;
+    if(!userId || nominal < 10000){
+      alert('Mohon isi Telegram User ID dan nominal minimal Rp10.000');
+      return false;
+    }
+    const url = `${GAS_WEBAPP_URL}?action=checkout&user_id=${encodeURIComponent(userId)}&nominal=${encodeURIComponent(nominal)}`;
+    window.location.href = url;
+    return false;
+  }
+</script>
 
 </body>
 </html>
