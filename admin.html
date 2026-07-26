@@ -405,7 +405,7 @@ function App() {
               ) : searchError ? (
                 <span style={{ color: 'var(--danger)' }}>⚠️ {searchError}</span>
               ) : needsNarrow ? (
-                <span>Ketik nama atau NIK, atau pilih Kecamatan/Desa tertentu, untuk menampilkan data. <span className="badge">mencegah scan berlebihan</span></span>
+                <span>Ketik nama/NIK, pilih Kecamatan/Desa, Jenis Kelamin, atau Umur untuk menampilkan data. <span className="badge">mencegah scan berlebihan</span></span>
               ) : hasSearched ? (
                 <span>Menampilkan <b className="mono">{results.length}</b> hasil {results.length >= 200 && '(dibatasi 200)'} dari <b className="mono">{scanned.toLocaleString('id-ID')}</b> data dipindai</span>
               ) : 'Menunggu pencarian...'}
