@@ -71,6 +71,12 @@
   .search-btn:hover { filter: brightness(1.08); }
   .search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+  .reset-btn {
+    background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+    padding: 0 14px; border-radius: 8px; font-size: 12.5px; cursor: pointer; white-space: nowrap;
+  }
+  .reset-btn:hover { color: var(--text); border-color: var(--text-faint); }
+
   .input, .select {
     background: var(--panel-alt); border: 1px solid var(--border); color: var(--text);
     padding: 10px 12px; border-radius: 8px; font-size: 13px; width: 100%; font-family: inherit;
@@ -202,6 +208,43 @@ function App() {
 
   const requestIdRef = useRef(0);
 
+  // Cegah klik kanan & shortcut devtools (hanya penghalang ringan, bukan proteksi sungguhan)
+  useEffect(() => {
+    const blockContextMenu = (e) => e.preventDefault();
+    const blockKeys = (e) => {
+      const k = e.key.toLowerCase();
+      if (e.key === 'F12') { e.preventDefault(); return false; }
+      if ((e.ctrlKey || e.metaKey) && k === 'u') { e.preventDefault(); return false; }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(k)) { e.preventDefault(); return false; }
+    };
+    document.addEventListener('contextmenu', blockContextMenu);
+    document.addEventListener('keydown', blockKeys);
+    return () => {
+      document.removeEventListener('contextmenu', blockContextMenu);
+      document.removeEventListener('keydown', blockKeys);
+    };
+  }, []);
+
+  // Auto-logout setelah 20 menit tidak ada aktivitas
+  useEffect(() => {
+    if (!token) return;
+    let timer;
+    const scheduleLogout = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+        setToken('');
+      }, 20 * 60 * 1000);
+    };
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    events.forEach(ev => window.addEventListener(ev, scheduleLogout));
+    scheduleLogout();
+    return () => {
+      clearTimeout(timer);
+      events.forEach(ev => window.removeEventListener(ev, scheduleLogout));
+    };
+  }, [token]);
+
   useEffect(() => {
     if (!token) return;
     fetch(API_URL + '?action=meta&token=' + encodeURIComponent(token))
@@ -288,6 +331,26 @@ function App() {
     runSearch();
   };
 
+  const resetFilters = () => {
+    setNamaQuery('');
+    setNikQuery('');
+    setJkFilter('SEMUA');
+    setUmurMin('');
+    setUmurMax('');
+    setSelKec('SEMUA');
+    setSelDesa('SEMUA');
+    setResults([]);
+    setHasSearched(false);
+    setNeedsNarrow(false);
+    setSearchError('');
+    setScanned(0);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+    setToken('');
+  };
+
   if (!token) {
     return <LoginScreen onSuccess={setToken} />;
   }
@@ -305,6 +368,9 @@ function App() {
         <div className="stat-row">
           <div className="stat-pill">👥 <b>{(meta.totalRecords || 0).toLocaleString('id-ID')}</b> data</div>
           <div className="stat-pill">📍 <b>{kecamatanList.length}</b> kec · <b>{totalDesa}</b> desa</div>
+          <button onClick={handleLogout} className="stat-pill" style={{ cursor: 'pointer', border: 'none', color: 'var(--danger)' }}>
+            🚪 Keluar
+          </button>
         </div>
       </div>
 
@@ -381,6 +447,9 @@ function App() {
               inputMode="numeric"
             />
           </div>
+          <button type="button" className="reset-btn" onClick={resetFilters} disabled={isEmpty}>
+            ↺ Reset Filter
+          </button>
         </div>
       </div>
 
