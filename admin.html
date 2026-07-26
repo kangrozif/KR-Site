@@ -54,8 +54,16 @@
   .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
   .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
 
-  .filter-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; }
+  .filter-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 10px; }
   @media (max-width: 700px) { .filter-grid { grid-template-columns: 1fr; } }
+
+  .search-btn {
+    background: var(--gold); color: #1a1608; border: none; border-radius: 8px;
+    padding: 0 18px; font-size: 15px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; min-width: 46px;
+  }
+  .search-btn:hover { filter: brightness(1.08); }
+  .search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .input, .select {
     background: var(--panel-alt); border: 1px solid var(--border); color: var(--text);
@@ -88,6 +96,19 @@
 
   .spin { display: inline-block; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  .login-wrap { min-height: calc(100vh - 48px); display: flex; align-items: center; justify-content: center; }
+  .login-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 32px 28px; width: 100%; max-width: 340px; }
+  .login-icon { font-size: 26px; margin-bottom: 10px; }
+  .login-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .login-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 20px; }
+  .login-btn {
+    width: 100%; margin-top: 10px; background: var(--gold); color: #1a1608; border: none;
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .login-btn:hover { filter: brightness(1.08); }
+  .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .login-error { color: var(--danger); font-size: 12px; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -99,7 +120,61 @@ const { useState, useEffect, useCallback, useRef, useMemo } = React;
 // Ganti dengan Web App URL hasil deploy Apps Script (admin-appscript/Code.gs)
 const API_URL = 'https://script.google.com/macros/s/AKfycbwasc_tlV4zllzv0cUnhK7HU7Mp6L-c-DAIez5TOG7_zDaVRRvdmnVHw5qqXrBPL0xScg/exec';
 
+const TOKEN_STORAGE_KEY = 'dpt_admin_token';
+
+function LoginScreen({ onSuccess }) {
+  const [value, setValue] = useState('');
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState('');
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!value.trim()) return;
+    setChecking(true);
+    setError('');
+    fetch(API_URL + '?action=meta&token=' + encodeURIComponent(value.trim()))
+      .then(r => r.json())
+      .then(data => {
+        if (data.unauthorized) {
+          setError('Password salah.');
+          return;
+        }
+        if (data.error) {
+          setError(data.error);
+          return;
+        }
+        sessionStorage.setItem(TOKEN_STORAGE_KEY, value.trim());
+        onSuccess(value.trim());
+      })
+      .catch(() => setError('Gagal menghubungi server. Cek koneksi.'))
+      .finally(() => setChecking(false));
+  };
+
+  return (
+    <div className="login-wrap">
+      <form className="login-card" onSubmit={submit}>
+        <div className="login-icon">🔒</div>
+        <div className="login-title">Akses Admin</div>
+        <div className="login-sub">Masukkan password untuk membuka data pemilih.</div>
+        <input
+          className="input"
+          type="password"
+          placeholder="Password"
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          autoFocus
+        />
+        {error && <div className="login-error">⚠️ {error}</div>}
+        <button className="login-btn" type="submit" disabled={checking}>
+          {checking ? 'Memeriksa...' : 'Masuk'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 function App() {
+  const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_STORAGE_KEY) || '');
   const [meta, setMeta] = useState({ kecamatan: {}, totalRecords: 0 });
   const [metaLoading, setMetaLoading] = useState(true);
   const [metaError, setMetaError] = useState('');
@@ -115,18 +190,24 @@ function App() {
   const [searchError, setSearchError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
 
-  const debounceRef = useRef(null);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
-    fetch(API_URL + '?action=meta')
+    if (!token) return;
+    fetch(API_URL + '?action=meta&token=' + encodeURIComponent(token))
       .then(r => r.json())
       .then(data => {
+        if (data.unauthorized) {
+          sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+          setToken('');
+          return;
+        }
         if (data.error) throw new Error(data.error);
         setMeta(data);
       })
       .catch(err => setMetaError(err.message || 'Gagal memuat data. Cek API_URL sudah diisi Web App URL yang benar.'))
       .finally(() => setMetaLoading(false));
-  }, []);
+  }, [token]);
 
   const kecamatanList = useMemo(() => Object.keys(meta.kecamatan || {}).sort(), [meta]);
   const desaList = useMemo(() => {
@@ -144,7 +225,10 @@ function App() {
     setSearching(true);
     setNeedsNarrow(false);
 
+    const myRequestId = ++requestIdRef.current;
+
     const url = API_URL + '?action=search'
+      + '&token=' + encodeURIComponent(token)
       + '&nama=' + encodeURIComponent(namaQuery.trim())
       + '&kec=' + encodeURIComponent(selKec)
       + '&desa=' + encodeURIComponent(selDesa);
@@ -152,6 +236,12 @@ function App() {
     fetch(url)
       .then(r => r.json())
       .then(data => {
+        if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
+        if (data.unauthorized) {
+          sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+          setToken('');
+          throw new Error('Sesi berakhir, silakan login ulang.');
+        }
         if (data.error) throw new Error(data.error);
         if (data.needsNarrow) {
           setNeedsNarrow(true);
@@ -162,16 +252,31 @@ function App() {
           setScanned(data.scanned || 0);
         }
       })
-      .catch(err => setSearchError(err.message || 'Gagal mengambil hasil pencarian.'))
-      .finally(() => setSearching(false));
-  }, [namaQuery, selKec, selDesa]);
+      .catch(err => {
+        if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
+        setSearchError(err.message || 'Gagal mengambil hasil pencarian.');
+      })
+      .finally(() => {
+        if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
+        setSearching(false);
+      });
+  }, [namaQuery, selKec, selDesa, token]);
 
+  // Dropdown Kecamatan/Desa: auto-search (aksi diskrit, aman dari race condition)
   useEffect(() => {
     if (metaLoading || kecamatanList.length === 0) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(runSearch, 400);
-    return () => clearTimeout(debounceRef.current);
-  }, [namaQuery, selKec, selDesa, metaLoading]);
+    runSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selKec, selDesa, metaLoading]);
+
+  const handleNamaSubmit = (e) => {
+    e.preventDefault();
+    runSearch();
+  };
+
+  if (!token) {
+    return <LoginScreen onSuccess={setToken} />;
+  }
 
   const isEmpty = !metaLoading && kecamatanList.length === 0 && !metaError;
 
@@ -190,7 +295,7 @@ function App() {
       </div>
 
       <div className="panel">
-        <div className="filter-grid">
+        <form className="filter-grid" onSubmit={handleNamaSubmit}>
           <input
             className="input"
             placeholder="Ketik nama untuk mencari..."
@@ -216,7 +321,10 @@ function App() {
             <option value="SEMUA">Semua Desa</option>
             {desaList.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
-        </div>
+          <button type="submit" className="search-btn" disabled={isEmpty || searching} title="Cari">
+            🔎
+          </button>
+        </form>
       </div>
 
       <div className="panel" style={{ padding: 0 }}>
