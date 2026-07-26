@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Filter Data Pemilih — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root {
+    --bg: #12141c;
+    --panel: #191c27;
+    --panel-alt: #1f2330;
+    --border: #2a2e3d;
+    --gold: #e3b341;
+    --gold-dim: #8a6c2c;
+    --text: #eaecf3;
+    --text-muted: #8890a6;
+    --text-faint: #565d70;
+    --danger: #ff6b6b;
+    --danger-dim: #4a2323;
+  }
+  * { box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 800px 400px at 20% -10%, rgba(227,179,65,0.06), transparent),
+      radial-gradient(ellipse 600px 300px at 90% 0%, rgba(62,150,213,0.04), transparent);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  #root { max-width: 1040px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+  .header-eyebrow { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+  .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  .stat-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .stat-pill {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 14px; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
+  }
+  .stat-pill b { color: var(--text); font-family: 'JetBrains Mono', monospace; }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+
+  .filter-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 700px) { .filter-grid { grid-template-columns: 1fr; } }
+
+  .input, .select {
+    background: var(--panel-alt); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; width: 100%; font-family: inherit;
+  }
+  .input:focus, .select:focus { outline: 2px solid var(--gold-dim); outline-offset: 1px; }
+  .input::placeholder { color: var(--text-faint); }
+  .select:disabled { color: var(--text-faint); cursor: not-allowed; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-faint); padding: 8px 12px; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:hover { background: var(--panel-alt); }
+  td.nama { font-weight: 600; color: var(--text); }
+  td.mono-cell { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+  td.addr { color: var(--text-muted); font-size: 12.5px; }
+
+  .status-row { padding: 8px 4px 12px; font-size: 12px; color: var(--text-faint); }
+  .empty-state, .loading-state, .error-state { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }
+  .error-state { color: var(--danger); }
+  .empty-state .icon, .loading-state .icon, .error-state .icon { font-size: 24px; display: block; margin-bottom: 8px; }
+
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: var(--panel-alt); color: var(--text-muted); }
+
+  .footer-note { text-align: center; font-size: 11px; color: var(--text-faint); margin-top: 30px; }
+
+  .spin { display: inline-block; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef, useMemo } = React;
+
+// Ganti dengan Web App URL hasil deploy Apps Script (admin-appscript/Code.gs)
+const API_URL = 'https://script.google.com/macros/s/AKfycbwasc_tlV4zllzv0cUnhK7HU7Mp6L-c-DAIez5TOG7_zDaVRRvdmnVHw5qqXrBPL0xScg/exec';
+
+function App() {
+  const [meta, setMeta] = useState({ kecamatan: {}, totalRecords: 0 });
+  const [metaLoading, setMetaLoading] = useState(true);
+  const [metaError, setMetaError] = useState('');
+
+  const [namaQuery, setNamaQuery] = useState('');
+  const [selKec, setSelKec] = useState('SEMUA');
+  const [selDesa, setSelDesa] = useState('SEMUA');
+
+  const [results, setResults] = useState([]);
+  const [needsNarrow, setNeedsNarrow] = useState(false);
+  const [scanned, setScanned] = useState(0);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const debounceRef = useRef(null);
+
+  useEffect(() => {
+    fetch(API_URL + '?action=meta')
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        setMeta(data);
+      })
+      .catch(err => setMetaError(err.message || 'Gagal memuat data. Cek API_URL sudah diisi Web App URL yang benar.'))
+      .finally(() => setMetaLoading(false));
+  }, []);
+
+  const kecamatanList = useMemo(() => Object.keys(meta.kecamatan || {}).sort(), [meta]);
+  const desaList = useMemo(() => {
+    if (selKec === 'SEMUA') return [];
+    return (meta.kecamatan[selKec] || []).map(d => d.desa).sort();
+  }, [meta, selKec]);
+  const totalDesa = useMemo(
+    () => Object.values(meta.kecamatan || {}).reduce((s, arr) => s + arr.length, 0),
+    [meta]
+  );
+
+  const runSearch = useCallback(() => {
+    setHasSearched(true);
+    setSearchError('');
+    setSearching(true);
+    setNeedsNarrow(false);
+
+    const url = API_URL + '?action=search'
+      + '&nama=' + encodeURIComponent(namaQuery.trim())
+      + '&kec=' + encodeURIComponent(selKec)
+      + '&desa=' + encodeURIComponent(selDesa);
+
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        if (data.needsNarrow) {
+          setNeedsNarrow(true);
+          setResults([]);
+          setScanned(0);
+        } else {
+          setResults(data.results || []);
+          setScanned(data.scanned || 0);
+        }
+      })
+      .catch(err => setSearchError(err.message || 'Gagal mengambil hasil pencarian.'))
+      .finally(() => setSearching(false));
+  }, [namaQuery, selKec, selDesa]);
+
+  useEffect(() => {
+    if (metaLoading || kecamatanList.length === 0) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(runSearch, 400);
+    return () => clearTimeout(debounceRef.current);
+  }, [namaQuery, selKec, selDesa, metaLoading]);
+
+  const isEmpty = !metaLoading && kecamatanList.length === 0 && !metaError;
+
+  return (
+    <React.Fragment>
+      <div className="header">
+        <div>
+          <div className="header-eyebrow">Admin · Data Pemilih</div>
+          <h1 className="header-title">Filter &amp; Pencarian Data</h1>
+          <div className="header-sub">Cari berdasarkan Nama, Kecamatan, dan Desa/Kelurahan</div>
+        </div>
+        <div className="stat-row">
+          <div className="stat-pill">👥 <b>{(meta.totalRecords || 0).toLocaleString('id-ID')}</b> data</div>
+          <div className="stat-pill">📍 <b>{kecamatanList.length}</b> kec · <b>{totalDesa}</b> desa</div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="filter-grid">
+          <input
+            className="input"
+            placeholder="Ketik nama untuk mencari..."
+            value={namaQuery}
+            onChange={e => setNamaQuery(e.target.value)}
+            disabled={isEmpty}
+          />
+          <select
+            className="select"
+            value={selKec}
+            onChange={e => { setSelKec(e.target.value); setSelDesa('SEMUA'); }}
+            disabled={isEmpty}
+          >
+            <option value="SEMUA">Semua Kecamatan</option>
+            {kecamatanList.map(k => <option key={k} value={k}>{k}</option>)}
+          </select>
+          <select
+            className="select"
+            value={selDesa}
+            onChange={e => setSelDesa(e.target.value)}
+            disabled={isEmpty || selKec === 'SEMUA'}
+          >
+            <option value="SEMUA">Semua Desa</option>
+            {desaList.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className="panel" style={{ padding: 0 }}>
+        {metaLoading && (
+          <div className="loading-state"><span className="icon spin">⏳</span>Memuat data...</div>
+        )}
+
+        {metaError && (
+          <div className="error-state"><span className="icon">⚠️</span>{metaError}</div>
+        )}
+
+        {isEmpty && (
+          <div className="empty-state"><span className="icon">📭</span>Belum ada data terindeks di folder Drive.</div>
+        )}
+
+        {!metaLoading && !metaError && !isEmpty && (
+          <React.Fragment>
+            <div className="status-row" style={{ padding: '12px 16px 0' }}>
+              {searching ? (
+                <span><span className="spin">⏳</span> Mencari...</span>
+              ) : searchError ? (
+                <span style={{ color: 'var(--danger)' }}>⚠️ {searchError}</span>
+              ) : needsNarrow ? (
+                <span>Ketik nama, atau pilih Kecamatan/Desa tertentu, untuk menampilkan data. <span className="badge">mencegah scan berlebihan</span></span>
+              ) : hasSearched ? (
+                <span>Menampilkan <b className="mono">{results.length}</b> hasil {results.length >= 200 && '(dibatasi 200)'} dari <b className="mono">{scanned.toLocaleString('id-ID')}</b> data dipindai</span>
+              ) : 'Menunggu pencarian...'}
+            </div>
+
+            {!searching && !searchError && !needsNarrow && hasSearched && results.length === 0 && (
+              <div className="empty-state"><span className="icon">🔍</span>Tidak ada data yang cocok.</div>
+            )}
+
+            {results.length > 0 && (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nama</th>
+                      <th>NIK</th>
+                      <th>NKK</th>
+                      <th>TTL</th>
+                      <th>JK</th>
+                      <th>Alamat Lengkap</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.map((r, i) => (
+                      <tr key={i}>
+                        <td className="nama">{r[2]}</td>
+                        <td className="mono-cell">{r[1]}</td>
+                        <td className="mono-cell">{r[0]}</td>
+                        <td className="mono-cell">{r[3]}</td>
+                        <td>{r[4]}</td>
+                        <td className="addr">
+                          {r[5]}{r[6] && r[6] !== '0' ? `, RT ${r[6]}` : ''}{r[7] && r[7] !== '0' ? `/RW ${r[7]}` : ''}, {r[9]}, {r[8]}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </React.Fragment>
+        )}
+      </div>
+
+      <div className="footer-note">Filter Data Pemilih · Admin · kangrozif.my.id</div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
