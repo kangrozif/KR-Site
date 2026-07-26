@@ -57,6 +57,12 @@
   .filter-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 10px; }
   @media (max-width: 700px) { .filter-grid { grid-template-columns: 1fr; } }
 
+  .filter-grid-2 { display: grid; grid-template-columns: 1.4fr 1fr 0.7fr 0.7fr; gap: 10px; margin-top: 10px; }
+  @media (max-width: 700px) { .filter-grid-2 { grid-template-columns: 1fr 1fr; } }
+  .umur-row { display: flex; gap: 6px; align-items: center; }
+  .umur-row .input { text-align: center; }
+  .umur-row span { color: var(--text-faint); font-size: 12px; white-space: nowrap; }
+
   .search-btn {
     background: var(--gold); color: #1a1608; border: none; border-radius: 8px;
     padding: 0 18px; font-size: 15px; font-weight: 700; cursor: pointer;
@@ -180,6 +186,10 @@ function App() {
   const [metaError, setMetaError] = useState('');
 
   const [namaQuery, setNamaQuery] = useState('');
+  const [nikQuery, setNikQuery] = useState('');
+  const [jkFilter, setJkFilter] = useState('SEMUA');
+  const [umurMin, setUmurMin] = useState('');
+  const [umurMax, setUmurMax] = useState('');
   const [selKec, setSelKec] = useState('SEMUA');
   const [selDesa, setSelDesa] = useState('SEMUA');
 
@@ -230,6 +240,10 @@ function App() {
     const url = API_URL + '?action=search'
       + '&token=' + encodeURIComponent(token)
       + '&nama=' + encodeURIComponent(namaQuery.trim())
+      + '&nik=' + encodeURIComponent(nikQuery.trim())
+      + '&jk=' + encodeURIComponent(jkFilter)
+      + '&umurMin=' + encodeURIComponent(umurMin)
+      + '&umurMax=' + encodeURIComponent(umurMax)
       + '&kec=' + encodeURIComponent(selKec)
       + '&desa=' + encodeURIComponent(selDesa);
 
@@ -260,14 +274,14 @@ function App() {
         if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
         setSearching(false);
       });
-  }, [namaQuery, selKec, selDesa, token]);
+  }, [namaQuery, nikQuery, jkFilter, umurMin, umurMax, selKec, selDesa, token]);
 
-  // Dropdown Kecamatan/Desa: auto-search (aksi diskrit, aman dari race condition)
+  // Dropdown Kecamatan/Desa/Jenis Kelamin: auto-search (aksi diskrit, aman dari race condition)
   useEffect(() => {
     if (metaLoading || kecamatanList.length === 0) return;
     runSearch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selKec, selDesa, metaLoading]);
+  }, [selKec, selDesa, jkFilter, metaLoading]);
 
   const handleNamaSubmit = (e) => {
     e.preventDefault();
@@ -325,6 +339,49 @@ function App() {
             🔎
           </button>
         </form>
+
+        <div className="filter-grid-2">
+          <input
+            className="input"
+            placeholder="Cari NIK..."
+            value={nikQuery}
+            onChange={e => setNikQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } }}
+            disabled={isEmpty}
+            inputMode="numeric"
+          />
+          <select
+            className="select"
+            value={jkFilter}
+            onChange={e => setJkFilter(e.target.value)}
+            disabled={isEmpty}
+          >
+            <option value="SEMUA">Semua JK</option>
+            <option value="L">Laki-laki (L)</option>
+            <option value="P">Perempuan (P)</option>
+          </select>
+          <div className="umur-row">
+            <input
+              className="input"
+              placeholder="Min"
+              value={umurMin}
+              onChange={e => setUmurMin(e.target.value.replace(/[^0-9]/g, ''))}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } }}
+              disabled={isEmpty}
+              inputMode="numeric"
+            />
+            <span>—</span>
+            <input
+              className="input"
+              placeholder="Max"
+              value={umurMax}
+              onChange={e => setUmurMax(e.target.value.replace(/[^0-9]/g, ''))}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } }}
+              disabled={isEmpty}
+              inputMode="numeric"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="panel" style={{ padding: 0 }}>
@@ -348,7 +405,7 @@ function App() {
               ) : searchError ? (
                 <span style={{ color: 'var(--danger)' }}>⚠️ {searchError}</span>
               ) : needsNarrow ? (
-                <span>Ketik nama, atau pilih Kecamatan/Desa tertentu, untuk menampilkan data. <span className="badge">mencegah scan berlebihan</span></span>
+                <span>Ketik nama atau NIK, atau pilih Kecamatan/Desa tertentu, untuk menampilkan data. <span className="badge">mencegah scan berlebihan</span></span>
               ) : hasSearched ? (
                 <span>Menampilkan <b className="mono">{results.length}</b> hasil {results.length >= 200 && '(dibatasi 200)'} dari <b className="mono">{scanned.toLocaleString('id-ID')}</b> data dipindai</span>
               ) : 'Menunggu pencarian...'}
@@ -367,6 +424,7 @@ function App() {
                       <th>NIK</th>
                       <th>NKK</th>
                       <th>TTL</th>
+                      <th>Umur</th>
                       <th>JK</th>
                       <th>Alamat Lengkap</th>
                     </tr>
@@ -378,6 +436,7 @@ function App() {
                         <td className="mono-cell">{r[1]}</td>
                         <td className="mono-cell">{r[0]}</td>
                         <td className="mono-cell">{r[3]}</td>
+                        <td className="mono-cell">{r[10] || '-'}</td>
                         <td>{r[4]}</td>
                         <td className="addr">
                           {r[5]}{r[6] && r[6] !== '0' ? `, RT ${r[6]}` : ''}{r[7] && r[7] !== '0' ? `/RW ${r[7]}` : ''}, {r[9]}, {r[8]}
