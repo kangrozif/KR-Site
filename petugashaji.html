@@ -363,6 +363,58 @@
 
   footer.page-foot{max-width:1180px;margin:0 auto;padding:10px 20px 40px;color:var(--ink-soft);font-size:12px;text-align:center;}
 
+  /* ===== HISTORY SCREEN ===== */
+  .topbar-history-btn{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+    color:#F3F1E4;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;
+    cursor:pointer;font-family:inherit;
+  }
+  .topbar-history-btn:hover{background:rgba(255,255,255,.2);}
+
+  .history-head{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .history-summary{
+    display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;
+  }
+  .hsum-card{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;
+    padding:14px 18px;min-width:120px;box-shadow:var(--shadow);
+  }
+  .hsum-card .hnum{font-family:"Fraunces",serif;font-weight:800;font-size:22px;color:var(--green-deep);}
+  .hsum-card .hlbl{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+
+  .history-table-wrap{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:16px;
+    overflow-x:auto;box-shadow:var(--shadow);
+  }
+  table.history-table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px;}
+  table.history-table th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink-soft);padding:12px 14px;border-bottom:1.5px solid var(--line);
+    background:var(--paper);white-space:nowrap;
+  }
+  table.history-table td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap;}
+  table.history-table tr:last-child td{border-bottom:none;}
+  .hscore-pill{
+    display:inline-flex;align-items:center;justify-content:center;
+    font-weight:800;font-family:"IBM Plex Mono",monospace;font-size:12.5px;
+    padding:3px 10px;border-radius:999px;
+  }
+  .hscore-pill.high{background:var(--correct-soft);color:var(--correct);}
+  .hscore-pill.mid{background:var(--gold-soft);color:#8a641c;}
+  .hscore-pill.low{background:var(--wrong-soft);color:var(--wrong);}
+  .history-empty{padding:40px 20px;text-align:center;color:var(--ink-soft);font-size:14px;}
+  .history-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+  .history-note{font-size:11.5px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
+  .del-row-btn{
+    border:none;background:transparent;color:var(--wrong);cursor:pointer;font-size:12px;font-weight:700;
+    padding:4px 8px;border-radius:6px;
+  }
+  .del-row-btn:hover{background:var(--wrong-soft);}
+
   @media (max-width:520px){
     .navgrid{grid-template-columns:repeat(6,1fr);}
     .qtext{font-size:17px;}
@@ -380,8 +432,12 @@
       <span class="title">CAT Petugas Haji &mdash; Akomodasi &amp; Transportasi</span>
     </div>
   </div>
-  <div class="topbar-right" id="topbarRight">Bank Soal &middot; Irfan Pathurahman, M.Pd.</div>
+  <div class="topbar-right" style="display:flex;align-items:center;gap:12px;">
+    <span id="topbarRight">Bank Soal &middot; Irfan Pathurahman, M.Pd.</span>
+    <button type="button" class="topbar-history-btn" id="historyNavBtn">&#128203; Riwayat</button>
+  </div>
 </div>
+
 
 <div class="shell">
 
@@ -545,8 +601,51 @@
 
     <div class="foot-actions">
       <button class="btn btn-primary" id="retryBtn">Ulangi dengan Soal Baru</button>
+      <button class="btn btn-ghost" id="viewHistoryFromResultBtn">Lihat Riwayat</button>
       <button class="btn btn-ghost" id="backHomeBtn">Kembali ke Pengaturan</button>
     </div>
+  </section>
+
+  <!-- ============ HISTORY SCREEN ============ -->
+  <section id="historyScreen" class="hidden">
+    <div class="history-head">
+      <div>
+        <h2 style="font-size:20px;">Riwayat Uji Coba</h2>
+        <p style="font-size:12.5px;color:var(--ink-soft);margin-top:4px;">Selalu tersimpan di perangkat ini, dan terkirim ke Google Sheets pusat jika sinkronisasi server sudah aktif.</p>
+      </div>
+      <button class="btn btn-ghost" id="historyBackBtn">&larr; Kembali</button>
+    </div>
+
+    <div class="history-summary" id="historySummary"></div>
+
+    <div class="history-table-wrap">
+      <table class="history-table" id="historyTable">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Nama Peserta</th>
+            <th>Paket</th>
+            <th>Skor</th>
+            <th>Benar</th>
+            <th>Salah</th>
+            <th>Kosong</th>
+            <th>Waktu</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody"></tbody>
+      </table>
+      <div id="historyEmpty" class="history-empty hidden">Belum ada riwayat uji coba di perangkat ini. Selesaikan satu sesi try out untuk mulai merekam data.</div>
+    </div>
+
+    <div class="history-actions">
+      <button class="btn btn-primary" id="syncNowBtn">Sinkronkan Ulang</button>
+      <button class="btn btn-ghost" id="exportCsvBtn">Unduh CSV</button>
+      <button class="btn btn-ghost" id="clearHistoryBtn" style="color:var(--wrong);border-color:var(--wrong-soft);">Hapus Semua Riwayat</button>
+    </div>
+    <p class="history-note" id="backendStatusNote"></p>
+    <p class="history-note">Perekaman mencatat: nama peserta (jika diisi), tanggal/waktu, paket soal, skor akhir, jumlah benar/salah/kosong, waktu pengerjaan, dan rincian per domain kompetensi. Salinan selalu tersimpan lokal di browser ini; gunakan tombol "Unduh CSV" kapan saja untuk cadangan tambahan.</p>
   </section>
 
 </div>
@@ -855,6 +954,7 @@ packageChoices.addEventListener('click', (e) => {
 
 document.getElementById('startBtn').addEventListener('click', () => {
   const name = document.getElementById('participantName').value.trim();
+  session.participantName = name;
   document.getElementById('topbarRight').textContent = name ? ('Peserta: ' + name) : 'Bank Soal · Irfan Pathurahman, M.Pd.';
   buildSession(selectedPackage.count, selectedPackage.secpq);
   showScreen('exam');
@@ -870,6 +970,7 @@ function showScreen(name){
   document.getElementById('startScreen').classList.toggle('hidden', name!=='start');
   document.getElementById('examScreen').classList.toggle('hidden', name!=='exam');
   document.getElementById('resultScreen').classList.toggle('hidden', name!=='result');
+  document.getElementById('historyScreen').classList.toggle('hidden', name!=='history');
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -1142,6 +1243,29 @@ function renderResults(){
   currentFilter = 'all';
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter==='all'));
   renderReviewList();
+
+  saveHistoryEntry({
+    name: session.participantName || '',
+    date: new Date().toISOString(),
+    packageLabel: packageLabelFor(total, session.untimed),
+    total: total,
+    correct: correct,
+    wrong: wrong,
+    empty: empty,
+    pct: pct,
+    timeUsedSec: timeUsed,
+    untimed: session.untimed,
+    perCategory: Object.keys(perCat).filter(k => perCat[k].total).map(k => ({
+      key: k, label: CATEGORY_META[k].label, correct: perCat[k].correct, total: perCat[k].total
+    })),
+  });
+}
+
+function packageLabelFor(total, untimed){
+  if(untimed) return 'Latihan (' + total + ' soal, tanpa waktu)';
+  if(total <= 30) return 'Cepat (' + total + ' soal)';
+  if(total <= 75) return 'Sedang (' + total + ' soal)';
+  return 'Lengkap (' + total + ' soal)';
 }
 
 let currentFilter = 'all';
@@ -1211,6 +1335,248 @@ document.getElementById('backHomeBtn').addEventListener('click', () => {
   clearInterval(session.timerId);
   showScreen('start');
 });
+
+/* =========================================================
+   PEREKAMAN DATA PENGGUNA
+   Perekaman dua lapis:
+   1) localStorage — selalu tersimpan lokal, jadi tetap berfungsi
+      walau offline atau backend belum dikonfigurasi.
+   2) Google Apps Script + Google Sheets — kirim otomatis ke satu
+      spreadsheet pusat kalau BACKEND_URL sudah diisi (lihat Code.gs).
+========================================================= */
+
+// ISI DUA BARIS INI SETELAH MEN-DEPLOY Code.gs (lihat petunjuk di file itu).
+// Kosongkan (biarkan "") kalau belum ingin mengaktifkan sinkronisasi server —
+// halaman tetap berfungsi penuh dengan perekaman lokal saja.
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzV-6syec7WdK8x5Msyj2NH8-NR9n6v8mLZq6hE7LiSMmCz6Vgp6DLjJDxoK73PFMxAAg/exec";
+const BACKEND_TOKEN = "Rahasia1";
+
+const HISTORY_KEY = 'cat_petugas_haji_riwayat_v1';
+
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if(!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch(e){
+    console.warn('Gagal membaca riwayat lokal:', e);
+    return [];
+  }
+}
+
+function persistHistory(list){
+  try{
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+    return true;
+  } catch(e){
+    console.warn('Gagal menyimpan riwayat lokal:', e);
+    return false;
+  }
+}
+
+function saveHistoryEntry(entry){
+  const list = loadHistory();
+  entry.id = Date.now() + '-' + Math.random().toString(36).slice(2,8);
+  entry.syncStatus = BACKEND_URL ? 'pending' : 'local-only';
+  list.unshift(entry);
+  persistHistory(list);
+  if(BACKEND_URL){
+    syncEntryToBackend(entry);
+  }
+  return entry;
+}
+
+function deleteHistoryEntry(id){
+  const list = loadHistory().filter(e => e.id !== id);
+  persistHistory(list);
+  renderHistoryScreen();
+}
+
+function updateEntrySyncStatus(id, status){
+  const list = loadHistory();
+  const idx = list.findIndex(e => e.id === id);
+  if(idx === -1) return;
+  list[idx].syncStatus = status;
+  persistHistory(list);
+}
+
+function syncEntryToBackend(entry){
+  if(!BACKEND_URL) return Promise.resolve(false);
+  const payload = Object.assign({}, entry, {
+    token: BACKEND_TOKEN,
+    userAgent: (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '',
+  });
+  // Sengaja tidak set header Content-Type agar fetch memakai default
+  // 'text/plain' — ini menghindari CORS preflight yang tidak didukung
+  // Google Apps Script Web App. Sisi server tetap membaca body sebagai JSON.
+  return fetch(BACKEND_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+    .then(res => res.json().catch(() => ({ ok: res.ok })))
+    .then(data => {
+      const ok = !!(data && data.ok);
+      updateEntrySyncStatus(entry.id, ok ? 'synced' : 'failed');
+      if(document.getElementById('historyScreen') && !document.getElementById('historyScreen').classList.contains('hidden')){
+        renderHistoryScreen();
+      }
+      return ok;
+    })
+    .catch(() => {
+      updateEntrySyncStatus(entry.id, 'failed');
+      return false;
+    });
+}
+
+function syncAllPending(){
+  const list = loadHistory();
+  const pending = list.filter(e => e.syncStatus === 'pending' || e.syncStatus === 'failed');
+  if(!BACKEND_URL){
+    alert('Sinkronisasi server belum dikonfigurasi (BACKEND_URL kosong). Lihat petunjuk di Code.gs untuk mengaktifkannya.');
+    return;
+  }
+  if(!pending.length){
+    renderHistoryScreen();
+    return;
+  }
+  pending.forEach(e => { e.syncStatus = 'pending'; });
+  persistHistory(list);
+  renderHistoryScreen();
+  Promise.all(pending.map(e => syncEntryToBackend(e))).then(() => {
+    renderHistoryScreen();
+  });
+}
+
+function scorePillClass(pct){
+  if(pct >= 70) return 'high';
+  if(pct >= 50) return 'mid';
+  return 'low';
+}
+
+function syncStatusBadge(status){
+  if(status === 'synced') return '<span class="hscore-pill high" style="font-weight:600;">Tersinkron</span>';
+  if(status === 'pending') return '<span class="hscore-pill mid" style="font-weight:600;">Mengirim…</span>';
+  if(status === 'failed') return '<span class="hscore-pill low" style="font-weight:600;">Gagal</span>';
+  return '<span class="hscore-pill" style="background:var(--line);color:var(--ink-soft);font-weight:600;">Lokal saja</span>';
+}
+
+function renderHistoryScreen(){
+  const list = loadHistory();
+  const summaryWrap = document.getElementById('historySummary');
+  const tbody = document.getElementById('historyTableBody');
+  const emptyEl = document.getElementById('historyEmpty');
+  const tableEl = document.getElementById('historyTable');
+
+  if(!list.length){
+    summaryWrap.innerHTML = '';
+    tbody.innerHTML = '';
+    tableEl.classList.add('hidden');
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+  tableEl.classList.remove('hidden');
+  emptyEl.classList.add('hidden');
+
+  const attempts = list.length;
+  const avgPct = Math.round(list.reduce((s,e)=>s+e.pct,0) / attempts);
+  const bestPct = Math.max(...list.map(e=>e.pct));
+  const uniqueNames = new Set(list.map(e => e.name || 'Tanpa nama')).size;
+
+  summaryWrap.innerHTML =
+    '<div class="hsum-card"><div class="hnum">'+attempts+'</div><div class="hlbl">Sesi Tercatat</div></div>'+
+    '<div class="hsum-card"><div class="hnum">'+avgPct+'%</div><div class="hlbl">Rata-rata Skor</div></div>'+
+    '<div class="hsum-card"><div class="hnum">'+bestPct+'%</div><div class="hlbl">Skor Terbaik</div></div>'+
+    '<div class="hsum-card"><div class="hnum">'+uniqueNames+'</div><div class="hlbl">Nama Peserta Berbeda</div></div>';
+
+  tbody.innerHTML = '';
+  list.forEach(entry => {
+    const d = new Date(entry.date);
+    const dateStr = isNaN(d.getTime()) ? '—' : d.toLocaleString('id-ID', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>'+dateStr+'</td>'+
+      '<td>'+escapeHtml(entry.name || '—')+'</td>'+
+      '<td>'+escapeHtml(entry.packageLabel || '—')+'</td>'+
+      '<td><span class="hscore-pill '+scorePillClass(entry.pct)+'">'+entry.pct+'%</span></td>'+
+      '<td>'+entry.correct+'</td>'+
+      '<td>'+entry.wrong+'</td>'+
+      '<td>'+entry.empty+'</td>'+
+      '<td>'+(entry.untimed ? '—' : formatTime(entry.timeUsedSec)) +'</td>'+
+      '<td>'+syncStatusBadge(entry.syncStatus)+'</td>'+
+      '<td><button class="del-row-btn" data-id="'+entry.id+'">Hapus</button></td>';
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.del-row-btn').forEach(btn => {
+    btn.addEventListener('click', () => deleteHistoryEntry(btn.dataset.id));
+  });
+
+  const noteEl = document.getElementById('backendStatusNote');
+  if(noteEl){
+    noteEl.textContent = BACKEND_URL
+      ? 'Sinkronisasi server aktif — hasil terbaru otomatis terkirim ke Google Sheets pusat Anda.'
+      : 'Sinkronisasi server belum dikonfigurasi (BACKEND_URL kosong) — data hanya tersimpan di perangkat ini. Lihat petunjuk di Code.gs untuk mengaktifkan pencatatan terpusat.';
+  }
+}
+
+function exportHistoryCSV(){
+  const list = loadHistory();
+  if(!list.length){ alert('Belum ada riwayat untuk diunduh.'); return; }
+  const header = ['Tanggal','Nama Peserta','Paket','Total Soal','Skor (%)','Benar','Salah','Kosong','Waktu (detik)','Status Sinkron'];
+  const rows = list.map(e => [
+    e.date, (e.name||'').replace(/,/g,' '), (e.packageLabel||'').replace(/,/g,' '),
+    e.total, e.pct, e.correct, e.wrong, e.empty, e.untimed ? '' : e.timeUsedSec, e.syncStatus || ''
+  ]);
+  const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const filename = 'riwayat-cat-petugas-haji-' + new Date().toISOString().slice(0,10) + '.csv';
+  try{
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e){
+    // Fallback for environments without Blob/URL.createObjectURL support
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+
+document.getElementById('historyNavBtn').addEventListener('click', () => {
+  renderHistoryScreen();
+  showScreen('history');
+});
+document.getElementById('viewHistoryFromResultBtn').addEventListener('click', () => {
+  renderHistoryScreen();
+  showScreen('history');
+});
+document.getElementById('historyBackBtn').addEventListener('click', () => {
+  showScreen('start');
+});
+document.getElementById('exportCsvBtn').addEventListener('click', exportHistoryCSV);
+document.getElementById('syncNowBtn').addEventListener('click', syncAllPending);
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+  if(confirm('Hapus semua riwayat uji coba di perangkat ini? Tindakan ini tidak dapat dibatalkan.')){
+    persistHistory([]);
+    renderHistoryScreen();
+  }
+});
+
+// Coba sinkronkan ulang entri yang tertunda begitu halaman dibuka
+// (misalnya sesi sebelumnya gagal kirim karena sedang offline).
+if(BACKEND_URL){
+  const pendingOnLoad = loadHistory().filter(e => e.syncStatus === 'pending' || e.syncStatus === 'failed');
+  pendingOnLoad.forEach(e => syncEntryToBackend(e));
+}
 </script>
 </body>
 </html>
