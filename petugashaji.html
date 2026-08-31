@@ -409,6 +409,39 @@
   .history-empty{padding:40px 20px;text-align:center;color:var(--ink-soft);font-size:14px;}
   .history-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
   .history-note{font-size:11.5px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
+
+  /* ===== REGISTRATION / APPROVAL GATE ===== */
+  .gate-wrap{max-width:560px;margin:24px auto;}
+  .gate-card{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:20px;
+    padding:36px 34px;box-shadow:var(--shadow);text-align:center;
+  }
+  .gate-card.form-align{text-align:left;}
+  .gate-icon{
+    width:56px;height:56px;border-radius:50%;margin:0 auto 18px;
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+  }
+  .gate-icon.pending{background:var(--gold-soft);}
+  .gate-icon.approved{background:var(--correct-soft);}
+  .gate-icon.rejected{background:var(--wrong-soft);}
+  .gate-title{font-family:"Fraunces",serif;font-weight:700;font-size:22px;margin-bottom:8px;}
+  .gate-sub{color:var(--ink-soft);font-size:14px;line-height:1.6;margin-bottom:4px;}
+  .gate-name-pill{
+    display:inline-block;margin-top:14px;padding:7px 16px;border-radius:999px;
+    background:var(--paper);border:1px solid var(--line);font-size:13px;font-weight:600;
+  }
+  .gate-actions{display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap;}
+  .gate-field{margin-bottom:16px;}
+  .gate-field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;color:var(--ink);}
+  .gate-field .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .gate-note-box{
+    margin-top:18px;padding:12px 14px;border-radius:10px;
+    background:var(--wrong-soft);color:var(--wrong);font-size:13px;text-align:left;
+  }
+  .gate-backend-off{
+    max-width:560px;margin:0 auto 18px;font-size:11.5px;color:var(--ink-soft);
+    background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:10px 14px;
+  }
   .del-row-btn{
     border:none;background:transparent;color:var(--wrong);cursor:pointer;font-size:12px;font-weight:700;
     padding:4px 8px;border-radius:6px;
@@ -441,8 +474,71 @@
 
 <div class="shell">
 
+  <!-- ============ REGISTER SCREEN ============ -->
+  <section id="registerScreen" class="hidden">
+    <div class="gate-wrap">
+      <div class="gate-card form-align">
+        <div style="text-align:center;">
+          <div class="gate-icon pending">&#128221;</div>
+          <div class="gate-title">Registrasi Peserta</div>
+          <p class="gate-sub">Isi data di bawah untuk mengajukan akses uji coba. Admin akan meninjau &amp; menyetujui pendaftaran Anda.</p>
+        </div>
+
+        <div class="gate-field" style="margin-top:24px;">
+          <label for="regName">Nama Lengkap *</label>
+          <input type="text" id="regName" class="input-text" placeholder="Nama lengkap Anda">
+        </div>
+        <div class="gate-field">
+          <label for="regInstansi">Instansi / Satuan Kerja *</label>
+          <input type="text" id="regInstansi" class="input-text" placeholder="Contoh: KUA Kecamatan Pilangkenceng, Kab. Madiun">
+        </div>
+        <div class="gate-field">
+          <label for="regKontak">Kontak WhatsApp / Email *</label>
+          <input type="text" id="regKontak" class="input-text" placeholder="0812xxxxxxxx atau email aktif">
+          <div class="hint">Dipakai admin untuk menghubungi Anda bila diperlukan. Tidak ditampilkan ke peserta lain.</div>
+        </div>
+
+        <div id="regErrorBox" class="gate-note-box hidden"></div>
+
+        <button class="btn btn-primary btn-block" id="regSubmitBtn" style="margin-top:8px;">Daftar &amp; Ajukan Persetujuan</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PENDING APPROVAL SCREEN ============ -->
+  <section id="pendingScreen" class="hidden">
+    <div class="gate-wrap">
+      <div class="gate-card">
+        <div class="gate-icon pending">&#8987;</div>
+        <div class="gate-title">Menunggu Persetujuan Admin</div>
+        <p class="gate-sub">Pendaftaran Anda sudah tercatat dan admin sudah menerima notifikasi. Silakan tunggu &mdash; halaman ini bisa memeriksa status terbaru kapan saja.</p>
+        <div class="gate-name-pill" id="pendingNamePill">—</div>
+        <div class="gate-actions">
+          <button class="btn btn-primary" id="checkStatusBtn">Cek Status Sekarang</button>
+          <button class="btn btn-ghost" id="pendingResetBtn">Daftar Ulang</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REJECTED SCREEN ============ -->
+  <section id="rejectedScreen" class="hidden">
+    <div class="gate-wrap">
+      <div class="gate-card">
+        <div class="gate-icon rejected">&#10005;</div>
+        <div class="gate-title">Pendaftaran Belum Disetujui</div>
+        <p class="gate-sub">Admin belum menyetujui pendaftaran Anda untuk saat ini.</p>
+        <div class="gate-name-pill" id="rejectedNamePill">—</div>
+        <div id="rejectedNoteBox" class="gate-note-box hidden"></div>
+        <div class="gate-actions">
+          <button class="btn btn-primary" id="rejectedResetBtn">Daftar Ulang</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ START SCREEN ============ -->
-  <section id="startScreen">
+  <section id="startScreen" class="hidden">
     <div class="hero">
       <div class="hero-main">
         <span class="hero-eyebrow">Try Out &middot; Computer Assisted Test</span>
@@ -474,8 +570,9 @@
 
       <div class="hero-side">
         <div>
-          <div class="field-label">Nama Peserta (opsional)</div>
+          <div class="field-label" id="participantNameLabel">Nama Peserta (opsional)</div>
           <input type="text" id="participantName" class="input-text" placeholder="Tulis nama Anda" style="margin-top:7px;">
+          <div id="participantVerifiedNote" class="hidden" style="font-size:11.5px;color:var(--correct);margin-top:6px;font-weight:600;">&#10003; Identitas terverifikasi lewat pendaftaran yang disetujui admin</div>
         </div>
 
         <div>
@@ -987,11 +1084,13 @@ document.getElementById('startBtn').addEventListener('click', () => {
 /* =========================================================
    SCREEN SWITCH
 ========================================================= */
+const GATE_SCREEN_IDS = ['registerScreen','pendingScreen','rejectedScreen','startScreen','examScreen','resultScreen','historyScreen'];
 function showScreen(name){
-  document.getElementById('startScreen').classList.toggle('hidden', name!=='start');
-  document.getElementById('examScreen').classList.toggle('hidden', name!=='exam');
-  document.getElementById('resultScreen').classList.toggle('hidden', name!=='result');
-  document.getElementById('historyScreen').classList.toggle('hidden', name!=='history');
+  const map = { register:'registerScreen', pending:'pendingScreen', rejected:'rejectedScreen', start:'startScreen', exam:'examScreen', result:'resultScreen', history:'historyScreen' };
+  const targetId = map[name];
+  GATE_SCREEN_IDS.forEach(id => {
+    document.getElementById(id).classList.toggle('hidden', id !== targetId);
+  });
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -1370,7 +1469,202 @@ document.getElementById('backHomeBtn').addEventListener('click', () => {
 // Kosongkan (biarkan "") kalau belum ingin mengaktifkan sinkronisasi server —
 // halaman tetap berfungsi penuh dengan perekaman lokal saja.
 const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzV-6syec7WdK8x5Msyj2NH8-NR9n6v8mLZq6hE7LiSMmCz6Vgp6DLjJDxoK73PFMxAAg/exec";
-const BACKEND_TOKEN = "Rahasia1";
+const BACKEND_TOKEN = "R@hasia1";
+
+/* =========================================================
+   MODUL: REGISTRASI & GERBANG PERSETUJUAN ADMIN
+   Aktif hanya jika BACKEND_URL sudah diisi (lihat Code.gs untuk
+   cara deploy). Kalau BACKEND_URL kosong, gerbang ini dilewati
+   sepenuhnya dan halaman langsung ke layar mulai seperti biasa —
+   supaya file ini tetap berfungsi penuh sebelum backend dipasang.
+========================================================= */
+const REGISTRATION_KEY = 'cat_petugas_haji_pendaftaran_v1';
+let statusPollTimer = null;
+
+function loadRegistration(){
+  try{
+    const raw = localStorage.getItem(REGISTRATION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e){ return null; }
+}
+
+function saveRegistration(reg){
+  try{ localStorage.setItem(REGISTRATION_KEY, JSON.stringify(reg)); } catch(e){}
+}
+
+function clearRegistration(){
+  try{ localStorage.removeItem(REGISTRATION_KEY); } catch(e){}
+}
+
+function showGateError(message){
+  const box = document.getElementById('regErrorBox');
+  box.textContent = message;
+  box.classList.remove('hidden');
+}
+function hideGateError(){
+  document.getElementById('regErrorBox').classList.add('hidden');
+}
+
+function submitRegistration(){
+  const name = document.getElementById('regName').value.trim();
+  const instansi = document.getElementById('regInstansi').value.trim();
+  const kontak = document.getElementById('regKontak').value.trim();
+  hideGateError();
+
+  if(!name || !instansi || !kontak){
+    showGateError('Nama, Instansi/Satuan Kerja, dan Kontak wajib diisi.');
+    return;
+  }
+
+  const btn = document.getElementById('regSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Mengirim…';
+
+  fetch(BACKEND_URL, {
+    method: 'POST',
+    body: JSON.stringify({ type:'register', token:BACKEND_TOKEN, name, instansi, kontak }),
+  })
+    .then(res => res.json().catch(() => ({ ok:false })))
+    .then(data => {
+      btn.disabled = false;
+      btn.textContent = 'Daftar & Ajukan Persetujuan';
+      if(data && data.ok){
+        saveRegistration({ id:data.id, name, instansi, kontak, status:data.status || 'Menunggu', note:'' });
+        renderPendingScreen();
+        showScreen('pending');
+        startStatusPolling();
+      } else {
+        showGateError((data && data.error) ? data.error : 'Gagal mengirim pendaftaran. Periksa koneksi internet, lalu coba lagi.');
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Daftar & Ajukan Persetujuan';
+      showGateError('Gagal terhubung ke server. Periksa koneksi internet, lalu coba lagi.');
+    });
+}
+
+function renderPendingScreen(){
+  const reg = loadRegistration();
+  document.getElementById('pendingNamePill').textContent = reg ? reg.name : '—';
+}
+
+function renderRejectedScreen(){
+  const reg = loadRegistration();
+  document.getElementById('rejectedNamePill').textContent = reg ? reg.name : '—';
+  const noteBox = document.getElementById('rejectedNoteBox');
+  if(reg && reg.note){
+    noteBox.textContent = 'Catatan admin: ' + reg.note;
+    noteBox.classList.remove('hidden');
+  } else {
+    noteBox.classList.add('hidden');
+  }
+}
+
+function checkRegistrationStatus(silent){
+  const reg = loadRegistration();
+  if(!reg || !reg.id) return Promise.resolve();
+
+  const checkBtn = document.getElementById('checkStatusBtn');
+  if(!silent && checkBtn){ checkBtn.disabled = true; checkBtn.textContent = 'Memeriksa…'; }
+
+  return fetch(BACKEND_URL + '?action=status&id=' + encodeURIComponent(reg.id))
+    .then(res => res.json().catch(() => ({ ok:false })))
+    .then(data => {
+      if(!silent && checkBtn){ checkBtn.disabled = false; checkBtn.textContent = 'Cek Status Sekarang'; }
+      if(data && data.ok){
+        reg.status = data.status;
+        reg.note = data.note || '';
+        saveRegistration(reg);
+        routeByRegistrationStatus(reg);
+      } else if(!silent){
+        alert((data && data.error) ? data.error : 'Belum bisa memeriksa status. Coba lagi sebentar.');
+      }
+    })
+    .catch(() => {
+      if(!silent && checkBtn){ checkBtn.disabled = false; checkBtn.textContent = 'Cek Status Sekarang'; }
+      if(!silent) alert('Gagal terhubung ke server. Periksa koneksi internet.');
+    });
+}
+
+function routeByRegistrationStatus(reg){
+  if(reg.status === 'Disetujui'){
+    stopStatusPolling();
+    enterStartScreenAsRegistrant(reg);
+  } else if(reg.status === 'Ditolak'){
+    stopStatusPolling();
+    renderRejectedScreen();
+    showScreen('rejected');
+  } else {
+    renderPendingScreen();
+    showScreen('pending');
+    startStatusPolling();
+  }
+}
+
+function startStatusPolling(){
+  stopStatusPolling();
+  statusPollTimer = setInterval(() => checkRegistrationStatus(true), 20000);
+}
+function stopStatusPolling(){
+  if(statusPollTimer){ clearInterval(statusPollTimer); statusPollTimer = null; }
+}
+
+function enterStartScreenAsRegistrant(reg){
+  const nameInput = document.getElementById('participantName');
+  nameInput.value = reg.name;
+  nameInput.readOnly = true;
+  nameInput.style.background = 'var(--paper)';
+  session.participantName = reg.name;
+  document.getElementById('topbarRight').textContent = 'Peserta: ' + reg.name + ' ✓';
+  const verifiedNote = document.getElementById('participantVerifiedNote');
+  if(verifiedNote) verifiedNote.classList.remove('hidden');
+  showScreen('start');
+}
+
+function initRegistrationGate(){
+  if(!BACKEND_URL){
+    showScreen('start');
+    return;
+  }
+  const reg = loadRegistration();
+  if(!reg || !reg.id){
+    showScreen('register');
+    return;
+  }
+  if(reg.status === 'Disetujui'){
+    // Tampilkan langsung (optimis), lalu verifikasi ulang diam-diam di latar.
+    enterStartScreenAsRegistrant(reg);
+    checkRegistrationStatus(true).then(() => {
+      const fresh = loadRegistration();
+      if(fresh && fresh.status !== 'Disetujui'){
+        routeByRegistrationStatus(fresh);
+      }
+    });
+  } else if(reg.status === 'Ditolak'){
+    renderRejectedScreen();
+    showScreen('rejected');
+  } else {
+    renderPendingScreen();
+    showScreen('pending');
+    startStatusPolling();
+    checkRegistrationStatus(true);
+  }
+}
+
+document.getElementById('regSubmitBtn').addEventListener('click', submitRegistration);
+document.getElementById('checkStatusBtn').addEventListener('click', () => checkRegistrationStatus(false));
+document.getElementById('pendingResetBtn').addEventListener('click', () => {
+  if(confirm('Hapus pendaftaran ini dan isi ulang formulir dari awal?')){
+    stopStatusPolling();
+    clearRegistration();
+    showScreen('register');
+  }
+});
+document.getElementById('rejectedResetBtn').addEventListener('click', () => {
+  clearRegistration();
+  showScreen('register');
+});
 
 const HISTORY_KEY = 'cat_petugas_haji_riwayat_v1';
 
@@ -1598,6 +1892,10 @@ if(BACKEND_URL){
   const pendingOnLoad = loadHistory().filter(e => e.syncStatus === 'pending' || e.syncStatus === 'failed');
   pendingOnLoad.forEach(e => syncEntryToBackend(e));
 }
+
+// Tentukan layar awal: gerbang registrasi (jika backend aktif) atau
+// langsung ke layar mulai (jika backend belum dikonfigurasi).
+initRegistrationGate();
 </script>
 </body>
 </html>
