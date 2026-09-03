@@ -474,83 +474,8 @@
 
 <div class="shell">
 
-  <!-- ============ SETUP REQUIRED SCREEN (BACKEND_URL kosong) ============ -->
-  <section id="setupScreen" class="hidden">
-    <div class="gate-wrap">
-      <div class="gate-card">
-        <div class="gate-icon pending">&#9881;</div>
-        <div class="gate-title">Backend Belum Dikonfigurasi</div>
-        <p class="gate-sub">Demi keamanan, soal &amp; kunci jawaban tidak lagi disimpan di file HTML ini &mdash; semua diambil dari server saat ujian berlangsung. Halaman ini butuh <b>BACKEND_URL</b> terisi untuk bisa mulai mengerjakan soal.</p>
-        <p class="gate-sub" style="margin-top:14px;">Buka <code>Code.gs</code>, ikuti langkah pemasangan di bagian komentar atas file, deploy sebagai Web App, lalu isi <code>BACKEND_URL</code> dan <code>BACKEND_TOKEN</code> di file ini.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ REGISTER SCREEN ============ -->
-  <section id="registerScreen" class="hidden">
-    <div class="gate-wrap">
-      <div class="gate-card form-align">
-        <div style="text-align:center;">
-          <div class="gate-icon pending">&#128221;</div>
-          <div class="gate-title">Registrasi Peserta</div>
-          <p class="gate-sub">Isi data di bawah untuk mengajukan akses uji coba. Admin akan meninjau &amp; menyetujui pendaftaran Anda.</p>
-        </div>
-
-        <div class="gate-field" style="margin-top:24px;">
-          <label for="regName">Nama Lengkap *</label>
-          <input type="text" id="regName" class="input-text" placeholder="Nama lengkap Anda">
-        </div>
-        <div class="gate-field">
-          <label for="regInstansi">Instansi / Satuan Kerja *</label>
-          <input type="text" id="regInstansi" class="input-text" placeholder="Contoh: KUA Kecamatan Pilangkenceng, Kab. Madiun">
-        </div>
-        <div class="gate-field">
-          <label for="regKontak">Kontak WhatsApp / Email *</label>
-          <input type="text" id="regKontak" class="input-text" placeholder="0812xxxxxxxx atau email aktif">
-          <div class="hint">Dipakai admin untuk menghubungi Anda bila diperlukan. Tidak ditampilkan ke peserta lain.</div>
-        </div>
-
-        <div id="regErrorBox" class="gate-note-box hidden"></div>
-
-        <button class="btn btn-primary btn-block" id="regSubmitBtn" style="margin-top:8px;">Daftar &amp; Ajukan Persetujuan</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PENDING APPROVAL SCREEN ============ -->
-  <section id="pendingScreen" class="hidden">
-    <div class="gate-wrap">
-      <div class="gate-card">
-        <div class="gate-icon pending">&#8987;</div>
-        <div class="gate-title">Menunggu Persetujuan Admin</div>
-        <p class="gate-sub">Pendaftaran Anda sudah tercatat dan admin sudah menerima notifikasi. Silakan tunggu &mdash; halaman ini bisa memeriksa status terbaru kapan saja.</p>
-        <div class="gate-name-pill" id="pendingNamePill">—</div>
-        <div class="gate-actions">
-          <button class="btn btn-primary" id="checkStatusBtn">Cek Status Sekarang</button>
-          <button class="btn btn-ghost" id="pendingResetBtn">Daftar Ulang</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ REJECTED SCREEN ============ -->
-  <section id="rejectedScreen" class="hidden">
-    <div class="gate-wrap">
-      <div class="gate-card">
-        <div class="gate-icon rejected">&#10005;</div>
-        <div class="gate-title">Pendaftaran Belum Disetujui</div>
-        <p class="gate-sub">Admin belum menyetujui pendaftaran Anda untuk saat ini.</p>
-        <div class="gate-name-pill" id="rejectedNamePill">—</div>
-        <div id="rejectedNoteBox" class="gate-note-box hidden"></div>
-        <div class="gate-actions">
-          <button class="btn btn-primary" id="rejectedResetBtn">Daftar Ulang</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ============ START SCREEN ============ -->
-  <section id="startScreen" class="hidden">
+  <section id="startScreen">
     <div class="hero">
       <div class="hero-main">
         <span class="hero-eyebrow">Try Out &middot; Computer Assisted Test</span>
@@ -582,22 +507,21 @@
 
       <div class="hero-side">
         <div>
-          <div class="field-label" id="participantNameLabel">Nama Peserta (opsional)</div>
+          <div class="field-label">Nama Peserta (opsional)</div>
           <input type="text" id="participantName" class="input-text" placeholder="Tulis nama Anda" style="margin-top:7px;">
-          <div id="participantVerifiedNote" class="hidden" style="font-size:11.5px;color:var(--correct);margin-top:6px;font-weight:600;">&#10003; Identitas terverifikasi lewat pendaftaran yang disetujui admin</div>
         </div>
 
         <div>
           <div class="field-label">Paket Uji Coba</div>
           <div class="field-hint">Setiap paket mengambil soal acak dari total 224 soal koleksi.</div>
           <div class="choice-grid" id="packageChoices">
-            <button type="button" class="choice" data-count="30" data-secpq="45">
+            <button type="button" class="choice" data-count="25" data-secpq="45">
               <div class="c-title">Cepat</div>
-              <div class="c-sub">30 soal acak &middot; ~22 menit</div>
+              <div class="c-sub">25 soal acak &middot; ~19 menit</div>
             </button>
-            <button type="button" class="choice" data-count="75" data-secpq="40">
+            <button type="button" class="choice" data-count="50" data-secpq="42">
               <div class="c-title">Sedang</div>
-              <div class="c-sub">75 soal acak &middot; ~50 menit</div>
+              <div class="c-sub">50 soal acak &middot; ~35 menit</div>
             </button>
             <button type="button" class="choice selected" data-count="100" data-secpq="40">
               <div class="c-title">Penuh</div>
@@ -778,22 +702,260 @@ const CATEGORY_META = {
   integritas:  { label:"Integritas Petugas",color:"var(--c-integritas)", soft:"var(--c-integritas-soft)" },
 };
 
-/* =========================================================
-   BANK SOAL — MODE AMAN (SISI SERVER)
-   Soal, opsi, dan kunci jawaban TIDAK disimpan di file ini sama sekali.
-   Semua diambil dari backend per sesi (lihat Code.gs, endpoint
-   get_questions & submit_exam) setelah peserta terdaftar & disetujui
-   admin. Ini sengaja dilakukan supaya kunci jawaban tidak bisa dibaca
-   lewat "View Page Source" oleh siapa pun.
-========================================================= */
+const RAW_BANK = [
+// ---------------- AKOMODASI (25) ----------------
+["akomodasi","Dasar hukum yang mengatur layanan jemaah haji adalah…",["UU No. 34 Tahun 2014","UU No. 8 Tahun 2019","PP No. 76 Tahun 2015","Perpres No. 62 Tahun 2020"],1],
+["akomodasi","Standar konsumsi jemaah haji Safety berarti…",["Jumlah makanan sesuai menu","Makanan aman, higienis, tidak tercemar","Cita rasa sesuai standar Arab Saudi","Tepat waktu distribusi"],1],
+["akomodasi","Yang termasuk standar konsumsi 5 standar kecuali…",["Safety","Gizi","Citra rasa","Kemasan mewah"],3],
+["akomodasi","Kasfiyah dalam sistem katering Saudi berarti…",["Izin pendirian tenda Armuzna","Lisensi resmi perusahaan katering","Perjanjian layanan transportasi","Sistem tender hotel"],1],
+["akomodasi","Tasreh adalah…",["Izin operasional bus","Izin gedung dapur katering","Izin masuk jalur khusus","Sertifikat kesehatan jemaah"],1],
+["akomodasi","Dalam layanan katering, cold chain berarti…",["Rantai distribusi makanan panas","Pengiriman bahan makanan dalam ruangan ber-AC","Sistem distribusi makanan dalam suhu terkendali","Pengemasan makanan dalam plastik"],2],
+["akomodasi","Konsumsi yang diberikan saat terjadi keterlambatan katering adalah…",["Hot meal","Dry meal","Emergency meal","Makan prasmanan"],2],
+["akomodasi","Pengawasan kualitas makanan dilakukan melalui…",["Pengecekan vendor","Food testing","Laporan harian kloter","Semua benar"],3],
+["akomodasi","Pendistribusian makanan Armuzna menantang karena faktor…",["Kemacetan ekstrem dan kepadatan tenda","Hotel terlalu dekat","Tidak ada vendor resmi","Tidak ada SOP"],0],
+["akomodasi","Standar gizi makanan jemaah mencakup…",["2.000–2.800 kkal/hari","1.200–1.500 kkal/hari","3.500–4.000 kkal/hari","Ditentukan sektor"],0],
+["akomodasi","Distribusi katering bandara untuk jemaah dilakukan pada saat…",["Hanya saat mendarat","Saat kedatangan & kepulangan","Saat transit","Saat turun pesawat"],1],
+["akomodasi","Pengelolaan akomodasi hotel termasuk…",["Penentuan tasreh","Penempatan kamar jemaah","Pemeriksaan paspor","Pendampingan ibadah"],1],
+["akomodasi","Laporan pengawasan katering dikirim minimal…",["Setiap menit","Setiap hari","Setiap pekan","Setiap akhir masa haji"],1],
+["akomodasi","Risiko utama katering Armuzna adalah…",["Kekurangan tenaga","Tidak tersedianya bahan baku","Keterlambatan distribusi","Tidak adanya vendor"],2],
+["akomodasi","Tray meal adalah…",["Makanan kering","Makanan panas dalam tray individual","Makanan impor","Makanan prasmanan"],1],
+["akomodasi","Penempatan jemaah hotel mempertimbangkan…",["Asal provinsi","Kedekatan dengan rute bus","Jenis paket haji","Semua benar"],3],
+["akomodasi","Hotel di Madinah rata-rata berada di wilayah…",["Al-Haram","Ring I–III","Al-Masani","Jamarat district"],1],
+["akomodasi","Pemeriksaan suhu makanan dilakukan dengan alat…",["Thermometer probe","Alat berat","Hygrometer","Lux meter"],0],
+["akomodasi","Pengawasan vendor dilakukan oleh…",["Kloter","Sektor","Daker","Semuanya berperan"],3],
+["akomodasi","Kegiatan receiving berarti…",["Makanan dibagikan","Makanan diproduksi","Makanan diterima dari vendor","Makanan disimpan"],2],
+["akomodasi","Keterlambatan katering harus ditangani dengan…",["Laporan cepat","Pemanggilan vendor","Distribusi emergency meal","Semua benar"],3],
+["akomodasi","Kapasitas kamar hotel diatur dalam standar…",["Tamtir","Tasreh","Kasfiyah","Tasnif"],0],
+["akomodasi","Kualitas makanan harus memenuhi standar Saudi, yaitu…",["GSO","FDA","BPOM","HACCP"],0],
+["akomodasi","Kamar hotel untuk jemaah Indonesia mayoritas kategori…",["VVIP","Deluxe","Standar Sharing","Single Room"],2],
+["akomodasi","Pengawasan akomodasi melibatkan…",["Daker","Sektor","Kloter","Semua benar"],3],
+
+// ---------------- TRANSPORTASI (35) ----------------
+["transportasi","Sistem transportasi jamaah haji di Saudi beroperasi berdasarkan…",["Mekanisme penunjukan bebas perusahaan transportasi","Sistem zonasi dan rute terjadwal sesuai wilayah pemondokan","Sistem shuttle yang tidak memiliki jadwal tertentu","Mekanisme manual dari masing-masing maktab"],1],
+["transportasi","Layanan bus shalawat berfungsi untuk…",["Mengangkut jamaah dari hotel ke Miqat","Mobilisasi jamaah dari hotel ke Masjidil Haram","Mengantar jamaah ke Jamarat setiap saat","Mengantar jamaah dari Madinah ke Makkah"],1],
+["transportasi","Headway dalam konteks transportasi haji adalah…",["Jarak fisik antara dua bus","Selisih waktu kedatangan antar bus dalam satu trayek","Durasi perjalanan Makkah–Arafah","Waktu tunggu jamaah di terminal"],1],
+["transportasi","TAT (Turn Around Time) adalah…",["Waktu total bus bekerja dalam sehari","Waktu yang diperlukan bus menyelesaikan 1 putaran rute","Waktu henti di terminal","Waktu pemeliharaan bus"],1],
+["transportasi","Faktor yang paling memengaruhi TAT bus shalawat adalah…",["Ukuran bagasi penumpang","Kemacetan dan kepadatan jalur masuk masjid","Warna bus","Kapasitas AC bus"],1],
+["transportasi","Pada puncak haji, pergerakan jamaah Armuzna menggunakan sistem…",["Bebas tanpa pengaturan","Konvoi terjadwal berdasarkan maktab dan zona","Shuttle 24 jam tanpa jeda","Sistem daring"],1],
+["transportasi","Rute Arafah → Muzdalifah → Mina dalam sistem Armuzna disebut…",["Rute pemondokan","Rute taraddudiyah","Rute masyair","Rute syibh-masyair"],2],
+["transportasi","Bus taraddudiyah berfungsi untuk…",["Hanya mengantar jamaah ke Jamarat","Hilir-mudik (bolak-balik) Mina–Jamarat","Perjalanan dari Madinah ke Makkah","Mengantar jamaah ke hotel"],1],
+["transportasi","Jamaah gelombang pertama biasanya turun di…",["Bandara Jeddah","Bandara Madinah (Pangeran Muhammad bin Abdulaziz)","Bandara Riyadh","Pelabuhan Yanbu"],1],
+["transportasi","Pengaturan pergerakan jamaah dari Muzdalifah ke Mina sangat bergantung pada…",["Tahap paspor jamaah","Cuaca dan kapasitas Jamarat","Jadwal petugas kesehatan","Warna gelang jamaah"],1],
+["transportasi","Perpindahan jamaah dari Madinah ke Makkah dilakukan menggunakan…",["Kereta Haramain","Bus antar kota (SAPTCO dan PO mitra)","Mobil kecil","Taksi online"],1],
+["transportasi","Faktor utama keterlambatan bus Armuzna adalah…",["Sopir tidak hafal rute","Kepadatan jalur Masyair","Kondisi AC","Warna maktab"],1],
+["transportasi","Sistem zonasi transportasi Saudi dibuat untuk…",["Mengurangi beban Kemenag","Menghindari kelebihan kapasitas dan memecah kerumunan","Menyulitkan jamaah","Mengurangi biaya operasional"],1],
+["transportasi","Dalam sistem transportasi Armuzna, penanggung jawab utama pengaturan bus adalah…",["Ketua kloter","Muassasah","Naqabah (syarikah transport)","Kepala sektor"],2],
+["transportasi","Yang termasuk moda transportasi utama jamaah di Arab Saudi adalah…",["Taksi online","Shalawat bus dan bus antar kota","Sepeda motor","Metro Makkah"],1],
+["transportasi","Bus shalawat berhenti beroperasi sementara pada waktu…",["Subuh","Menjelang shalat Jumat karena padat","Malam hari","Hari-hari puncak haji (8–13 Dzulhijjah)"],3],
+["transportasi","Apa yang dilakukan petugas ketika headway meningkat lebih dari standar?",["Menghentikan seluruh bus","Melapor ke ketua sektor transport","Menganalisa kemacetan dan melakukan koordinasi percepatan","Meminta jamaah berjalan kaki"],2],
+["transportasi","Petugas wajib memastikan jamaah masuk bus sesuai…",["Warna mukena","Zona dan kode sektor","Urutan pendaftaran","Hotel mahal"],1],
+["transportasi","Perpindahan jamaah dari Muzdalifah ke Mina dilakukan setelah…",["Matahari terbit","Mabit minimal hingga lewat tengah malam (muzdalifah nuzul)","Wukuf","Melontar jumrah"],1],
+["transportasi","Sumber kemacetan utama di Mina adalah…",["Petugas foto-foto","Titik sempit menuju Jamarat","Kurangnya lampu jalan","Sopir terlambat"],1],
+["transportasi","Sistem bus transit Mina–Jamarat mengharuskan jamaah…",["Berdiri di luar bus","Menggunakan jalur khusus sesuai maktab","Membawa bagasi berat","Menunggu di Muzdalifah"],1],
+["transportasi","Transportasi Armuzna disebut “Masyair” karena…",["Dilakukan di tiga lokasi ibadah utama","Hanya menggunakan bus ber-AC","Dipimpin tentara","Gratis seluruhnya"],0],
+["transportasi","Pengaturan pergerakan dari hotel ke terminal shalawat dilakukan oleh…",["PPIH sektor","Hotel","Naqabah","Petugas taksi"],0],
+["transportasi","Kendala transportasi paling umum di masa puncak haji adalah…",["Kekurangan supir","Kepadatan ekstrim di Masyair","Tidak tersedia bensin","Semua bus mogok"],1],
+["transportasi","Data headway harus dilaporkan oleh petugas setiap…",["1 jam","30 menit","Setiap kali ada bus datang","Saat diminta ketua kloter"],1],
+["transportasi","Ketika bus mogok di tengah rute, tindakan petugas adalah…",["Menyuruh jamaah kembali ke hotel","Menghubungi sektor transport untuk deploy bus cadangan","Meninggalkan jamaah sementara","Meminta jamaah berjalan kaki"],1],
+["transportasi","Tanda bus jamaah haji Indonesia biasanya adalah…",["Strip hijau dan logo bendera","Warna merah dominan","Tidak ada tanda","Kode maktab"],0],
+["transportasi","Perjalanan Makkah–Arafah biasanya dimulai pada…",["8 Dzulhijjah pagi","7 Dzulhijjah malam","9 Dzulhijjah sore","10 Dzulhijjah"],0],
+["transportasi","Mengapa bus taraddudiyah tidak boleh ditahan lama oleh jamaah?",["Menghabiskan bahan bakar","Akan mengganggu ritme bolak-balik","Supir harus istirahat","Tidak ada AC"],1],
+["transportasi","Bus shalawat hanya bisa digunakan jamaah yang…",["Membayar tiket tambahan","Hotelnya masuk zonasi shalawat","Bermukim di luar kota","Jamaah tamu diplomat"],1],
+["transportasi","Pergerakan dinamis jamaah Jamarat dipengaruhi oleh…",["Jadwal lontar","Cuaca","Volume jamaah global","Semua benar"],3],
+["transportasi","Penanggung jawab transport sektor adalah…",["Ketua kloter","Kepala sektor","Muassasah","Hotel"],1],
+["transportasi","Koordinasi final Armuzna dilakukan pada…",["Rapat wukuf","Final meeting Masyair","Administrasi paspor","Penutupan layanan"],1],
+["transportasi","Petugas harus mengarahkan jamaah masuk bus sesuai…",["Nomor kursi","Nomor sektor dan zona","Kaos panitia","Tempat tinggal di Indonesia"],1],
+["transportasi","Sistem transportasi saat kepulangan jamaah ke bandara Jeddah disebut…",["First phase departure","Nafrah Mutawakkil","Tashgheel","Final departure movement"],3],
+
+// ---------------- REGULASI PPIH (15) ----------------
+["regulasi","Dasar hukum utama penyelenggaraan ibadah haji di Indonesia adalah…",["UU No. 34 Tahun 2014","UU No. 8 Tahun 2019","UU No. 14 Tahun 2025","PP No. 79 Tahun 2021"],1],
+["regulasi","UU No. 14 Tahun 2025 merupakan perubahan ketiga atas…",["UU 14/2014","UU 12/2011","UU 8/2019","UU 6/2023"],2],
+["regulasi","Pasal yang mengatur perlindungan jamaah haji secara menyeluruh tertuang dalam…",["Bab II UU 8/2019","Bab IV UU 8/2019","Bab VI UU 8/2019","Bab XI UU 8/2019"],0],
+["regulasi","Penyelenggara ibadah haji terbagi menjadi dua skema: haji reguler dan haji khusus, sebagaimana termuat dalam…",["UU 8/2019 pasal 6","UU 8/2019 pasal 58","UU 14/2025 pasal 3","PMA 13/2021 pasal 12"],0],
+["regulasi","Penugasan Petugas Penyelenggara Ibadah Haji (PPIH) diatur dalam…",["PMA 29/2019","PMA 13/2021","PMA 6/2021","PMA tentang PPIH yang berlaku setiap musim"],3],
+["regulasi","Pelayanan akomodasi dan konsumsi jamaah haji diatur pada pasal…",["Pasal 8 UU 8/2019","Pasal 12–21 UU 8/2019","Pasal 36–37 UU 8/2019","Pasal 64–67 UU 8/2019"],1],
+["regulasi","Perubahan substansial dalam UU 14/2025 adalah…",["Pemindahan kewenangan ke Kemenparekraf","Pembentukan “Kementerian Haji dan Umrah” RI","Penambahan kuota jamaah 10%","Penghapusan petugas kloter"],1],
+["regulasi","Yang bertugas melakukan pengawasan penyelenggaraan ibadah haji menurut UU ialah…",["Kemenhag Saudi","DPR RI","Kantor Urusan Haji (KUH)","Presiden langsung"],1],
+["regulasi","Dalam PMA, fungsi PPIH Arab Saudi mencakup…",["Verifikasi pendaftaran jamaah","Penandatanganan kontrak pemerintah","Supervisi layanan transportasi, akomodasi, dan konsumsi","Penentuan kuota nasional"],2],
+["regulasi","PMA 13/2021 mengatur tentang…",["Kriteria makanan jamaah","Penyelenggaraan perjalanan ibadah umrah","Mekanisme mutasi jamaah antar kloter","Penyelenggaraan haji khusus"],1],
+["regulasi","Yang termasuk hak jamaah haji menurut UU adalah…",["Meminta jenis hotel tertentu","Mendapat pelayanan kesehatan","Menentukan maskapai penerbangan","Membawa barang tanpa batas"],1],
+["regulasi","Ketentuan mengenai pembinaan manasik jamaah diatur dalam…",["PMA 6/2021","UU 8/2019 pasal 33","UU 14/2025 pasal 7","PMA 13/2021"],1],
+["regulasi","Pemindahan jamaah antar armuzna berada dalam kewenangan…",["KUH Arab Saudi","Kementerian Haji dan Umrah RI","PPIH Arab Saudi","Sektor Khusus Arafah"],2],
+["regulasi","Pasal 4 UU 8/2019 mengatur tentang…",["Prinsip-prinsip penyelenggaraan ibadah haji","Wewenang Kantor Daker","Kategori jamaah haji","Syarat pengunduran diri petugas"],0],
+["regulasi","Prinsip penyelenggaraan ibadah haji menurut UU mencakup…",["Fast response, transparan, ekonomis","Adil, profesional, akuntabel","Simple, fleksibel, bebas biaya","Prioritas pada kloter pertama"],1],
+
+// ---------------- KASUS LAPANGAN (30) ----------------
+["kasus","Seorang jamaah lanjut usia ditemukan menangis karena tersesat dan tidak tahu arah kembali ke hotel. Tindakan pertama yang paling tepat adalah…",["Mengantar langsung ke hotel tanpa bertanya","Menyuruh jamaah menunggu di halte terdekat","Menenangkan jamaah, memastikan identitas gelang/hotel, lalu koordinasi sektor","Meminta jamaah menelepon keluarga sendiri"],2],
+["kasus","Petugas menemukan 5 jamaah kehilangan arah saat perjalanan dari Masjidil Haram menuju hotel. Langkah terbaik adalah…",["Meminta mereka mengikuti rombongan lain","Mengarahkan secara lisan tanpa mengantar","Mengambil data hotel & kloter, lalu mengantar atau koordinasi sektor","Membiarkan mereka mencari sendiri"],2],
+["kasus","Bus kloter mengalami mogok di tengah perjalanan menuju Arafah. Apa prioritas utama petugas?",["Meminta jamaah turun dan jalan kaki","Memanggil mekanik terlebih dahulu","Mengamankan jamaah, cari bus pengganti, lapor ke Daker Transportasi","Menunggu bus diperbaiki tanpa update"],2],
+["kasus","Saat di Mina, satu regu jamaah tidak kembali ke tenda hingga lebih dari 2 jam. Langkah petugas?",["Membiarkan, karena biasanya kembali sendiri","Melapor ke sektor & melakukan pencarian terstruktur","Menunggu sampai ada jamaah yang melapor","Mengumumkan melalui pengeras suara tenda saja"],1],
+["kasus","Petugas menerima laporan bahwa hotel jamaah kotor dan kamar mandi rusak. Tindakan yang tepat:",["Meminta jamaah sabar karena kondisi padat","Memanggil tim kebersihan hotel & lapor ke pengawas akomodasi","Mengganti hotel tanpa prosedur","Menyiapkan kamar darurat tanpa melapor"],1],
+["kasus","Ada perbedaan data kamar: rombongan yang harusnya lantai 7 dialihkan ke lantai 3 tanpa pemberitahuan. Langkah petugas?",["Memarahi pihak hotel","Meminta jamaah menyesuaikan","Klarifikasi ke hotel, sinkronkan data, lapor ke pengawas akomodasi","Membiarkan karena tidak terlalu penting"],2],
+["kasus","Peristiwa jamaah hilang kontak di Muzdalifah sering terjadi. Prioritas petugas?",["Menyuruh jamaah tetap di tempat","Mengedukasi titik kumpul & signage sektor","Meminta jamaah berjalan sendiri","Tidak perlu mengatur karena pasti kembali"],1],
+["kasus","Saat distribusi katering, ditemukan makanan basi/berbau. Tindakan pertama:",["Tetap dibagikan agar tidak terlambat","Menyimpan saja untuk laporan","Stop distribusi, lapor ke sektor konsumsi, ganti emergency meal","Membuang seluruh makanan"],2],
+["kasus","Petugas mendapati jamaah terpisah dari rombongan akibat macet ekstrem menuju hotel. Apa tindakan benar?",["Membiarkan jamaah ikut rombongan lain","Mengantar jamaah ke titik aman, lalu koordinasi sektor","Meminta jamaah jalan kaki","Menunggu kemacetan hilang"],1],
+["kasus","Petugas menemukan koper jamaah tertukar di hotel. Langkah terbaik?",["Menyuruh jamaah menukar sendiri","Membiarkan sampai pemilik lapor","Menghubungi pemilik koper sesuai tag & koordinasi kloter","Membuka koper untuk mengecek"],2],
+["kasus","Saat di Arafah, 3 jamaah tidak ada dalam tenda saat pengecekan. Prioritas?",["Menunggu sampai jamaah kembali","Menghubungi ketua regu/rombongan & cek di pos kesehatan","Mengabaikan karena belum wajib berada di tenda","Mengumumkan lewat speaker"],1],
+["kasus","Bus menuju hotel salah rute dan terjebak di jalur yang tertutup. Sikap petugas?",["Menyalahkan supir","Meminta supir menerobos karena jamaah lelah","Menenangkan jamaah & koordinasi pengalihan rute dengan Daker Transportasi","Turun dan jalan kaki sendiri"],2],
+["kasus","Satu jamaah panic attack di tengah kerumunan saat thawaf. Tindakan terbaik?",["Memaksanya tetap thawaf","Menepi ke area aman & minta bantuan P3JH","Membiarkan jamaah duduk di lantai thawaf","Mengangkat jamaah ke jalur cepat thawaf"],1],
+["kasus","Di Mina terjadi overload tenda sehingga jamaah tidak mendapatkan ruang tidur. Langkah benar?",["Menggabungkan semua jamaah tanpa perhitungan","Laporkan ke maktab & koordinator tenda untuk redistribusi","Meminta jamaah tidur di luar","Membiarkan saja"],1],
+["kasus","Petugas menemukan jamaah yang bingung dan menyebut nama hotel yang tidak ada dalam daftar SISKOHAT. Solusi?",["Menganggap jamaah salah ingat","Mengantar ke hotel terdekat","Mengecek gelang, kartu hotel, atau barcode data","Membiarkan jamaah menunggu"],2],
+["kasus","Hotel menyediakan lift yang rusak dan membuat antrean panjang jamaah lansia. Tindakan petugas?",["Menyuruh jamaah menggunakan tangga","Mengatur lift secara bergiliran & koordinasi manajemen hotel","Membiarkan jamaah berebut","Membiarkan pihak hotel bekerja sendiri"],1],
+["kasus","Kamar jamaah mengalami kebocoran AC dan basah. Apa solusi?",["Menunggu teknisi sampai besok","Memindahkan jamaah sementara ke kamar cadangan","Membiarkan jamaah tidur dalam kondisi lembap","Memberikan tisu dan kain pel"],1],
+["kasus","Di Muzdalifah, jamaah terpisah saat turun dari bus. Prosedur terbaik?",["Membiarkan jamaah mencari sendiri","Menetapkan titik kumpul & koordinasi lampu sektor","Menghukum supir","Mengajak jamaah jalan random"],1],
+["kasus","Regu jamaah tidak mendapatkan makan malam di Mina karena distribusi tersendat. Tindakan pertama:",["Menyuruh jamaah bersabar","Menghubungi sektor konsumsi untuk emergency meal","Membuatkan mie instan","Tidak perlu tindakan"],1],
+["kasus","Petugas menemukan jamaah pingsan akibat dehidrasi. Langkah:",["Mengangkat jamaah tanpa cek","Panggil petugas kesehatan & berikan oralit jika sadar","Menunggu jamaah siuman","Memberikan makanan dulu"],1],
+["kasus","Hotel mengurangi kapasitas kamar tanpa pemberitahuan. Apa langkah formal?",["Protes keras ke resepsionis","Lapor ke pengawas akomodasi & buat Berita Acara","Meminta jamaah rela bersempit-sempit","Membiarkan"],1],
+["kasus","Jamaah kehilangan sandal di Masjid Nabawi dan tidak bisa berjalan jauh. Petugas harus…",["Memarahinya karena tidak menjaga barang","Mencari sandal yang mirip","Menyediakan sandal darurat dan antar ke titik transport","Membiarkan jamaah duduk"],2],
+["kasus","Bus kloter berhenti terlalu jauh dari hotel karena polisi menutup jalan. Petugas?",["Menyuruh jamaah jalan sendiri","Mengantar jamaah dengan aman sampai hotel","Meminta supir memaksa masuk","Menunggu sampai jalan dibuka"],1],
+["kasus","Petugas menemukan jamaah yang berdebat keras tentang kamar. Sikap petugas?",["Mengabaikan","Memarahinya agar diam","Menengahi dengan tenang & cek data kamar","Memindahkan mereka ke kamar lain tanpa prosedur"],2],
+["kasus","Di jalur Mina, 2 jamaah hilang karena tertinggal rombongan. Petugas harus…",["Mengajak jamaah lain mencari","Menghubungi maktab & melakukan pencarian sektor","Menunggu laporan masuk","Mengumumkan tanpa tindakan"],1],
+["kasus","Jamaah mengeluh tidak mendapatkan air minum dalam kamar. Tindakan:",["Membiarkan","Meminta jamaah membeli sendiri","Koordinasi housekeeping hotel segera","Menunda sampai besok"],2],
+["kasus","Tentara Saudi menutup sebagian jalur di Arafah. Tindakan petugas?",["Panik","Menyesuaikan jalur & koordinasi Daker","Memarahi tentara","Mengantar jamaah menembus blokade"],1],
+["kasus","Petugas menemukan jamaah terjebak di lift. Langkah:",["Memaksa membuka pintu","Tenangkan jamaah & hubungi teknisi hotel","Meminta jamaah melompat keluar","Membiarkan"],1],
+["kasus","Satu jamaah mengalami heatstroke ringan di Mina. Tindakan terbaik:",["Memberikan air es dalam jumlah besar","Bawa ke pos kesehatan + pendinginan bertahap","Menunggu jamaah pulih sendiri","Menyuruh jamaah tetap berjalan"],1],
+["kasus","Jamaah menolak kembali ke hotel karena ingin tetap di masjid padahal sudah larut malam dan rawan tersesat. Sikap petugas:",["Membiarkan","Menegur & memberikan edukasi keselamatan","Menyerah dan ikut menunggu","Membiarkan jamaah tidur di luar"],1],
+
+// ==================== TAMBAHAN: TRANSPORTASI, MODERASI, WAWASAN KEBANGSAAN, FIQIH & INTEGRITAS (100 soal) ====================
+// Catatan: kunci jawaban pada set ini belum tersedia dari sumber resmi;
+// jawaban ditentukan berdasarkan penalaran & referensi materi terkait, bukan hasil verifikasi resmi.
+["transportasi","Yang termasuk rute transportasi antarkota gelombang pertama adalah, kecuali…",["Bandara AMAA Madinah – Madinah","Madinah – Makkah","Makkah – Madinah","Makkah – Bandara KAIA Jeddah"],2],
+["moderasi","Di media sosial seorang remaja mengungkapkan kebencian terhadap temannya karena kesal kalah bermain game, sampai menyinggung dan menjelekkan agama temannya. Jika menggunakan Rabat Plan of Action untuk membahas kejadian ini, ambang rangsangan manakah yang menjadi pertimbangan?",["Konteks, pengujar, maksud","Batasan ujaran, kemungkinan, isi dan bentuk","Konteks, kemungkinan, pengujar","Isi dan bentuk, maksud, batasan ujaran"],0],
+["moderasi","Setiap daerah memiliki norma adat yang mengandung hal-hal yang boleh dan tidak boleh dilakukan masyarakat. Pernyataan yang paling tepat adalah…",["Saya setuju dengan norma adat, asalkan tidak bertentangan dengan hukum formal dan hukum agama","Pimpinan dan tokoh adat, serta masyarakat yang melanggar norma adat, perlu diberi sanksi","Walaupun saya warga pendatang, saya harus menghormati norma adat di daerah tempat saya tinggal","Saya akan berusaha mematuhi norma adat yang ditetapkan para pemangku adat dimana saya tinggal"],0],
+["transportasi","Layanan transportasi Shalawat di Makkah tidak beroperasi sementara pada…",["Saat memasuki waktu-waktu sholat Subuh","Masa Masyair 6–13 Dzulhijjah","Pukul 06.00 s.d. 24.00 WAS","Pukul 03.00 s.d. 24.00 WAS"],1],
+["transportasi","Setiap bus yang mengangkut Jemaah Haji dari Kota Madinah menuju Kota Makkah, akan melalui check point di…",["Terminal Hijrah","Syumaysi","Bir Ali","Jumum"],3],
+["integritas","Saat anda bertugas ada Jemaah yang memberikan imbalan berupa uang, apa yang akan anda lakukan?",["Menerima saja karena tidak meminta dan anggap sebagai sedekah","Menolak dan menyampaikan bahwa tugas anda memang melayani Jemaah dan telah dibayar oleh negara","Menerima dan mengumpulkan kepada koordinator lapangan untuk kebutuhan tugas","Menolak dan menasehati Jemaah agar tidak diulang lagi karena itu suap"],1],
+["wasbang","Di bawah ini merupakan tindakan sehari-hari yang sejalan dengan Pancasila dalam mewujudkan Sila ke-4, kecuali…",["Setiap warga negara mempunyai kedudukan, hak dan kewajiban yang sama","Memberikan kepercayaan kepada wakil-wakil untuk melaksanakan pemusyawaratan","Tidak boleh memaksakan kehendak kepada orang lain","Sanggup dan rela berkorban untuk kepentingan negara dan bangsa apabila diperlukan"],3],
+["transportasi","Terminal bus angkutan Shalawat apa saja yang digunakan Jemaah haji Indonesia di Makkah?",["Bab Malik, Bab Ali, Jarwal, dan Babusalam","Bab Syarif, Bab Makkah, Bab Ali, dan Syib Amir","Bab Ali, Syib Amir, Ajyad, dan Bab Malik","Syib Amir, Ajyad, Bab Ali, dan Jamarat"],3],
+["transportasi","Tugas kepala pos terminal pada layanan transportasi Shalawat adalah…",["Mengkoordinir petugas Shalawat di halte dan terminal serta bertanggung jawab atas kelancaran bus","Mengkoordinir petugas Shalawat di sektor dan bertanggung jawab atas kelancaran bus","Mengkoordinir petugas Shalawat di terminal dan bertanggung jawab atas kelancaran bus","Mengkoordinir petugas yang ada di halte dan bertanggung jawab atas kelancaran bus"],0],
+["wasbang","Di bawah ini adalah pengertian dari tradisi, kecuali…",["Adat-istiadat/kebiasaan turun-temurun yang masih dijalankan masyarakat","Suatu cerita/prosa rakyat yang disampaikan turun-temurun dan dianggap benar-benar terjadi","Sesuatu yang dilakukan sejak lama dan menjadi bagian kehidupan suatu kelompok masyarakat","Sesuatu yang diteruskan antar generasi dan dianggap cara/model terbaik selagi belum ada alternatif lain"],1],
+["moderasi","Secara umum, kewajiban negara terhadap jaminan kebebasan beragama adalah…",["Melindungi (to protect) dan memajukan (to promote)","Melindungi (to protect) dan menghormati (to respect)","Menghormati (to respect) dan memenuhi (to fulfill)","Semua benar"],3],
+["transportasi","Untuk tahun 2025, layanan transportasi Shalawat diberikan kepada…",["Seluruh jemaah haji yang menempati hotel di Makkah","Jemaah haji yang menempati hotel di Makkah berjarak di atas 2.000 meter dari Masjidil Haram","Jemaah haji yang menempati hotel di wilayah Mahbas Jin dan Jarwal","Jemaah haji yang menempati hotel di wilayah Raudhah dan Syisyah"],0],
+["wasbang","Masyarakat yang heterogen didorong menjadi homogen, elemen yang berbeda melebur menjadi satu sebagai suatu kesamaan budaya yang harmonis. Istilah untuk hal tersebut adalah…",["Melting pot","Multikulturalisme","Pluralisme","Bhineka Tunggal Ika"],0],
+["transportasi","Pada jarak berapa setiap negara yang mengirim Jemaah Haji wajib menyediakan layanan transportasi Shalawat sebagaimana tercantum dalam Ta'limatul Hajj?",["500 meter","1.000 meter","1.500 meter","2.000 meter"],3],
+["transportasi","Termasuk rute transportasi antarkota gelombang kedua adalah, kecuali…",["Makkah – Madinah","Madinah – Makkah","Madinah – Bandara AMAA Madinah","Bandara KAIA Jeddah – Makkah"],1],
+["wasbang","Sikap manakah yang mencerminkan nilai luhur Bangsa Indonesia dalam menjalankan sila ke-2?",["Gemar melakukan kegiatan kemanusiaan","Mengakui persamaan derajat, persamaan hak dan kewajiban asasi setiap manusia","Mengembangkan sikap saling mencintai sesama manusia","Menghargai sesama warga negara tanpa membeda-bedakan suku, agama, ras, dan golongan"],1],
+["transportasi","Perusahaan transportasi yang mengangkut Jemaah Haji Indonesia selama di Arab Saudi adalah perusahaan bus yang memiliki izin resmi dan terdaftar di…",["Muassasah Adilla","Syarikah","Maktab","Naqabah Ammah Lissayarat"],3],
+["regulasi","Materi kegiatan sosialisasi Masalah Haji dan Umrah meliputi…",["Kebijakan pemerintah dalam penyelenggaraan ibadah haji","Kebijakan pemerintah dalam penyelenggaraan ibadah umrah","Fungsi pengawasan dan penganggaran penyelenggaraan ibadah haji","a, b, dan c benar"],3],
+["transportasi","Petugas terminal memiliki tugas sebagai berikut, kecuali…",["Mencatat nomor body bus","Mencatat keberangkatan bus dari terminal","Mencatat kedatangan bus di terminal","Mencatat jumlah Jemaah Haji"],3],
+["transportasi","Perwakilan personil perusahaan bus yang bertugas di terminal adalah…",["Syarikah","Mandub","Maktab","Wukala"],3],
+["moderasi","Pemeliharaan kerukunan tidak hanya sekadar gagasan semata, namun harus diterapkan sebagai upaya bersama umat beragama dan pemerintah, yaitu pada…",["Kehidupan sehari-hari, bukan hanya di momen tertentu","Saat upacara hari kemerdekaan dan peringatan hari besar keagamaan","Bidang pelayanan, pengaturan, dan pemberdayaan umat beragama saja","Hanya di manapun saat menjalankan tugas kedinasan"],0],
+["transportasi","Setiap bus yang mengangkut Jemaah Haji dari Jeddah menuju Makkah, akan melalui check point di…",["Terminal Hijrah","Syumaysi","Bandara King Abdul Aziz Jeddah","Jumum"],1],
+["fiqih","Di bawah ini ketentuan khusus yang berlaku bagi perempuan yang melaksanakan ibadah haji/umrah, kecuali…",["Perempuan menutup auratnya kecuali muka dan telapak tangan (ketika ihram)","Perempuan tidak mengeraskan suaranya saat membaca talbiyah/berdoa","Perempuan tidak perlu berlari kecil (ramal) ketika thawaf pada 3 putaran pertama dan saat melintasi 2 pilar/lampu hijau ketika sai","Perempuan tidak perlu berlari kecil (ramal) di setiap putaran thawaf dan saat melintasi 2 pilar/lampu hijau"],3],
+["moderasi","Salah satu contoh perilaku membela agama adalah menghina mereka yang berbuat buruk terhadap agama Anda. Pernyataan di bawah ini yang paling sesuai adalah…",["Saya tidak akan ikut menghina orang lain yang berbuat buruk kepada agama saya, walaupun itu bentuk bela agama","Percaya bahwa menghina orang yang berbuat buruk kepada agama kita tidak boleh dilakukan walaupun untuk membela agama","Membela agama kita dengan menghina mereka yang berbuat buruk kepada agama kita tidak sepatutnya kita lakukan","Saya akan mengajak orang-orang di sekitar untuk bersikap sama"],0],
+["regulasi","Regulasi terkait penyuluhan manasik sepanjang tahun dimaksudkan sebagai panduan dalam penyuluhan manasik bagi…",["Jemaah daftar tunggu 1–2 tahun keberangkatan","Jemaah daftar tunggu 1–3 tahun keberangkatan","Jemaah daftar tunggu 1–4 tahun keberangkatan","Jemaah daftar tunggu 1–5 tahun keberangkatan"],0],
+["transportasi","Setiap pengemudi bus yang berangkat dari Madinah menuju Makkah wajib berhenti, memberi kesempatan Jemaah Haji untuk mengambil miqat di…",["Terminal Hijrah","Syumaysi","Bir Ali","Jumum"],2],
+["fiqih","Bagaimana tata cara tayamum bagi yang berpendapat sah tayamum di pesawat?",["Sekali tepuk untuk wajah, langsung dilanjutkan ke pergelangan tangan sampai ujung jari","Sekali tepuk untuk wajah saja, tepukan berikutnya untuk pergelangan tangan sampai ujung jari","2 kali tepukan di 2 tempat berbeda, satu untuk wajah dan satu untuk tangan sampai siku","Tidak perlu tayamum, cukup shalat seperti biasa"],1],
+["transportasi","Transportasi yang disediakan untuk melayani Jemaah Haji dari seluruh negara dan beroperasi dari terminal Jamarat menuju terminal Bab Ali disebut…",["Transportasi antarkota","Transportasi shalawat","Transportasi taraddudi","b dan c benar"],2],
+["transportasi","Bus shalawat di terminal tidak beroperasi karena mengalami kerusakan. Apa yang dilakukan petugas transportasi di terminal?",["Mencatat nama perusahaan dan jumlah bus, dilaporkan ke petugas transportasi Daker","Mencatat nama supir dan jumlah bus, dilaporkan ke petugas transportasi Daker","Mencatat nama perusahaan dan nama supir, dilaporkan ke petugas transportasi Daker","Mencatat jumlah bus, selanjutnya dilaporkan ke petugas transportasi Daker"],3],
+["transportasi","Layanan transportasi Shalawat yang diberikan kepada Jemaah Haji Indonesia selama di Arab Saudi adalah…",["Transportasi Jemaah haji dari Hotel Makkah ke Masjidil Haram PP","Transportasi Jemaah haji dari Hotel Madinah ke Masjidil Haram PP","Transportasi Jemaah haji dari Madinah ke Masjidil Haram PP","Transportasi Jemaah haji dari Mina ke Masjidil Haram PP"],0],
+["moderasi","Jika Anda mengadakan perayaan atau resepsi keluarga, sikap yang paling tepat adalah…",["Menghargai teman/kerabat beda keyakinan, kehadiran mereka penting bagi perayaan","Memberitahunya, terserah mau datang atau tidak, itu pilihan mereka","Mengundang teman beda agama ke perayaan keluarga tanpa penjelasan lain","Membiasakan diri melibatkan teman/kerabat tanpa membedakan keyakinan dan agama yang dianut"],3],
+["fiqih","Pernyataan yang benar tentang kondisi perempuan haid/nifas boleh melaksanakan ihram adalah, kecuali…",["Boleh dan sah ihramnya","Boleh tetapi tidak sah ihramnya","Ihramnya tetap dan tidak batal","a dan c benar"],1],
+["wasbang","Pernyataan berikut merupakan alasan mengapa tradisi perlu dipertahankan oleh suatu masyarakat, kecuali…",["Tradisi menyediakan simbol identitas kolektif yang memperkuat loyalitas primordial","Kehadiran agama adalah untuk menghapus tradisi-tradisi leluhur yang diwariskan turun-temurun","Jauh sebelum agama datang masyarakat telah memiliki nilai, norma sosial, dan adat kebiasaan sendiri","Tradisi merupakan suatu pola perilaku yang telah mapan dalam masyarakat"],1],
+["wasbang","Negara Indonesia merupakan negara demokrasi. Hal tersebut merupakan penjabaran sila…",["Ketuhanan Yang Maha Esa","Kemanusiaan yang adil dan beradab","Persatuan Indonesia","Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan"],3],
+["integritas","Saat menjadi petugas haji, ada kerabat dekat yang menjadi Jemaah haji meminta bantuan diantar ke suatu tempat saat Anda sedang bertugas. Bagaimana sikap Anda?",["Menyanggupi dan meminta teman menggantikan tugas anda","Meminta untuk menunda atau menjadwal ulang saat anda sedang tidak bertugas","Meminta bantuan petugas lain untuk mengantarkan saudara anda","Menyanggupi dan meninggalkan tugas karena volume pekerjaan sedang tidak padat"],1],
+["transportasi","Siapakah penanggung jawab layanan angkutan di Arab Saudi?",["Muassasah","Maktab Wukala","Syarikah Zamazimah","Naqabah Ammah Lissayarat"],3],
+["fiqih","Bagaimana tata cara shalat di pesawat?",["Tayamum lalu shalat duduk seperti biasa, tanpa perlu diulang","Tayamum lalu shalat duduk seperti biasa, tetapi harus diulang (i'adah) setelah sampai di darat","Tanpa tayamum shalat seperti biasa sambil duduk (li hurmatil waktu), tetapi harus diulang (i'adah) setelah sampai di darat","a dan b benar"],3],
+["transportasi","Apabila barang bawaan Jemaah tidak dapat terangkut semuanya ke dalam bagasi bus saat keberangkatan Madinah–Makkah atau sebaliknya, apa yang dilakukan petugas transportasi antarkota di Sektor?",["Mencatat jumlah koper dan melaporkan ke Ketua Sektor","Mencatat jumlah koper dan melaporkan ke Ketua Kloter","Mencatat jumlah koper dan melaporkan ke Kasi Transportasi Daker Madinah/Makkah","Mencatat jumlah koper dan melaporkan ke Kasi Akomodasi Daker Madinah"],2],
+["transportasi","Transportasi haji dengan rute Makkah – Arafah – Muzdalifah – Mina – Makkah diselenggarakan oleh…",["Naqabah Ammah Lissayarat","Pemerintah Indonesia","PPIH Arab Saudi","Syarikah"],0],
+["transportasi","Petugas transportasi antarkota di Sektor melaporkan kedatangan bus di hotel, melalui…",["Alat komunikasi WhatsApp","Alat komunikasi Handphone","Alat komunikasi Bravo","Alat komunikasi IMO"],2],
+["transportasi","Bus yang digunakan oleh Jemaah Haji Indonesia yang fasilitasnya telah ditingkatkan dibanding bus standar pemerintah Arab Saudi adalah…",["Bus taraddudi","Bus upgrade","Bus shuttle","Bus feeder"],1],
+["fiqih","Ada 2 pendapat ulama berbeda terkait hukum perempuan boleh berhaji tanpa izin suami, yaitu…",["Imam Hambali harus izin suami, sedangkan Imam Syafii berpendapat suami tidak boleh melarang isterinya melaksanakan haji wajib kecuali haji sunat","Imam Syafii harus izin suami, sedangkan Imam Hambali berpendapat suami boleh melarang isterinya haji wajib apalagi haji sunat","Imam Hambali harus izin suami, sedangkan Imam Syafii berpendapat suami boleh melarang isterinya haji wajib apalagi haji sunat","Kedua imam sepakat suami tidak berhak melarang istri berhaji dalam kondisi apapun"],0],
+["transportasi","Yang dimaksud dengan checker bus Shalawat adalah…",["Petugas pencatat bus, jumlah Jemaah dan merek bus","Petugas pencatat bus, jumlah Jemaah dan permasalahannya","Petugas pencatat bus, jumlah Jemaah dan koper","Petugas pencatat bus Shalawat"],3],
+["transportasi","Pelayanan transportasi darat di Arab Saudi terdiri dari…",["Transportasi angkutan udara","Transportasi Antarkota, Shalawat dan Masyair","Transportasi Antarkota dan Shalawat","Transportasi Udara, Antarkota, Shalawat dan Masyair"],1],
+["fiqih","Hikmah yang dapat dipetik dari perjalanan hidup Siti Hajar dalam prosesi sai adalah antara lain…",["Mencetak generasi shaleh yang menyembah hanya kepada Allah SWT","Mengikuti ajaran Islam secara totalitas","Mempertimbangkan aspek kognitif, afektif, dan psikomotorik","Semua jawaban benar"],3],
+["transportasi","Saat bertugas piket di terminal, ada jemaah lansia yang meminta bantuan untuk diantarkan ke hotel. Apa yang anda lakukan?",["Memintanya masuk ke dalam bus sesuai rute yang sesuai","Menasehatinya mencari bus sesuai rute karena jemaah harus mandiri","Mengantarkannya sendiri sampai hotel jemaah","Membantu mencarikan dan menitipkannya ke Jemaah lain yang serute dan di hotel sama"],3],
+["transportasi","Berikut ini adalah kebijakan layanan transportasi shalawat untuk Jemaah haji Indonesia, kecuali…",["Layanan Shalawat untuk semua Jemaah Haji Indonesia di Makkah","Jemaah satu kali naik bus dari hotel ke terminal","Layanan Shalawat untuk semua Jemaah Haji Indonesia di Madinah","Beroperasi 24 jam/hari"],2],
+["regulasi","Materi penyuluhan manasik sepanjang tahun paling sedikit meliputi…",["Manasik dan hikmah ibadah haji","Kebijakan pemerintah dalam penyelenggaraan ibadah haji","Kebijakan pemerintah Arab Saudi/Ta'limatul Hajj","a dan b benar"],3],
+["transportasi","Apabila bus antarkota yang datang ke hotel pada saat keberangkatan tidak sesuai spesifikasi yang dipersyaratkan, tindakan yang harus dilakukan petugas transportasi antarkota di Sektor adalah…",["Mencatat nama perusahaan bus dan melaporkan ke Ketua Sektor","Mencatat nama perusahaan bus dan melaporkan ke Ketua Kloter","Mencatat nama perusahaan bus dan melaporkan ke Kasi Transportasi Daker sebelum bus berangkat","Mencatat nama perusahaan dan melaporkan ke Kasi Transportasi Daker setelah bus berangkat"],2],
+["transportasi","Setiap pengemudi bus yang berangkat dari Kota Madinah menuju Kota Makkah wajib berhenti, memberi kesempatan Jemaah Haji untuk mengambil miqat di…",["Terminal Hijrah","Syumaysi","Bir Ali","Jumum"],2],
+["moderasi","Sekelompok pemuda di lingkungan Anda membubarkan acara keagamaan kelompok aliran lain karena dianggap sesat oleh masyarakat. Bagaimana sikap Anda?",["Menolak mendukung pembubaran tersebut karena merupakan tindakan yang tidak tepat","Yakin bahwa pembubaran itu tidak tepat, namun tetap diam saja","Berusaha mengubah pandangan pemuda tersebut tanpa bertindak apa pun","Mengajak teman atau anggota keluarga lain untuk turut membubarkan"],0],
+["transportasi","Termasuk rute transportasi Masyair adalah, kecuali…",["Makkah – Muzdalifah","Muzdalifah – Mina","Makkah – Arafah","Mina – Makkah"],0],
+["transportasi","Petugas transportasi di Terminal Hijrah memiliki tugas, kecuali…",["Memastikan bus yang datang sesuai jumlahnya","Mengatur dan mengarahkan Jemaah ke dalam bus sesuai rombongan","Memastikan jumlah Jemaah dalam bus sesuai paspor","Melaporkan keberangkatan bus dari Terminal Hijrah ke Daker Madinah"],3],
+["transportasi","Jika bus antarkota dalam perjalanannya mengalami pecah ban, sebagai petugas transportasi tindakan apa yang akan anda lakukan?",["Melacak GPS dan menghubungi sopir untuk kembali ke pool bus","Melacak GPS dan menghubungi sopir untuk diarahkan ke jalur yang sesuai","Melacak GPS dan menghubungi sopir untuk mengganti ban sendiri","Melacak GPS dan menghubungi mandub (petugas perusahaan) untuk mengganti bus"],3],
+["transportasi","Bus Shalawat yang datang ke terminal ternyata tidak sesuai spesifikasi, apa yang dilakukan petugas transportasi di terminal?",["Mencatat jumlah bus dan memeriksa spesifikasi bus tersebut","Mencatat nama perusahaan dan jumlah bus, dilaporkan ke petugas transportasi Sektor","Mencatat nama perusahaan dan nama supir, dilaporkan ke petugas transportasi Daker","Menghubungi mandub (petugas perusahaan) melalui penghubung transportasi"],1],
+["transportasi","Menurut anda, alat/media komunikasi yang paling efektif digunakan oleh petugas lapangan dalam pelaksanaan tugas layanan transportasi adalah…",["Handy Talky","Aplikasi pertemanan (medsos)","WhatsApp Grup","Telepon kantor"],0],
+["fiqih","Hukum shalat di atas pesawat terdapat perbedaan pendapat di kalangan ulama, antara lain…",["Tidak sah, karena salah satu syarat sah shalat adalah menapak/berpaut dengan bumi","Sah shalatnya dan tidak harus mengulang saat tiba di bandara","Sah shalatnya, tapi harus mengulang saat tiba di bandara","a dan b benar"],3],
+["transportasi","Bus Shalawat yang dipersyaratkan kepada penyedia adalah bus yang memiliki 3 pintu, pertimbangannya adalah…",["2 pintu untuk Jemaah, 1 pintu untuk petugas","2 pintu untuk Jemaah, 1 pintu untuk sopir dan petugas","Untuk memudahkan keluar masuk Jemaah","1 pintu sebagai pintu darurat"],3],
+["fiqih","Peristiwa monumental turunnya wahyu terakhir kepada Nabi Muhammad SAW, yang memiliki keagungan menjadi hari pengampunan dosa dan dilipatgandakannya amal kebajikan, adalah gambaran keagungan prosesi ibadah…",["Mabit di Muzdalifah","Wukuf di Arafah","Mabit di Mina","Thawaf dan sai"],1],
+["transportasi","Tugas kepala pos di setiap rute pada layanan transportasi shalawat adalah…",["Mengkoordinir petugas Shalawat di halte dan terminal, bertanggung jawab atas kelancaran bus","Mengkoordinir petugas Shalawat di sektor, bertanggung jawab atas kelancaran bus","Mengkoordinir petugas Shalawat di terminal, bertanggung jawab atas kelancaran bus","Mengkoordinir petugas di halte-halte, bertanggung jawab atas kelancaran bus"],0],
+["moderasi","Saat ini masih sering terjadi tindakan intoleransi terhadap kelompok Ahmadiyah. Pemerintah telah menetapkan kebijakan terkait kelompok Ahmadiyah yaitu…",["SKB Menteri Agama, Menteri Dalam Negeri dan Jaksa Agung Tahun 2008","PBM No. 9 dan 8 Tahun 2006 tentang Pedoman Pelaksanaan Tugas Kepala Daerah dalam Pemeliharaan Kerukunan Umat Beragama","UU PNPS Tahun 1965 tentang Pencegahan Penyalahgunaan dan/atau Penodaan Agama","Keputusan Bersama Menteri No. 1 Tahun 1979"],0],
+["regulasi","Regulasi terkait kegiatan manasik haji dimaksudkan sebagai panduan untuk meningkatkan pengetahuan dan pemahaman mengenai ibadah haji bagi…",["Seluruh warga negara Indonesia","Pemerhati haji","Masyarakat yang berkeinginan melaksanakan ibadah haji","a, b dan c benar"],3],
+["fiqih","Esensi melempar jamrah adalah…",["Kemenangan perang melawan setan","Lambang perjuangan yang dilakukan tidak teratur dan berkesinambungan","Menghilangkan keburukan","Jawaban a dan c benar"],3],
+["wasbang","Sikap menjunjung tinggi keadilan, menjaga kelestarian lingkungan sekitar, serta menghormati pemeluk agama lain merupakan salah satu contoh pengamalan nilai Pancasila dalam kehidupan sehari-hari. Nilai Pancasila yang dimaksud adalah…",["Nilai Kerohanian","Nilai filosofis","Nilai falsafah","Nilai umum"],0],
+["transportasi","Petugas transportasi di Bir Ali memiliki tugas, kecuali…",["Memastikan bus yang datang sesuai jumlahnya","Mengatur dan mengarahkan Jemaah ke dalam bus sesuai rombongan","Melaporkan keberangkatan bus dari Bir Ali ke Daker Makkah","Menata koper Jemaah ke dalam bagasi bus sesuai rombongan"],3],
+["fiqih","Bagaimana cara pelaksanaan shalat i'adah?",["Dilaksanakan segera setelah sampai di tempat tujuan","Dilaksanakan sebagaimana shalat biasa dengan gerak shalat sempurna (kamilah)","Shalat i'adah di AMAA Madinah atau KAIA Jeddah dapat dilaksanakan dengan jama dan qashar","a, b dan c benar"],3],
+["integritas","Pada saat bertugas anda menemukan barang bawaan yang tertinggal, apa yang akan anda lakukan?",["Menyimpannya saja sambil menunggu pemilik mencari","Dapat dimiliki karena jarang ada yang mencari barang tertinggal","Menyampaikan ke koordinator lapangan untuk dikumpulkan, diinventarisir, dan disampaikan ke Jemaah melalui sektor-sektor","Dicari pemiliknya sampai ketemu, meninggalkan tugas lain"],2],
+["regulasi","Salah satu komponen BPIH digunakan untuk pembiayaan pembinaan jemaah haji di tanah air dan di Arab Saudi. Pernyataan tersebut tertuang dalam…",["Pasal 35 UU nomor 8 Tahun 2019","Pasal 45 UU nomor 8 Tahun 2019","Pasal 25 UU nomor 8 Tahun 2019","Pasal 15 UU nomor 8 Tahun 2019"],0],
+["transportasi","Jam operasional layanan bus Shalawat di Makkah adalah…",["08.00 s.d. 18.00 WAS","Ketika memasuki waktu-waktu sholat","24 Jam","24 Jam kecuali memasuki waktu-waktu shalat"],2],
+["transportasi","Bus antarkota yang datang ke hotel ternyata tidak sesuai spesifikasi, apa yang dilakukan petugas transportasi di Sektor?",["Mencatat nama perusahaan dan jumlah bus, dilaporkan ke Daker sebelum bus berangkat","Mencatat nama perusahaan dan jumlah bus, dilaporkan ke Daker setelah bus berangkat","Mencatat nama perusahaan dan nama supir, dilaporkan ke Daker sebelum bus berangkat","Mencatat nama perusahaan dan nama supir, dilaporkan ke Daker setelah bus berangkat"],2],
+["transportasi","Petugas halte shalawat memiliki tugas sebagai berikut, kecuali…",["Mencatat nomor body bus","Mencatat keberangkatan bus dari halte","Mencatat kedatangan bus di halte","Mencatat jumlah Jemaah Haji"],3],
+["transportasi","Transportasi yang dipergunakan untuk mengantar Jemaah dari Hotel Makkah menuju Arafah, dari Arafah menuju Muzdalifah, dari Muzdalifah menuju Mina dan dari Mina menuju Hotel Makkah disebut…",["Transportasi Shalawat","Transportasi Bandara","Transportasi Antarkota","Transportasi Masyair"],3],
+["transportasi","Berapa jumlah bus untuk transportasi Masyair rute Makkah – Arafah pada tahun 1446 H?",["5 bus","7 bus","16 bus","21 bus"],1],
+["fiqih","Ulama fiqih berbeda pendapat terhadap hukum melaksanakan tayamum di pesawat, yakni…",["Sah, karena di mana ada angin di situ ada debu","Tidak sah, karena sifat tanah adalah debu yang tampak benda dan sifatnya","Sah tayamumnya, tapi harus i'adah saat tiba di bandara","a dan b benar"],3],
+["fiqih","Apa syarat-syarat bagi perempuan yang akan berhaji?",["Sesuai dengan syarat haji sebagaimana mestinya","Disyaratkan harus ada suami atau mahram yang menyertainya","Membuat pernyataan bergabung dengan petugas kloter","a dan b benar"],3],
+["transportasi","Setiap bus yang mengangkut Jemaah Haji dari Madinah menuju Makkah, akan melalui check point di…",["Terminal Hijrah","Syumaysi","Bir Ali","Jumum"],3],
+["moderasi","Agama Anda dicemooh umat agama lain. Apa yang akan Anda lakukan?",["Membela agama saya dengan cara apa pun","Bersikap acuh tak acuh","Diam saja karena diam itu emas","Mendoakan mereka yang mencemooh agama Anda"],3],
+["wasbang","Salah satu contoh pengamalan sila pertama Pancasila butir ke-6 adalah…",["Membantu korban bencana alam yang beragama lain","Tidak menghalangi kegiatan ibadah agama lain","Tidak menghina agama lain","Mengucapkan selamat hari raya kepada umat beragama lain"],1],
+["fiqih","Substansi talbiyah adalah pernyataan memenuhi panggilan Allah, yang tiada sekutu bagi-Nya. Maka berlaku baginya…",["Fisik yang berangkat menuju Baitullah bukan memenuhi undangan/perintah manusia","Meningkatkan intensitas membangun relasi positif kepada Allah","Menjadi roh dari segala aktivitas ibadah haji yang hanya diorientasikan oleh dan untuk Allah semata","Semua jawaban benar"],3],
+["transportasi","Petugas transportasi di sektor memiliki tugas, kecuali…",["Memastikan bus sesuai spesifikasi","Mengatur dan mengarahkan Jemaah ke dalam bus sesuai rombongan","Menata koper Jemaah ke dalam bagasi bus sesuai rombongan","Mengabsen setiap Jemaah sesuai paspor"],2],
+["transportasi","Saat mengangkut Jemaah haji dari terminal setelah sholat 5 waktu di Masjidil Haram, bus Shalawat pada salah satu rute tidak tersedia di jalurnya karena terlambat masuk terminal. Apa yang dilakukan petugas transportasi terminal?",["Menunggu bus sampai masuk kembali ke terminal","Membiarkan Jemaah di terminal sampai bus datang","Mengarahkan Jemaah naik bus rute lain sendiri tanpa pendampingan","Menggunakan bus rute lain untuk mengangkut Jemaah didampingi petugas terminal"],3],
+["moderasi","Semua agama berpusat pada kebenaran ajaran yang diyakini oleh pemeluknya, dan perbedaan itu kerap bersinggungan satu sama lain. Bagaimana sikap Anda?",["Biarkan mereka dengan keyakinan agamanya, baik-buruk manusia tergantung caranya memperlakukan orang lain","Perlu menghargai keberadaan semua agama di Indonesia, menjamin pemeluknya bebas menjalankan peribadatan","Sebagai pemeluk agama yang baik, penting mengelola kehidupan bersama dengan keyakinan yang berbeda","Tidak perlu berinteraksi dengan pemeluk agama lain"],1],
+["transportasi","Bus antarkota mengalami salah jalan dalam perjalanan. Sebagai petugas transportasi, tindakan apa yang akan anda lakukan?",["Melacak GPS dan menghubungi sopir untuk kembali ke pool bus","Melacak GPS dan menghubungi sopir untuk diarahkan ke jalur yang sesuai","Melacak GPS dan menghubungi sopir untuk kembali ke hotel","Menghubungi mandub melalui penghubung transportasi"],1],
+["wasbang","Indonesia merupakan negara demokrasi yang mengakui serta menjunjung tinggi kedaulatan rakyat, wajib menjamin setiap warga negara memperoleh pendidikan, pekerjaan, dan penghidupan yang layak. Hal ini sesuai dengan prinsip Pancasila yaitu sila…",["Kemanusiaan yang adil dan beradab","Persatuan Indonesia","Kerakyatan yang dipimpin oleh hikmat dalam permusyawaratan/perwakilan","Keadilan sosial bagi seluruh rakyat Indonesia"],3],
+["transportasi","Berikut ini yang termasuk rute transportasi antarkota yang digunakan jemaah haji Indonesia adalah, kecuali…",["Bandara AMAA Madinah – Madinah","Jeddah – Madinah","Makkah – Jeddah","Madinah – Makkah"],1],
+["transportasi","Dalam perjalanan dari Kota Makkah menuju Kota Madinah, pengemudi bus antarkota wajib berhenti dan melaporkan kedatangannya di…",["Terminal Hijrah","Terminal Bir Ali","Terminal Jumum","Terminal Syumaysi"],0],
+["moderasi","Di Pariaman, Sumatera Barat, terdapat sebuah sungai jernih dengan banyak ikan. Terdapat larangan bagi masyarakat untuk mengambil ikan dari sungai tersebut kecuali satu tahun sekali pada hari tertentu yang ditetapkan pemangku adat, dengan kepercayaan siapa yang melanggar akan gatal-gatal. Sikap Anda yang paling tepat?",["Saya anggap kepercayaan adat itu hanya mitos, namun saya tetap menghormatinya","Kepercayaan adat itu perlu dipatuhi seluruh masyarakat tanpa kecuali","Saya aktif mensosialisasikan kepada wisatawan agar tidak melanggar aturan tersebut","Saya anggap itu tidak masuk akal dan boleh diabaikan"],0],
+["transportasi","Jumlah maksimum kapasitas (duduk & berdiri) yang digunakan untuk bus transportasi Shalawat adalah…",["40 orang","50 orang","60 orang","70 orang"],1],
+["transportasi","Alat yang digunakan untuk mengetahui posisi bus ketika bus beroperasi adalah…",["Alat komunikasi Bravo","Global Positioning System (GPS)","CCTV","Google Maps"],1],
+["transportasi","Transportasi yang dipergunakan untuk mengantar Jemaah dari Hotel Makkah menuju Arafah, dari Arafah menuju Muzdalifah, dari Muzdalifah menuju Mina dan dari Mina menuju Hotel Makkah disebut…",["Transportasi Shalawat","Transportasi Perhajian","Transportasi Antarkota","Transportasi Masyair"],3],
+["transportasi","Layanan transportasi Shalawat yang diberikan kepada Jemaah Haji Indonesia selama di Arab Saudi adalah…",["Transportasi Jemaah haji dari Hotel Makkah ke Masjidil Haram PP","Transportasi Jemaah haji dari Hotel Madinah ke Masjidil Haram PP","Transportasi Jemaah haji dari Madinah ke Masjidil Haram PP","Transportasi Jemaah haji dari Mina ke Masjidil Haram PP"],0],
+["transportasi","Petugas transportasi antarkota di Sektor memiliki tugas sebagai berikut, kecuali…",["Mencatat nomor body bus","Mencatat nomor polisi bus","Mencatat kedatangan dan keberangkatan bus","Mencatat jumlah Jemaah"],3],
+["regulasi","Pernyataan yang benar di bawah ini adalah…",["Dalam menyelenggarakan bimbingan dan pembinaan manasik haji reguler dan khusus, Menteri dapat melibatkan KBIHU dan pembimbing bersertifikat","Dalam menyelenggarakan bimbingan dan pembinaan manasik haji reguler, Menteri dapat melibatkan KBIHU","Dalam menyelenggarakan bimbingan dan pembinaan manasik haji reguler dan khusus, Menteri harus melibatkan KBIHU dan PIHK","Untuk haji reguler, Menteri dapat melibatkan KBIHU, PPIU, dan PIHK serta para pembimbing bersertifikat"],3],
+["transportasi","Alur perjalanan Jemaah haji Transportasi Masyair adalah…",["Makkah – Arafah – Muzdalifah – Mina – Makkah","Arafah – Mina – Makkah – Muzdalifah – Arafah","Madinah – Makkah – Jeddah – Mina – Madinah","Madinah – Jeddah – Mina – Makkah – Muzdalifah"],0],
+["transportasi","Berikut ini adalah kebijakan layanan transportasi antarkota untuk Jemaah haji Indonesia tahun 1446 H, kecuali…",["Melalui rute Madinah – Jeddah – Makkah – Bandara AMAA","Melalui rute Bandara AMAA – Madinah – Makkah – Bandara KAIA","Melalui rute Bandara KAIA – Makkah – Madinah – Bandara AMAA","Usia bus yang digunakan maksimal produksi 5 tahun terakhir"],0],
+["transportasi","Berapa jumlah bus untuk transportasi rute Mina – Makkah pada Tahun 1446 H?",["9 bus","7 bus","16 bus","21 bus"],1],
+["transportasi","Saat perjalanan dari Makkah menuju Madinah, sebelum memasuki Kota Madinah, pengemudi bus antarkota wajib berhenti dan melaporkan kedatangannya di…",["Terminal Hijrah","Terminal Bir Ali","Terminal Jumum","Terminal Syumaysi"],0],
+["regulasi","Regulasi terkait kegiatan sosialisasi Masalah Haji dan Umrah dimaksudkan sebagai panduan untuk meningkatkan pengetahuan, pemahaman dan koordinasi bagi…",["Seluruh warga negara Indonesia","PPIU dan PIHK","KBIHU, instansi terkait, dan stakeholder penyelenggara ibadah haji","b dan c benar"],0],
+["transportasi","Sopir bus Shalawat dilaporkan memaksa meminta uang tips atau baksis dari Jemaah haji. Sebagai petugas transportasi, tindakan apa yang akan anda lakukan?",["Mencatat nomor polisi bus dan nama sopir, dilaporkan ke petugas transportasi Daker Makkah","Mencatat nomor polisi bus dan nama sopir, dilaporkan ke petugas transportasi Sektor","Mencatat nomor body bus dan nama sopir, dilaporkan ke petugas keamanan Sektor","Memarahi sopir karena itu menyalahi ketentuan"],1],
+["integritas","Anda baru saja ganti shift bebas tugas untuk istirahat. Belum juga tiba di hotel, anda mendapat perintah dari pimpinan untuk kembali ke tempat tugas karena ada masalah krusial, sementara petugas shift berikutnya belum datang dan tidak bisa dihubungi. Apa yang anda lakukan?",["Melanjutkan perjalanan ke hotel karena lelah dan yakin masalah akan teratasi sendiri","Menghubungi petugas lain yang bisa membantu, tanpa kembali sendiri","Balik kanan dan kembali ke tempat tugas","Mengabaikan perintah karena sudah waktunya istirahat"],2],
+
+// ==================== UPDATE MUSIM HAJI 1447 H / 2026 M: Bus Shalawat Makkah & Layanan Masyair (19 soal) ====================
+["transportasi","Pada musim haji 1447 H/2026 M, total armada Bus Shalawat yang beroperasi 24 jam penuh di Makkah berjumlah…",["352 armada","452 armada","552 armada","652 armada"],1],
+["transportasi","Pada musim haji 1447 H/2026 M, berapa unit Bus Shalawat yang dilengkapi suspensi hidrolik rendah untuk memudahkan jemaah lansia dan berkebutuhan khusus naik-turun bus?",["22 unit","32 unit","42 unit","52 unit"],3],
+["transportasi","Pada skema 1447 H/2026 M, alur pergerakan Bus Shalawat di Makkah dipusatkan secara rigid ke berapa terminal utama di sekitar Masjidil Haram?",["2 terminal","3 terminal","4 terminal","5 terminal"],1],
+["transportasi","Pada skema 1447 H/2026 M, Terminal Syib Amir melayani jemaah dari wilayah…",["Misfalah dan Jarwal","Syisyah dan Raudhah","Jarwal dan Aziziyah","Misfalah saja"],1],
+["transportasi","Pada skema 1447 H/2026 M, Terminal Jiad (Ajyad) melayani jemaah dari wilayah…",["Syisyah","Raudhah","Misfalah","Aziziyah"],2],
+["transportasi","Pada skema 1447 H/2026 M, Terminal Jabal Ka'bah melayani jemaah dari wilayah…",["Syisyah dan Raudhah","Misfalah saja","Jarwal dan Aziziyah","Seluruh wilayah tanpa kecuali"],2],
+["transportasi","Pada musim 1447 H/2026 M, layanan Bus Shalawat di Makkah reorganisasi rutenya menjadi total…",["15 rute","18 rute","21 rute","25 rute"],2],
+["transportasi","Pada musim 1447 H/2026 M, layanan Bus Shalawat di Makkah dibagi menjadi berapa wilayah sektor?",["3 wilayah","4 wilayah","5 wilayah","6 wilayah"],2],
+["transportasi","Pada skema stiker Bus Shalawat 1447 H/2026 M, kode warna untuk wilayah Raudhah adalah…",["Hijau atau Biru","Merah Muda (Pink)","Ungu","Kuning"],1],
+["transportasi","Pada skema stiker Bus Shalawat 1447 H/2026 M, kode warna untuk wilayah Misfalah adalah…",["Hijau atau Biru","Merah Muda (Pink)","Ungu","Oranye"],2],
+["transportasi","Pada skema stiker Bus Shalawat 1447 H/2026 M, kode warna untuk wilayah Jarwal adalah…",["Oranye","Kuning","Ungu","Merah Muda (Pink)"],0],
+["transportasi","Pada skema stiker Bus Shalawat 1447 H/2026 M, kode warna untuk wilayah Aziziyah adalah…",["Hijau atau Biru","Oranye","Kuning","Ungu"],2],
+["transportasi","Untuk mencegah jemaah tersasar akibat reorganisasi 21 rute baru pada musim 1447 H/2026 M, setiap jemaah dibekali…",["Aplikasi ponsel wajib diinstal","Kartu panduan rute dengan kode warna dan nomor yang presisi secara personal","Pendamping khusus per orang","Gelang pelacak GPS"],1],
+["transportasi","Dibanding regulasi dasar Arab Saudi yang hanya mewajibkan Bus Shalawat bagi jemaah berjarak hotel di atas 2.000 meter, kebijakan Indonesia pada musim 1447 H/2026 M adalah…",["Tetap mengikuti syarat jarak di atas 2.000 meter","Menghapus syarat jarak — Bus Shalawat gratis untuk seluruh jemaah tanpa memandang jarak hotel","Menaikkan syarat jarak menjadi 3.000 meter","Meniadakan layanan Bus Shalawat sama sekali"],1],
+["transportasi","Pada masa puncak haji 1447 H/2026 M, pengangkutan jemaah dari Makkah menuju Arafah, Muzdalifah, hingga Mina menggunakan sistem…",["Bebas sesuai kesiapan jemaah masing-masing","Jadwal pergerakan rigid dan dikunci per kloter dengan jendela waktu (time slot) digital","Antrean manual di pelataran maktab","Sistem lotere digital harian"],1],
+["transportasi","Operasional Bus Shalawat pada musim 1447 H/2026 M dihentikan sementara secara serentak pada…",["Awal bulan Dzulhijjah","Sehari setelah kloter terakhir gelombang kedua tiba di Makkah","Tepat tanggal 8 Dzulhijjah pagi","Setelah rangkaian wukuf selesai"],1],
+["transportasi","Alasan utama penghentian sementara dan pengalihan seluruh armada Bus Shalawat pada masa Masyair musim 1447 H/2026 M adalah…",["Menghemat biaya operasional tahunan","Memperkuat manajemen logistik Masyair agar tidak terjadi kelangkaan armada di jalur Armuzna","Perbaikan rutin/perawatan bus","Permintaan resmi dari jemaah"],1],
+["transportasi","Pada musim 1447 H/2026 M, perusahaan penyedia layanan transportasi lokal (syarikah) dipantau langsung oleh…",["Aplikasi Kawal Haji milik Indonesia","Dasbor digital Pusat Keselamatan Transportasi Nasional Arab Saudi","Kementerian Agama RI secara langsung","Masing-masing maktab secara mandiri"],1],
+["transportasi","Pada sistem pemantauan Masyair musim 1447 H/2026 M, jika ada armada bus syarikah yang mogok atau keluar jalur, apa yang terjadi?",["Jemaah menunggu tanpa ada kepastian waktu","Sistem mendeteksi secara real-time dan mengirimkan armada pengganti dalam hitungan menit","Petugas kloter mencari bus pengganti secara manual ke jalan raya","Jemaah diarahkan untuk berjalan kaki ke tujuan"],1],
+];
+
+const FULL_BANK = RAW_BANK.map((row, i) => ({
+  id: i,
+  category: row[0],
+  question: row[1],
+  options: row[2],
+  answer: row[3],
+}));
 
 /* =========================================================
    STATE
 ========================================================= */
 let session = {
-  sessionId: null,
-  questions: [],       // {qid, category, question, options} — TANPA kunci jawaban
-  userAnswers: [],      // index dipilih per soal, atau null
+  questions: [],      // array of question objects (shuffled, with shuffled options)
+  userAnswers: [],     // index chosen per question, or null
   flagged: [],
   current: 0,
   secondsTotal: 0,
@@ -804,33 +966,31 @@ let session = {
   participantName: '',
 };
 
-/**
- * Mengambil satu set soal acak dari server untuk sesi baru.
- * Mengembalikan Promise yang resolve setelah session.questions terisi.
- */
-function buildSessionFromServer(count, secPerQ){
-  const reg = loadRegistration();
-  if(!reg || !reg.id || !reg.token){
-    return Promise.reject(new Error('Anda belum terverifikasi. Silakan cek status pendaftaran kembali.'));
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
   }
-  const url = BACKEND_URL + '?action=get_questions&id=' + encodeURIComponent(reg.id) +
-              '&token=' + encodeURIComponent(reg.token) + '&count=' + encodeURIComponent(count);
-  return fetch(url)
-    .then(res => res.json().catch(() => ({ ok:false })))
-    .then(data => {
-      if(!data || !data.ok){
-        throw new Error((data && data.error) ? data.error : 'Gagal memuat soal dari server.');
-      }
-      session.sessionId = data.sessionId;
-      session.questions = data.questions;
-      session.userAnswers = new Array(session.questions.length).fill(null);
-      session.flagged = new Array(session.questions.length).fill(false);
-      session.current = 0;
-      session.finished = false;
-      session.untimed = secPerQ >= 9999;
-      session.secondsTotal = session.untimed ? 0 : session.questions.length * secPerQ;
-      session.secondsLeft = session.secondsTotal;
-    });
+  return a;
+}
+
+function buildSession(count, secPerQ){
+  const chosen = shuffle(FULL_BANK).slice(0, count);
+  const withShuffledOptions = chosen.map(q => {
+    const order = shuffle([0,1,2,3]);
+    const options = order.map(idx => q.options[idx]);
+    const answer = order.indexOf(q.answer);
+    return { id:q.id, category:q.category, question:q.question, options, answer };
+  });
+  session.questions = withShuffledOptions;
+  session.userAnswers = new Array(withShuffledOptions.length).fill(null);
+  session.flagged = new Array(withShuffledOptions.length).fill(false);
+  session.current = 0;
+  session.finished = false;
+  session.untimed = secPerQ >= 9999;
+  session.secondsTotal = session.untimed ? 0 : count * secPerQ;
+  session.secondsLeft = session.secondsTotal;
 }
 
 /* =========================================================
@@ -850,38 +1010,20 @@ packageChoices.addEventListener('click', (e) => {
 document.getElementById('startBtn').addEventListener('click', () => {
   const name = document.getElementById('participantName').value.trim();
   session.participantName = name;
-  if(!document.getElementById('participantName').readOnly){
-    document.getElementById('topbarRight').textContent = name ? ('Peserta: ' + name) : 'Bank Soal · Irfan Pathurahman, M.Pd.';
-  }
-
-  const btn = document.getElementById('startBtn');
-  btn.disabled = true;
-  btn.textContent = 'Memuat soal dari server…';
-
-  buildSessionFromServer(selectedPackage.count, selectedPackage.secpq)
-    .then(() => {
-      btn.disabled = false;
-      btn.textContent = 'Mulai Uji Coba  →';
-      showScreen('exam');
-      renderNavigator();
-      renderQuestion();
-      startTimer();
-    })
-    .catch(err => {
-      btn.disabled = false;
-      btn.textContent = 'Mulai Uji Coba  →';
-      alert(err.message || 'Gagal memuat soal. Periksa koneksi internet dan coba lagi.');
-      // Token mungkin sudah kedaluwarsa/dicabut — verifikasi ulang status pendaftaran.
-      checkRegistrationStatus(false);
-    });
+  document.getElementById('topbarRight').textContent = name ? ('Peserta: ' + name) : 'Bank Soal · Irfan Pathurahman, M.Pd.';
+  buildSession(selectedPackage.count, selectedPackage.secpq);
+  showScreen('exam');
+  renderNavigator();
+  renderQuestion();
+  startTimer();
 });
 
 /* =========================================================
    SCREEN SWITCH
 ========================================================= */
-const GATE_SCREEN_IDS = ['setupScreen','registerScreen','pendingScreen','rejectedScreen','startScreen','examScreen','resultScreen','historyScreen'];
+const GATE_SCREEN_IDS = ['startScreen','examScreen','resultScreen','historyScreen'];
 function showScreen(name){
-  const map = { setup:'setupScreen', register:'registerScreen', pending:'pendingScreen', rejected:'rejectedScreen', start:'startScreen', exam:'examScreen', result:'resultScreen', history:'historyScreen' };
+  const map = { start:'startScreen', exam:'examScreen', result:'resultScreen', history:'historyScreen' };
   const targetId = map[name];
   GATE_SCREEN_IDS.forEach(id => {
     document.getElementById(id).classList.toggle('hidden', id !== targetId);
@@ -1103,59 +1245,25 @@ function finishExam(){
   if(session.finished) return;
   session.finished = true;
   clearInterval(session.timerId);
-
-  const submitBtn = document.getElementById('submitBtn');
-  if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Menilai jawaban…'; }
-
-  submitExamToServer()
-    .then(data => {
-      if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Selesai & Kumpulkan Jawaban'; }
-      if(!data || !data.ok){
-        alert((data && data.error) ? data.error : 'Gagal mengirim jawaban ke server.');
-        session.finished = false;
-        return;
-      }
-      renderResultsFromServer(data);
-      showScreen('result');
-    })
-    .catch(() => {
-      if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Selesai & Kumpulkan Jawaban'; }
-      alert('Gagal terhubung ke server untuk menilai jawaban. Periksa koneksi internet dan coba lagi.');
-      session.finished = false;
-    });
+  renderResults();
+  showScreen('result');
 }
 
-function submitExamToServer(){
-  const reg = loadRegistration();
+function renderResults(){
   const total = session.questions.length;
-  const timeUsed = session.untimed ? 0 : (session.secondsTotal - session.secondsLeft);
-  const answers = session.questions.map((q, idx) => ({ qid: q.qid, selected: session.userAnswers[idx] }));
+  let correct = 0, wrong = 0, empty = 0;
+  const perCat = {};
+  Object.keys(CATEGORY_META).forEach(k => perCat[k] = {correct:0, total:0});
 
-  return fetch(BACKEND_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      type: 'submit_exam',
-      token: reg ? reg.token : '',
-      id: reg ? reg.id : '',
-      sessionId: session.sessionId,
-      answers: answers,
-      packageLabel: packageLabelFor(total, session.untimed),
-      untimed: session.untimed,
-      timeUsedSec: timeUsed,
-      name: session.participantName || (reg ? reg.name : ''),
-      date: new Date().toISOString(),
-      userAgent: (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '',
-    }),
-  }).then(res => res.json().catch(() => ({ ok:false })));
-}
+  session.questions.forEach((q, idx) => {
+    perCat[q.category].total++;
+    const ua = session.userAnswers[idx];
+    if(ua === null){ empty++; }
+    else if(ua === q.answer){ correct++; perCat[q.category].correct++; }
+    else { wrong++; }
+  });
 
-let lastReview = [];
-
-function renderResultsFromServer(data){
-  const total = data.total;
-  const correct = data.correct, wrong = data.wrong, empty = data.empty, pct = data.pct;
-  lastReview = data.review || [];
-
+  const pct = Math.round((correct/total)*100);
   document.getElementById('scoreRing').style.setProperty('--pct', pct);
   document.getElementById('scorePct').textContent = pct + '%';
   document.getElementById('metaCorrect').textContent = correct;
@@ -1175,14 +1283,15 @@ function renderResultsFromServer(data){
 
   const breakdownWrap = document.getElementById('breakdownWrap');
   breakdownWrap.innerHTML = '';
-  (data.perCategory || []).forEach(d => {
+  Object.keys(CATEGORY_META).forEach(catKey => {
+    const d = perCat[catKey];
     if(!d.total) return;
-    const meta = CATEGORY_META[d.key] || { color:'var(--ink-soft)', label:d.label };
+    const meta = CATEGORY_META[catKey];
     const catPct = Math.round((d.correct/d.total)*100);
     const card = document.createElement('div');
     card.className = 'bcard';
     card.innerHTML =
-      '<div class="bhead"><span class="bdot" style="background:'+meta.color+'"></span><span class="bname">'+(d.label||meta.label)+'</span></div>'+
+      '<div class="bhead"><span class="bdot" style="background:'+meta.color+'"></span><span class="bname">'+meta.label+'</span></div>'+
       '<div class="bnum" style="color:'+meta.color+'">'+d.correct+'<span style="font-size:14px;color:var(--ink-soft);font-family:Inter,sans-serif;font-weight:600;"> / '+d.total+'</span></div>'+
       '<div class="btrack"><div class="bfill" style="width:'+catPct+'%;background:'+meta.color+'"></div></div>';
     breakdownWrap.appendChild(card);
@@ -1192,22 +1301,27 @@ function renderResultsFromServer(data){
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter==='all'));
   renderReviewList();
 
-  // Server sudah menyimpan hasil ke sheet Riwayat saat submit_exam — simpan
-  // salinan lokal juga untuk kenyamanan layar "Riwayat" di perangkat ini.
   saveHistoryEntry({
     name: session.participantName || '',
     date: new Date().toISOString(),
     packageLabel: packageLabelFor(total, session.untimed),
-    total: total, correct: correct, wrong: wrong, empty: empty, pct: pct,
-    timeUsedSec: timeUsed, untimed: session.untimed,
-    perCategory: data.perCategory || [],
-  }, true);
+    total: total,
+    correct: correct,
+    wrong: wrong,
+    empty: empty,
+    pct: pct,
+    timeUsedSec: timeUsed,
+    untimed: session.untimed,
+    perCategory: Object.keys(perCat).filter(k => perCat[k].total).map(k => ({
+      key: k, label: CATEGORY_META[k].label, correct: perCat[k].correct, total: perCat[k].total
+    })),
+  });
 }
 
 function packageLabelFor(total, untimed){
   if(untimed) return 'Latihan (' + total + ' soal, tanpa waktu)';
-  if(total <= 30) return 'Cepat (' + total + ' soal)';
-  if(total <= 75) return 'Sedang (' + total + ' soal)';
+  if(total <= 25) return 'Cepat (' + total + ' soal)';
+  if(total <= 50) return 'Sedang (' + total + ' soal)';
   return 'Penuh (' + total + ' soal)';
 }
 
@@ -1225,11 +1339,12 @@ function renderReviewList(){
   list.innerHTML = '';
   const letters = ['A','B','C','D'];
 
-  lastReview.forEach((q, idx) => {
-    const status = q.status;
+  session.questions.forEach((q, idx) => {
+    const ua = session.userAnswers[idx];
+    const status = ua === null ? 'empty' : (ua === q.answer ? 'correct' : 'wrong');
     if(currentFilter !== 'all' && currentFilter !== status) return;
 
-    const meta = CATEGORY_META[q.category] || { color:'var(--ink-soft)', soft:'var(--line)', label:q.category };
+    const meta = CATEGORY_META[q.category];
     const item = document.createElement('div');
     item.className = 'review-item';
 
@@ -1238,20 +1353,20 @@ function renderReviewList(){
     if(status === 'wrong'){
       answersHtml =
         '<div class="ranswers">'+
-        '<div class="ra-user">Jawaban Anda: '+letters[q.selected]+'. '+escapeHtml(q.options[q.selected])+'</div>'+
-        '<div class="ra-correct">Kunci: '+letters[q.correctIndex]+'. '+escapeHtml(q.options[q.correctIndex])+'</div>'+
+        '<div class="ra-user">Jawaban Anda: '+letters[ua]+'. '+escapeHtml(q.options[ua])+'</div>'+
+        '<div class="ra-correct">Kunci: '+letters[q.answer]+'. '+escapeHtml(q.options[q.answer])+'</div>'+
         '</div>';
     } else if(status === 'empty'){
       answersHtml =
-        '<div class="ranswers"><div class="ra-correct">Kunci: '+letters[q.correctIndex]+'. '+escapeHtml(q.options[q.correctIndex])+'</div></div>';
+        '<div class="ranswers"><div class="ra-correct">Kunci: '+letters[q.answer]+'. '+escapeHtml(q.options[q.answer])+'</div></div>';
     } else {
       answersHtml =
-        '<div class="ranswers"><div class="ra-correct">Jawaban Anda benar: '+letters[q.selected]+'. '+escapeHtml(q.options[q.selected])+'</div></div>';
+        '<div class="ranswers"><div class="ra-correct">Jawaban Anda benar: '+letters[ua]+'. '+escapeHtml(q.options[ua])+'</div></div>';
     }
 
     item.innerHTML =
       '<div class="rhead">'+
-        '<span class="qcat-eyebrow" style="background:'+meta.soft+';color:'+meta.color+'">'+(meta.label||q.category)+'</span>'+
+        '<span class="qcat-eyebrow" style="background:'+meta.soft+';color:'+meta.color+'">'+meta.label+'</span>'+
         '<span class="rtag '+status+'">'+tagLabel+'</span>'+
         '<span class="qnum mono" style="margin-left:auto;">Soal '+(idx+1)+'</span>'+
       '</div>'+
@@ -1267,23 +1382,11 @@ function renderReviewList(){
 }
 
 document.getElementById('retryBtn').addEventListener('click', () => {
-  const btn = document.getElementById('retryBtn');
-  btn.disabled = true;
-  btn.textContent = 'Memuat soal…';
-  buildSessionFromServer(selectedPackage.count, selectedPackage.secpq)
-    .then(() => {
-      btn.disabled = false;
-      btn.textContent = 'Ulangi dengan Soal Baru';
-      showScreen('exam');
-      renderNavigator();
-      renderQuestion();
-      startTimer();
-    })
-    .catch(err => {
-      btn.disabled = false;
-      btn.textContent = 'Ulangi dengan Soal Baru';
-      alert(err.message || 'Gagal memuat soal. Coba lagi.');
-    });
+  buildSession(selectedPackage.count, selectedPackage.secpq);
+  showScreen('exam');
+  renderNavigator();
+  renderQuestion();
+  startTimer();
 });
 document.getElementById('backHomeBtn').addEventListener('click', () => {
   clearInterval(session.timerId);
@@ -1302,205 +1405,8 @@ document.getElementById('backHomeBtn').addEventListener('click', () => {
 // ISI DUA BARIS INI SETELAH MEN-DEPLOY Code.gs (lihat petunjuk di file itu).
 // Kosongkan (biarkan "") kalau belum ingin mengaktifkan sinkronisasi server —
 // halaman tetap berfungsi penuh dengan perekaman lokal saja.
-const BACKEND_URL = "https://script.google.com/macros/s/AKfycbxsivpSWPNVo41EjWYtTxpcCKGf3oXeEBLn6QHbJVj6hOzOhDk1Qv4gF0wiEYdbT8Ri2g/exec";
-const BACKEND_TOKEN = "R@hasia1";
-
-/* =========================================================
-   MODUL: REGISTRASI & GERBANG PERSETUJUAN ADMIN
-   Aktif hanya jika BACKEND_URL sudah diisi (lihat Code.gs untuk
-   cara deploy). Kalau BACKEND_URL kosong, gerbang ini dilewati
-   sepenuhnya dan halaman langsung ke layar mulai seperti biasa —
-   supaya file ini tetap berfungsi penuh sebelum backend dipasang.
-========================================================= */
-const REGISTRATION_KEY = 'R@hasia1';
-let statusPollTimer = null;
-
-function loadRegistration(){
-  try{
-    const raw = localStorage.getItem(REGISTRATION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch(e){ return null; }
-}
-
-function saveRegistration(reg){
-  try{ localStorage.setItem(REGISTRATION_KEY, JSON.stringify(reg)); } catch(e){}
-}
-
-function clearRegistration(){
-  try{ localStorage.removeItem(REGISTRATION_KEY); } catch(e){}
-}
-
-function showGateError(message){
-  const box = document.getElementById('regErrorBox');
-  box.textContent = message;
-  box.classList.remove('hidden');
-}
-function hideGateError(){
-  document.getElementById('regErrorBox').classList.add('hidden');
-}
-
-function submitRegistration(){
-  const name = document.getElementById('regName').value.trim();
-  const instansi = document.getElementById('regInstansi').value.trim();
-  const kontak = document.getElementById('regKontak').value.trim();
-  hideGateError();
-
-  if(!name || !instansi || !kontak){
-    showGateError('Nama, Instansi/Satuan Kerja, dan Kontak wajib diisi.');
-    return;
-  }
-
-  const btn = document.getElementById('regSubmitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Mengirim…';
-
-  fetch(BACKEND_URL, {
-    method: 'POST',
-    body: JSON.stringify({ type:'register', token:BACKEND_TOKEN, name, instansi, kontak }),
-  })
-    .then(res => res.json().catch(() => ({ ok:false })))
-    .then(data => {
-      btn.disabled = false;
-      btn.textContent = 'Daftar & Ajukan Persetujuan';
-      if(data && data.ok){
-        saveRegistration({ id:data.id, name, instansi, kontak, status:data.status || 'Menunggu', note:'' });
-        renderPendingScreen();
-        showScreen('pending');
-        startStatusPolling();
-      } else {
-        showGateError((data && data.error) ? data.error : 'Gagal mengirim pendaftaran. Periksa koneksi internet, lalu coba lagi.');
-      }
-    })
-    .catch(() => {
-      btn.disabled = false;
-      btn.textContent = 'Daftar & Ajukan Persetujuan';
-      showGateError('Gagal terhubung ke server. Periksa koneksi internet, lalu coba lagi.');
-    });
-}
-
-function renderPendingScreen(){
-  const reg = loadRegistration();
-  document.getElementById('pendingNamePill').textContent = reg ? reg.name : '—';
-}
-
-function renderRejectedScreen(){
-  const reg = loadRegistration();
-  document.getElementById('rejectedNamePill').textContent = reg ? reg.name : '—';
-  const noteBox = document.getElementById('rejectedNoteBox');
-  if(reg && reg.note){
-    noteBox.textContent = 'Catatan admin: ' + reg.note;
-    noteBox.classList.remove('hidden');
-  } else {
-    noteBox.classList.add('hidden');
-  }
-}
-
-function checkRegistrationStatus(silent){
-  const reg = loadRegistration();
-  if(!reg || !reg.id) return Promise.resolve();
-
-  const checkBtn = document.getElementById('checkStatusBtn');
-  if(!silent && checkBtn){ checkBtn.disabled = true; checkBtn.textContent = 'Memeriksa…'; }
-
-  return fetch(BACKEND_URL + '?action=status&id=' + encodeURIComponent(reg.id))
-    .then(res => res.json().catch(() => ({ ok:false })))
-    .then(data => {
-      if(!silent && checkBtn){ checkBtn.disabled = false; checkBtn.textContent = 'Cek Status Sekarang'; }
-      if(data && data.ok){
-        reg.status = data.status;
-        reg.note = data.note || '';
-        saveRegistration(reg);
-        routeByRegistrationStatus(reg);
-      } else if(!silent){
-        alert((data && data.error) ? data.error : 'Belum bisa memeriksa status. Coba lagi sebentar.');
-      }
-    })
-    .catch(() => {
-      if(!silent && checkBtn){ checkBtn.disabled = false; checkBtn.textContent = 'Cek Status Sekarang'; }
-      if(!silent) alert('Gagal terhubung ke server. Periksa koneksi internet.');
-    });
-}
-
-function routeByRegistrationStatus(reg){
-  if(reg.status === 'Disetujui'){
-    stopStatusPolling();
-    enterStartScreenAsRegistrant(reg);
-  } else if(reg.status === 'Ditolak'){
-    stopStatusPolling();
-    renderRejectedScreen();
-    showScreen('rejected');
-  } else {
-    renderPendingScreen();
-    showScreen('pending');
-    startStatusPolling();
-  }
-}
-
-function startStatusPolling(){
-  stopStatusPolling();
-  statusPollTimer = setInterval(() => checkRegistrationStatus(true), 20000);
-}
-function stopStatusPolling(){
-  if(statusPollTimer){ clearInterval(statusPollTimer); statusPollTimer = null; }
-}
-
-function enterStartScreenAsRegistrant(reg){
-  const nameInput = document.getElementById('participantName');
-  nameInput.value = reg.name;
-  nameInput.readOnly = true;
-  nameInput.style.background = 'var(--paper)';
-  session.participantName = reg.name;
-  document.getElementById('topbarRight').textContent = 'Peserta: ' + reg.name + ' ✓';
-  const nameLabel = document.getElementById('participantNameLabel');
-  if(nameLabel) nameLabel.textContent = 'Nama Peserta';
-  const verifiedNote = document.getElementById('participantVerifiedNote');
-  if(verifiedNote) verifiedNote.classList.remove('hidden');
-  showScreen('start');
-}
-
-function initRegistrationGate(){
-  if(!BACKEND_URL){
-    showScreen('setup');
-    return;
-  }
-  const reg = loadRegistration();
-  if(!reg || !reg.id){
-    showScreen('register');
-    return;
-  }
-  if(reg.status === 'Disetujui'){
-    // Tampilkan langsung (optimis), lalu verifikasi ulang diam-diam di latar.
-    enterStartScreenAsRegistrant(reg);
-    checkRegistrationStatus(true).then(() => {
-      const fresh = loadRegistration();
-      if(fresh && fresh.status !== 'Disetujui'){
-        routeByRegistrationStatus(fresh);
-      }
-    });
-  } else if(reg.status === 'Ditolak'){
-    renderRejectedScreen();
-    showScreen('rejected');
-  } else {
-    renderPendingScreen();
-    showScreen('pending');
-    startStatusPolling();
-    checkRegistrationStatus(true);
-  }
-}
-
-document.getElementById('regSubmitBtn').addEventListener('click', submitRegistration);
-document.getElementById('checkStatusBtn').addEventListener('click', () => checkRegistrationStatus(false));
-document.getElementById('pendingResetBtn').addEventListener('click', () => {
-  if(confirm('Hapus pendaftaran ini dan isi ulang formulir dari awal?')){
-    stopStatusPolling();
-    clearRegistration();
-    showScreen('register');
-  }
-});
-document.getElementById('rejectedResetBtn').addEventListener('click', () => {
-  clearRegistration();
-  showScreen('register');
-});
+const BACKEND_URL = "";
+const BACKEND_TOKEN = "";
 
 const HISTORY_KEY = 'cat_petugas_haji_riwayat_v1';
 
@@ -1728,10 +1634,6 @@ if(BACKEND_URL){
   const pendingOnLoad = loadHistory().filter(e => e.syncStatus === 'pending' || e.syncStatus === 'failed');
   pendingOnLoad.forEach(e => syncEntryToBackend(e));
 }
-
-// Tentukan layar awal: gerbang registrasi (jika backend aktif) atau
-// langsung ke layar mulai (jika backend belum dikonfigurasi).
-initRegistrationGate();
 </script>
 </body>
 </html>
