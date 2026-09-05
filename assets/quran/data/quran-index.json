@@ -70,7 +70,7 @@
       "name": "Yunus",
       "arabic": "يونس",
       "start_page": 208,
-      "end_page": 221
+      "end_page": 220
     },
     {
       "id": 11,
@@ -427,7 +427,7 @@
       "name": "As-Saf",
       "arabic": "الصف",
       "start_page": 551,
-      "end_page": 552
+      "end_page": 553
     },
     {
       "id": 62,
@@ -455,7 +455,7 @@
       "name": "At-Talaq",
       "arabic": "الطلاق",
       "start_page": 558,
-      "end_page": 559
+      "end_page": 560
     },
     {
       "id": 66,
@@ -830,11 +830,11 @@
     {
       "id": 6,
       "start_page": 102,
-      "end_page": 120
+      "end_page": 121
     },
     {
       "id": 7,
-      "start_page": 121,
+      "start_page": 122,
       "end_page": 141
     },
     {
@@ -850,11 +850,11 @@
     {
       "id": 10,
       "start_page": 182,
-      "end_page": 200
+      "end_page": 201
     },
     {
       "id": 11,
-      "start_page": 201,
+      "start_page": 202,
       "end_page": 221
     },
     {
