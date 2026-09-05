@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Al-Qur'an — KR Trade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ===== Design tokens — konsep: sampul mushaf berjilid, tinta hijau tua & prada emas ===== */
+    --ink-green-900: #08201A;   /* latar utama, seperti sampul mushaf beludru */
+    --ink-green-800: #0F2E25;   /* panel/overlay */
+    --ink-green-700: #163B2F;   /* border halus */
+    --gold-500: #C9A24A;        /* prada emas — aksen utama, dipakai secukupnya */
+    --gold-300: #E4D6A7;        /* teks emas pudar di atas latar gelap */
+    --paper-50: #F7F1E1;        /* kertas mushaf, dipakai utk placeholder halaman */
+    --paper-200: #EAE0C4;
+    --ink-900: #1C1A14;
+    --danger-soft: #C97A5A;
+
+    --font-display: "Amiri", "Traditional Arabic", serif;
+    --font-ui: "Inter", -apple-system, sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{
+    margin:0; padding:0; height:100%;
+    background: var(--ink-green-900);
+    color: var(--gold-300);
+    font-family: var(--font-ui);
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Tekstur geometris halus khas ornamen Islami — sangat samar, hanya sebagai latar */
+  body::before{
+    content:"";
+    position: fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 50% 50%, transparent 0, transparent 40%, var(--ink-green-900) 100%),
+      repeating-linear-gradient(45deg, rgba(201,162,74,0.035) 0 2px, transparent 2px 22px),
+      repeating-linear-gradient(-45deg, rgba(201,162,74,0.035) 0 2px, transparent 2px 22px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  #viewer{
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    z-index:1;
+    touch-action: none; /* biar swipe kita yang tangani, bukan gesture browser */
+  }
+
+  /* ===== Bingkai halaman — satu elemen "berani" dalam desain: garis ganda prada ===== */
+  #page-frame{
+    position: relative;
+    height: 94dvh;
+    max-width: 92vw;
+    aspect-ratio: 0.708; /* rasio umum halaman mushaf */
+    background: var(--paper-50);
+    border-radius: 2px;
+    box-shadow:
+      0 0 0 1px var(--ink-green-700),
+      0 0 0 6px var(--ink-green-900),
+      0 0 0 7px var(--gold-500),
+      0 20px 60px rgba(0,0,0,0.55);
+    overflow:hidden;
+    transition: box-shadow 0.3s ease;
+  }
+
+  #page-image{
+    width:100%; height:100%;
+    object-fit: contain;
+    display:block;
+    user-select:none;
+    -webkit-user-drag:none;
+    background: var(--paper-50);
+  }
+
+  #page-image.is-hidden{ display:none; }
+
+  /* ===== Placeholder — dipakai selama gambar belum diupload / gagal dimuat ===== */
+  #placeholder{
+    position:absolute; inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 8%;
+    color: var(--ink-900);
+  }
+  #placeholder.is-hidden{ display:none; }
+  #placeholder .corner{
+    position:absolute; width:34px; height:34px;
+    border: 2px solid var(--gold-500);
+    opacity:0.8;
+  }
+  #placeholder .corner.tl{ top:14px; left:14px; border-right:none; border-bottom:none; }
+  #placeholder .corner.tr{ top:14px; right:14px; border-left:none; border-bottom:none; }
+  #placeholder .corner.bl{ bottom:14px; left:14px; border-right:none; border-top:none; }
+  #placeholder .corner.br{ bottom:14px; right:14px; border-left:none; border-top:none; }
+  #placeholder-title{
+    font-family: var(--font-display);
+    font-size: clamp(20px, 3.4vw, 30px);
+    margin: 0 0 8px;
+  }
+  #placeholder-file{
+    font-family: var(--font-ui);
+    font-size: 13px;
+    color: #6b6552;
+    letter-spacing: 0.02em;
+  }
+
+  /* ===== Zona ketuk kiri/kanan — arah dibuat mengikuti kebiasaan mushaf (kanan-ke-kiri) ===== */
+  .tap-zone{
+    position:absolute; top:0; height:100%;
+    z-index:2;
+    cursor: pointer;
+  }
+  #tap-next{ left:0; width:34%; }      /* ketuk KIRI  = maju ke halaman berikutnya */
+  #tap-prev{ right:0; width:34%; }     /* ketuk KANAN = mundur ke halaman sebelumnya */
+  #tap-toggle{ left:33%; width:34%; }  /* ketuk TENGAH = sembunyikan/tampilkan bilah info */
+
+  /* ===== Bilah atas & bawah (overlay info) ===== */
+  .chrome{
+    position:fixed; left:0; right:0;
+    display:flex; align-items:center;
+    padding: 18px 22px;
+    z-index:3;
+    background: linear-gradient(to bottom, rgba(8,32,26,0.85), transparent);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events:none;
+  }
+  #chrome-top{ top:0; justify-content:space-between; }
+  #chrome-bottom{
+    bottom:0; justify-content:center;
+    background: linear-gradient(to top, rgba(8,32,26,0.85), transparent);
+  }
+  body.ui-hidden .chrome{ opacity:0; transform: translateY(-6px); }
+  body.ui-hidden #chrome-bottom{ transform: translateY(6px); }
+
+  #brand-mini{
+    font-family: var(--font-display);
+    font-size: 15px; letter-spacing: 0.03em;
+    color: var(--gold-300); opacity:0.85;
+  }
+  #page-counter{
+    font-family: var(--font-ui); font-size:13px; font-weight:500;
+    color: var(--gold-300); opacity:0.9;
+    font-variant-numeric: tabular-nums;
+  }
+  #reading-position{
+    font-family: var(--font-display);
+    font-size: 16px;
+    text-align:center;
+    color: var(--gold-300);
+  }
+  #reading-position small{
+    display:block;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(228,214,167,0.6);
+    margin-top:2px;
+  }
+
+  /* ===== Hint navigasi — muncul sekali saja untuk pengguna baru ===== */
+  #nav-hint{
+    position:fixed; inset:0;
+    background: rgba(8,32,26,0.92);
+    z-index:10;
+    display:flex; align-items:center; justify-content:center;
+    padding: 24px;
+    text-align:center;
+  }
+  #nav-hint.is-hidden{ display:none; }
+  #nav-hint-box{ max-width: 320px; }
+  #nav-hint-box h2{
+    font-family: var(--font-display); font-weight:400;
+    font-size: 22px; color: var(--gold-300); margin: 0 0 14px;
+  }
+  #nav-hint-box p{
+    font-size: 13.5px; line-height:1.6; color: rgba(228,214,167,0.85);
+    margin: 0 0 22px;
+  }
+  #nav-hint-close{
+    font-family: var(--font-ui); font-size: 13px; font-weight:600;
+    background: var(--gold-500); color: var(--ink-green-900);
+    border:none; border-radius: 3px;
+    padding: 10px 26px; cursor:pointer;
+    letter-spacing: 0.02em;
+  }
+
+  #chrome-top-left{ display:flex; align-items:center; gap:14px; }
+  #menu-toggle{
+    background:none; border: 1px solid rgba(228,214,167,0.35);
+    color: var(--gold-300); border-radius:3px;
+    width:32px; height:32px; font-size:15px; line-height:1;
+    cursor:pointer; pointer-events:auto;
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  #menu-toggle:hover{ border-color: var(--gold-500); background: rgba(201,162,74,0.08); }
+
+  /* ===== Drawer Daftar Isi ===== */
+  #drawer-backdrop{
+    position:fixed; inset:0; z-index:20;
+    background: rgba(4,16,13,0.55);
+    opacity:0; pointer-events:none;
+    transition: opacity 0.25s ease;
+  }
+  #drawer-backdrop.is-open{ opacity:1; pointer-events:auto; }
+
+  #daftar-isi{
+    position:fixed; top:0; left:0; bottom:0;
+    width: min(340px, 84vw);
+    background: var(--ink-green-800);
+    border-right: 1px solid var(--ink-green-700);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+    z-index:21;
+    display:flex; flex-direction:column;
+    transform: translateX(-100%);
+    transition: transform 0.28s ease;
+  }
+  #daftar-isi.is-open{ transform: translateX(0); }
+
+  #drawer-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 20px 18px 14px;
+    border-bottom: 1px solid var(--ink-green-700);
+  }
+  #drawer-header h2{
+    font-family: var(--font-display); font-weight:400;
+    font-size: 19px; color: var(--gold-300); margin:0;
+  }
+  #drawer-close{
+    background:none; border:none; color: var(--gold-300);
+    font-size:16px; cursor:pointer; opacity:0.75; padding:4px;
+  }
+  #drawer-close:hover{ opacity:1; }
+
+  #drawer-tabs{
+    display:flex; gap:0; padding: 12px 18px 0;
+    border-bottom: 1px solid var(--ink-green-700);
+  }
+  .drawer-tab{
+    flex:1; background:none; border:none; cursor:pointer;
+    font-family: var(--font-ui); font-size:13px; font-weight:600;
+    letter-spacing:0.02em;
+    color: rgba(228,214,167,0.55);
+    padding: 10px 4px 12px;
+    border-bottom: 2px solid transparent;
+  }
+  .drawer-tab.is-active{ color: var(--gold-300); border-bottom-color: var(--gold-500); }
+
+  #drawer-body{ flex:1; overflow-y:auto; padding: 6px 0; }
+  .drawer-list{ list-style:none; margin:0; padding:0; }
+  .drawer-list.is-hidden{ display:none; }
+  .drawer-list li{
+    padding: 11px 18px;
+    font-family: var(--font-ui); font-size:14px;
+    color: rgba(228,214,167,0.85);
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:10px; cursor:pointer;
+    border-bottom: 1px solid rgba(228,214,167,0.06);
+  }
+  .drawer-list li:hover{ background: rgba(201,162,74,0.07); }
+  .drawer-list li.is-current{
+    background: rgba(201,162,74,0.14);
+    color: var(--gold-300);
+  }
+  .drawer-list li .num{
+    font-size:12px; color: rgba(228,214,167,0.45);
+    font-variant-numeric: tabular-nums; flex-shrink:0;
+    width:22px;
+  }
+  .drawer-list li .name{ flex:1; }
+  .drawer-list li .arabic{
+    font-family: var(--font-display); font-size:15px;
+    color: rgba(228,214,167,0.6);
+  }
+  .drawer-list li .pageno{
+    font-size:11px; color: rgba(228,214,167,0.4);
+    font-variant-numeric: tabular-nums; flex-shrink:0;
+  }
+
+  #drawer-footer{
+    padding: 14px 18px 18px;
+    border-top: 1px solid var(--ink-green-700);
+  }
+  #reset-to-start{
+    width:100%; background:none;
+    border: 1px solid rgba(228,214,167,0.3);
+    color: rgba(228,214,167,0.75);
+    border-radius:3px; padding:10px;
+    font-family: var(--font-ui); font-size:12.5px; cursor:pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  #reset-to-start:hover{ border-color: var(--gold-500); color: var(--gold-300); }
+
+  #resume-toast{
+    position:fixed; bottom:70px; left:50%;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--ink-green-800);
+    border: 1px solid var(--gold-500);
+    color: var(--gold-300);
+    font-family: var(--font-ui); font-size:12.5px;
+    padding: 9px 18px; border-radius: 20px;
+    z-index: 15;
+    opacity:0; pointer-events:none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    white-space:nowrap;
+  }
+  #resume-toast.is-visible{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 520px){
+    #page-frame{ height: 90dvh; max-width: 96vw; }
+    .chrome{ padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="viewer">
+    <div id="page-frame">
+      <img id="page-image" alt="Halaman mushaf" draggable="false">
+      <div id="placeholder">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+        <p id="placeholder-title">Halaman belum tersedia</p>
+        <p id="placeholder-file">assets/quran/page-001.png</p>
+      </div>
+      <div id="tap-next" class="tap-zone" aria-label="Halaman berikutnya"></div>
+      <div id="tap-toggle" class="tap-zone" aria-label="Sembunyikan/tampilkan info"></div>
+      <div id="tap-prev" class="tap-zone" aria-label="Halaman sebelumnya"></div>
+    </div>
+  </div>
+
+  <div id="chrome-top" class="chrome">
+    <span id="chrome-top-left">
+      <button id="menu-toggle" aria-label="Buka Daftar Isi">☰</button>
+      <span id="brand-mini">Al-Qur'an • KR Trade</span>
+    </span>
+    <span id="page-counter">Hal. — / —</span>
+  </div>
+
+  <div id="chrome-bottom" class="chrome">
+    <span id="reading-position">—<small>—</small></span>
+  </div>
+
+  <div id="drawer-backdrop"></div>
+  <aside id="daftar-isi" aria-label="Daftar Isi">
+    <div id="drawer-header">
+      <h2>Daftar Isi</h2>
+      <button id="drawer-close" aria-label="Tutup">✕</button>
+    </div>
+    <div id="drawer-tabs">
+      <button class="drawer-tab is-active" data-tab="surah">Surah</button>
+      <button class="drawer-tab" data-tab="juz">Juz</button>
+    </div>
+    <div id="drawer-body">
+      <ul id="list-surah" class="drawer-list"></ul>
+      <ul id="list-juz" class="drawer-list is-hidden"></ul>
+    </div>
+    <div id="drawer-footer">
+      <button id="reset-to-start">⟲ Mulai dari Al-Fatihah</button>
+    </div>
+  </aside>
+
+  <div id="resume-toast"></div>
+
+  <div id="nav-hint">
+    <div id="nav-hint-box">
+      <h2>Cara membaca</h2>
+      <p>Ketuk sisi <strong>kiri</strong> layar untuk maju ke halaman berikutnya, sisi <strong>kanan</strong> untuk kembali — mengikuti arah baca mushaf. Ketuk bagian tengah untuk menyembunyikan bilah info.</p>
+      <button id="nav-hint-close">Mulai membaca</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  var TOTAL_PAGES_FALLBACK = 604;
+  var IMAGE_PATTERN = "assets/quran/page-{page}.png";
+  var INDEX_URL = "assets/quran/data/quran-index.json";
+  var STORAGE_KEY = "krtrade_quran_last_page";
+  var HINT_STORAGE_KEY = "krtrade_quran_hint_seen";
+
+  var state = {
+    currentPage: 1,
+    totalPages: TOTAL_PAGES_FALLBACK,
+    index: null
+  };
+
+  var el = {
+    image: document.getElementById("page-image"),
+    placeholder: document.getElementById("placeholder"),
+    placeholderFile: document.getElementById("placeholder-file"),
+    pageCounter: document.getElementById("page-counter"),
+    readingPosition: document.getElementById("reading-position"),
+    tapNext: document.getElementById("tap-next"),
+    tapPrev: document.getElementById("tap-prev"),
+    tapToggle: document.getElementById("tap-toggle"),
+    navHint: document.getElementById("nav-hint"),
+    navHintClose: document.getElementById("nav-hint-close"),
+    menuToggle: document.getElementById("menu-toggle"),
+    drawer: document.getElementById("daftar-isi"),
+    drawerBackdrop: document.getElementById("drawer-backdrop"),
+    drawerClose: document.getElementById("drawer-close"),
+    drawerTabs: document.querySelectorAll(".drawer-tab"),
+    listSurah: document.getElementById("list-surah"),
+    listJuz: document.getElementById("list-juz"),
+    resumeToast: document.getElementById("resume-toast"),
+    resetToStart: document.getElementById("reset-to-start")
+  };
+
+  function pad3(n){
+    return String(n).padStart(3, "0");
+  }
+
+  function imageUrlForPage(page){
+    return IMAGE_PATTERN.replace("{page}", pad3(page));
+  }
+
+  function findSurahForPage(page){
+    if (!state.index || !state.index.surahs) return null;
+    var match = null;
+    for (var i = 0; i < state.index.surahs.length; i++){
+      var s = state.index.surahs[i];
+      if (page >= s.start_page && page <= s.end_page) match = s;
+    }
+    return match;
+  }
+
+  function findJuzForPage(page){
+    if (!state.index || !state.index.juz) return null;
+    var match = null;
+    for (var i = 0; i < state.index.juz.length; i++){
+      var j = state.index.juz[i];
+      if (page >= j.start_page && page <= j.end_page) match = j;
+    }
+    return match;
+  }
+
+  function updateInfoBars(page){
+    el.pageCounter.textContent = "Hal. " + pad3(page) + " / " + state.totalPages;
+
+    var surah = findSurahForPage(page);
+    var juz = findJuzForPage(page);
+    var surahName = surah ? surah.name : "—";
+    var juzLabel = juz ? ("Juz " + juz.id) : "—";
+    el.readingPosition.innerHTML = surahName + "<small>" + juzLabel + "</small>";
+  }
+
+  function renderPage(page){
+    page = Math.max(1, Math.min(state.totalPages, page));
+    state.currentPage = page;
+
+    var url = imageUrlForPage(page);
+    el.placeholderFile.textContent = url;
+
+    // Reset dulu supaya onerror/onload lama tidak nyangkut di gambar sebelumnya
+    el.image.classList.add("is-hidden");
+    el.placeholder.classList.add("is-hidden");
+
+    el.image.onload = function(){
+      el.image.classList.remove("is-hidden");
+      el.placeholder.classList.add("is-hidden");
+    };
+    el.image.onerror = function(){
+      el.image.classList.add("is-hidden");
+      el.placeholder.classList.remove("is-hidden");
+    };
+    el.image.src = url;
+
+    updateInfoBars(page);
+    if (state.index) highlightCurrentInLists();
+
+    try {
+      localStorage.setItem(STORAGE_KEY, String(page));
+      localStorage.setItem(STORAGE_KEY + "_time", String(Date.now()));
+    } catch(e) {}
+  }
+
+  function nextPage(){ renderPage(state.currentPage + 1); }
+  function prevPage(){ renderPage(state.currentPage - 1); }
+  function toggleChrome(){ document.body.classList.toggle("ui-hidden"); }
+
+  function loadIndex(){
+    fetch(INDEX_URL)
+      .then(function(res){ if(!res.ok) throw new Error("index not found"); return res.json(); })
+      .then(function(data){
+        state.index = data;
+        state.totalPages = data.total_pages || TOTAL_PAGES_FALLBACK;
+        renderDaftarIsi();
+        goToInitialPage();
+      })
+      .catch(function(){
+        // JSON belum ada / gagal dimuat — tetap jalankan viewer dengan fallback 604 halaman
+        state.totalPages = TOTAL_PAGES_FALLBACK;
+        goToInitialPage();
+      });
+  }
+
+  function goToInitialPage(){
+    var saved = null;
+    try { saved = parseInt(localStorage.getItem(STORAGE_KEY), 10); } catch(e) {}
+    var start = (saved && saved >= 1 && saved <= state.totalPages) ? saved : 1;
+    renderPage(start);
+  }
+
+  function initHint(){
+    var seen = false;
+    try { seen = localStorage.getItem(HINT_STORAGE_KEY) === "1"; } catch(e) {}
+    if (seen){ el.navHint.classList.add("is-hidden"); return; }
+    el.navHintClose.addEventListener("click", function(){
+      el.navHint.classList.add("is-hidden");
+      try { localStorage.setItem(HINT_STORAGE_KEY, "1"); } catch(e) {}
+    });
+  }
+
+  // ===== Menu Daftar Isi (Juz/Surah) =====
+  var drawerOpen = false;
+  var activeTab = "surah";
+
+  function openDrawer(){
+    drawerOpen = true;
+    el.drawer.classList.add("is-open");
+    el.drawerBackdrop.classList.add("is-open");
+    highlightCurrentInLists();
+  }
+  function closeDrawer(){
+    drawerOpen = false;
+    el.drawer.classList.remove("is-open");
+    el.drawerBackdrop.classList.remove("is-open");
+  }
+
+  function buildListItem(item, label){
+    var li = document.createElement("li");
+    li.dataset.page = item.start_page;
+
+    var num = document.createElement("span");
+    num.className = "num";
+    num.textContent = item.id;
+
+    var name = document.createElement("span");
+    name.className = "name";
+    name.textContent = label;
+
+    var pageno = document.createElement("span");
+    pageno.className = "pageno";
+    pageno.textContent = "Hal. " + item.start_page;
+
+    li.appendChild(num);
+    li.appendChild(name);
+    li.appendChild(pageno);
+
+    li.addEventListener("click", function(){
+      renderPage(item.start_page);
+      closeDrawer();
+    });
+    return li;
+  }
+
+  function renderDaftarIsi(){
+    if (!state.index) return;
+
+    el.listSurah.innerHTML = "";
+    (state.index.surahs || []).forEach(function(s){
+      el.listSurah.appendChild(buildListItem(s, s.name));
+    });
+
+    el.listJuz.innerHTML = "";
+    (state.index.juz || []).forEach(function(j){
+      el.listJuz.appendChild(buildListItem(j, "Juz " + j.id));
+    });
+  }
+
+  function highlightCurrentInLists(){
+    var currentSurah = findSurahForPage(state.currentPage);
+    var currentJuz = findJuzForPage(state.currentPage);
+    [el.listSurah, el.listJuz].forEach(function(list){
+      list.querySelectorAll("li").forEach(function(li){ li.classList.remove("is-current"); });
+    });
+    if (currentSurah){
+      var s = el.listSurah.querySelector('li[data-page="' + currentSurah.start_page + '"]');
+      if (s) s.classList.add("is-current");
+    }
+    if (currentJuz){
+      var j = el.listJuz.querySelector('li[data-page="' + currentJuz.start_page + '"]');
+      if (j) j.classList.add("is-current");
+    }
+  }
+
+  function switchTab(tab){
+    activeTab = tab;
+    el.drawerTabs.forEach(function(btn){
+      btn.classList.toggle("is-active", btn.dataset.tab === tab);
+    });
+    el.listSurah.classList.toggle("is-hidden", tab !== "surah");
+    el.listJuz.classList.toggle("is-hidden", tab !== "juz");
+  }
+
+  el.menuToggle.addEventListener("click", openDrawer);
+  el.drawerClose.addEventListener("click", closeDrawer);
+  el.drawerBackdrop.addEventListener("click", closeDrawer);
+  el.drawerTabs.forEach(function(btn){
+    btn.addEventListener("click", function(){ switchTab(btn.dataset.tab); });
+  });
+
+  var suppressTap = false;
+  function guardedClick(handler){
+    return function(){
+      if (suppressTap || drawerOpen) return;
+      handler();
+    };
+  }
+  el.tapNext.addEventListener("click", guardedClick(nextPage));
+  el.tapPrev.addEventListener("click", guardedClick(prevPage));
+  el.tapToggle.addEventListener("click", guardedClick(toggleChrome));
+
+  // ===== Swipe gesture (mobile) =====
+  // Arah mengikuti kebiasaan mushaf: geser ke KIRI (dx negatif) = maju,
+  // geser ke KANAN (dx positif) = mundur — konsisten dengan zona ketuk.
+  var SWIPE_THRESHOLD = 48; // px minimal supaya dianggap sengaja menggeser, bukan ketukan
+  var swipeStart = null;
+  var viewerEl = document.getElementById("viewer");
+
+  viewerEl.addEventListener("pointerdown", function(e){
+    if (drawerOpen) return;
+    swipeStart = { x: e.clientX, y: e.clientY, time: Date.now() };
+    suppressTap = false;
+  });
+
+  viewerEl.addEventListener("pointerup", function(e){
+    if (!swipeStart) return;
+    var dx = e.clientX - swipeStart.x;
+    var dy = e.clientY - swipeStart.y;
+    swipeStart = null;
+
+    var isMostlyHorizontal = Math.abs(dx) > Math.abs(dy) * 1.5;
+    if (isMostlyHorizontal && Math.abs(dx) > SWIPE_THRESHOLD){
+      if (dx < 0) { nextPage(); } else { prevPage(); }
+      // Cegah event "click" bawaan yang muncul setelah pointerup ikut memicu navigasi ganda
+      suppressTap = true;
+      setTimeout(function(){ suppressTap = false; }, 250);
+    }
+  });
+
+  viewerEl.addEventListener("pointercancel", function(){ swipeStart = null; });
+
+  // ===== Navigasi panah keyboard (desktop) =====
+  // Sama seperti tap/swipe: panah KIRI = maju, panah KANAN = mundur.
+  window.addEventListener("keydown", function(e){
+    if (drawerOpen){
+      if (e.key === "Escape") closeDrawer();
+      return;
+    }
+    if (e.key === "ArrowLeft"){ nextPage(); }
+    else if (e.key === "ArrowRight"){ prevPage(); }
+  });
+
+  initHint();
+  loadIndex();
+})();
+</script>
+
+</body>
+</html>
