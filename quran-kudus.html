@@ -390,7 +390,7 @@
   <div id="nav-hint">
     <div id="nav-hint-box">
       <h2>Cara membaca</h2>
-      <p>Ketuk sisi <strong>kiri</strong> layar untuk maju ke halaman berikutnya, sisi <strong>kanan</strong> untuk kembali — mengikuti arah baca mushaf. Ketuk bagian tengah untuk menyembunyikan bilah info.</p>
+      <p>Geser (swipe) ke <strong>kiri</strong> untuk maju ke halaman berikutnya, geser ke <strong>kanan</strong> untuk kembali — mengikuti arah baca mushaf. Ketuk layar untuk menyembunyikan/menampilkan bilah info, dan ketuk dua kali untuk memperbesar halaman.</p>
       <button id="nav-hint-close">Mulai membaca</button>
     </div>
   </div>
@@ -697,10 +697,9 @@
   var pendingSingleTapTimer = null;
 
   function resolveTapAction(clientX){
-    var ratio = clientX / window.innerWidth;
-    if (ratio < 0.34) return nextPage;   // kiri = maju
-    if (ratio > 0.66) return prevPage;   // kanan = mundur
-    return toggleChrome;                 // tengah = sembunyikan/tampilkan info
+    // Pindah halaman sekarang murni lewat swipe. Ketuk (single tap) di mana saja
+    // hanya menyembunyikan/menampilkan bilah info, tidak lagi memindah halaman.
+    return toggleChrome;
   }
 
   viewerEl.addEventListener("pointerdown", function(e){
