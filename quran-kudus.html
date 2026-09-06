@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Al-Qur'an — KR Trade</title>
+<meta name="theme-color" content="#08201A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -83,6 +84,13 @@
     -webkit-user-drag:none;
     background: var(--paper-50);
   }
+
+  #zoom-wrap{
+    width:100%; height:100%;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  #zoom-wrap.is-panning{ transition:none; }
 
   #page-image.is-hidden{ display:none; }
 
@@ -331,7 +339,9 @@
 
   <div id="viewer">
     <div id="page-frame">
-      <img id="page-image" alt="Halaman mushaf" draggable="false">
+      <div id="zoom-wrap">
+        <img id="page-image" alt="Halaman mushaf" draggable="false">
+      </div>
       <div id="placeholder">
         <span class="corner tl"></span><span class="corner tr"></span>
         <span class="corner bl"></span><span class="corner br"></span>
@@ -403,6 +413,8 @@
 
   var el = {
     image: document.getElementById("page-image"),
+    zoomWrap: document.getElementById("zoom-wrap"),
+    pageFrame: document.getElementById("page-frame"),
     placeholder: document.getElementById("placeholder"),
     placeholderFile: document.getElementById("placeholder-file"),
     pageCounter: document.getElementById("page-counter"),
@@ -484,6 +496,7 @@
 
     updateInfoBars(page);
     if (state.index) highlightCurrentInLists();
+    resetZoom();
 
     try {
       localStorage.setItem(STORAGE_KEY, String(page));
@@ -511,12 +524,34 @@
       });
   }
 
+  function showResumeToast(page){
+    var lastTime = null;
+    try { lastTime = parseInt(localStorage.getItem(STORAGE_KEY + "_time"), 10); } catch(e) {}
+    var when = "";
+    if (lastTime){
+      var diffMs = Date.now() - lastTime;
+      var diffDays = Math.floor(diffMs / 86400000);
+      if (diffDays >= 1) when = " (" + diffDays + " hari lalu)";
+    }
+    el.resumeToast.textContent = "Melanjutkan dari halaman " + pad3(page) + when;
+    el.resumeToast.classList.add("is-visible");
+    setTimeout(function(){
+      el.resumeToast.classList.remove("is-visible");
+    }, 3200);
+  }
+
   function goToInitialPage(){
     var saved = null;
     try { saved = parseInt(localStorage.getItem(STORAGE_KEY), 10); } catch(e) {}
     var start = (saved && saved >= 1 && saved <= state.totalPages) ? saved : 1;
     renderPage(start);
+    if (start > 1) showResumeToast(start);
   }
+
+  el.resetToStart.addEventListener("click", function(){
+    renderPage(1);
+    closeDrawer();
+  });
 
   function initHint(){
     var seen = false;
@@ -617,49 +652,148 @@
     btn.addEventListener("click", function(){ switchTab(btn.dataset.tab); });
   });
 
-  var suppressTap = false;
-  function guardedClick(handler){
-    return function(){
-      if (suppressTap || drawerOpen) return;
-      handler();
-    };
-  }
-  el.tapNext.addEventListener("click", guardedClick(nextPage));
-  el.tapPrev.addEventListener("click", guardedClick(prevPage));
-  el.tapToggle.addEventListener("click", guardedClick(toggleChrome));
+  // ===== Zoom (pinch + double-tap) =====
+  var zoom = { scale: 1, x: 0, y: 0 };
+  var MIN_SCALE = 1, MAX_SCALE = 4, DOUBLE_TAP_SCALE = 2.4;
 
-  // ===== Swipe gesture (mobile) =====
-  // Arah mengikuti kebiasaan mushaf: geser ke KIRI (dx negatif) = maju,
-  // geser ke KANAN (dx positif) = mundur — konsisten dengan zona ketuk.
-  var SWIPE_THRESHOLD = 48; // px minimal supaya dianggap sengaja menggeser, bukan ketukan
-  var swipeStart = null;
+  function applyZoom(withTransition){
+    el.zoomWrap.classList.toggle("is-panning", !withTransition);
+    el.zoomWrap.style.transform = "scale(" + zoom.scale + ") translate(" + zoom.x + "px," + zoom.y + "px)";
+  }
+
+  function clampPan(){
+    var rect = el.pageFrame.getBoundingClientRect();
+    var maxX = (rect.width * (zoom.scale - 1)) / (2 * zoom.scale);
+    var maxY = (rect.height * (zoom.scale - 1)) / (2 * zoom.scale);
+    zoom.x = Math.max(-maxX, Math.min(maxX, zoom.x));
+    zoom.y = Math.max(-maxY, Math.min(maxY, zoom.y));
+  }
+
+  function resetZoom(){
+    zoom = { scale: 1, x: 0, y: 0 };
+    applyZoom(true);
+  }
+
+  function toggleZoomCenter(){
+    if (zoom.scale > 1){
+      resetZoom();
+    } else {
+      zoom.scale = DOUBLE_TAP_SCALE;
+      zoom.x = 0; zoom.y = 0;
+      applyZoom(true);
+    }
+  }
+
+  // ===== Interaksi terpusat: tap-zone, swipe, pan, double-tap =====
   var viewerEl = document.getElementById("viewer");
+  var SWIPE_THRESHOLD = 48;
+  var TAP_MAX_MOVE = 10;
+  var DOUBLE_TAP_MS = 300;
+  var SINGLE_TAP_DELAY = 260;
+
+  var swipeStart = null;
+  var panStart = null;
+  var lastTap = null;
+  var pendingSingleTapTimer = null;
+
+  function resolveTapAction(clientX){
+    var ratio = clientX / window.innerWidth;
+    if (ratio < 0.34) return nextPage;   // kiri = maju
+    if (ratio > 0.66) return prevPage;   // kanan = mundur
+    return toggleChrome;                 // tengah = sembunyikan/tampilkan info
+  }
 
   viewerEl.addEventListener("pointerdown", function(e){
     if (drawerOpen) return;
-    swipeStart = { x: e.clientX, y: e.clientY, time: Date.now() };
-    suppressTap = false;
+    if (zoom.scale > 1){
+      panStart = { x: e.clientX, y: e.clientY, origX: zoom.x, origY: zoom.y };
+    } else {
+      swipeStart = { x: e.clientX, y: e.clientY };
+    }
+  });
+
+  viewerEl.addEventListener("pointermove", function(e){
+    if (!panStart) return;
+    zoom.x = panStart.origX + (e.clientX - panStart.x) / zoom.scale;
+    zoom.y = panStart.origY + (e.clientY - panStart.y) / zoom.scale;
+    clampPan();
+    applyZoom(false);
   });
 
   viewerEl.addEventListener("pointerup", function(e){
+    if (drawerOpen){ swipeStart = null; panStart = null; return; }
+
+    if (panStart){
+      panStart = null;
+      applyZoom(true);
+      return;
+    }
+
     if (!swipeStart) return;
     var dx = e.clientX - swipeStart.x;
     var dy = e.clientY - swipeStart.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
     swipeStart = null;
 
     var isMostlyHorizontal = Math.abs(dx) > Math.abs(dy) * 1.5;
     if (isMostlyHorizontal && Math.abs(dx) > SWIPE_THRESHOLD){
       if (dx < 0) { nextPage(); } else { prevPage(); }
-      // Cegah event "click" bawaan yang muncul setelah pointerup ikut memicu navigasi ganda
-      suppressTap = true;
-      setTimeout(function(){ suppressTap = false; }, 250);
+      lastTap = null;
+      return;
+    }
+
+    if (dist < TAP_MAX_MOVE){
+      var now = Date.now();
+      if (lastTap && (now - lastTap.time) < DOUBLE_TAP_MS &&
+          Math.abs(e.clientX - lastTap.x) < 40 && Math.abs(e.clientY - lastTap.y) < 40){
+        clearTimeout(pendingSingleTapTimer);
+        pendingSingleTapTimer = null;
+        lastTap = null;
+        toggleZoomCenter();
+        return;
+      }
+      lastTap = { time: now, x: e.clientX, y: e.clientY };
+      var action = resolveTapAction(e.clientX);
+      pendingSingleTapTimer = setTimeout(function(){
+        pendingSingleTapTimer = null;
+        if (zoom.scale <= 1) action();
+      }, SINGLE_TAP_DELAY);
     }
   });
 
-  viewerEl.addEventListener("pointercancel", function(){ swipeStart = null; });
+  viewerEl.addEventListener("pointercancel", function(){ swipeStart = null; panStart = null; });
+
+  // ===== Pinch-to-zoom (touch dua jari) =====
+  var pinch = null;
+  viewerEl.addEventListener("touchstart", function(e){
+    if (drawerOpen) return;
+    if (e.touches.length === 2){
+      swipeStart = null; panStart = null;
+      var t0 = e.touches[0], t1 = e.touches[1];
+      pinch = {
+        startDist: Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY),
+        startScale: zoom.scale
+      };
+    }
+  }, { passive: true });
+
+  viewerEl.addEventListener("touchmove", function(e){
+    if (!pinch || e.touches.length !== 2) return;
+    var t0 = e.touches[0], t1 = e.touches[1];
+    var dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+    zoom.scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, pinch.startScale * (dist / pinch.startDist)));
+    clampPan();
+    applyZoom(false);
+  }, { passive: true });
+
+  viewerEl.addEventListener("touchend", function(e){
+    if (e.touches.length < 2){
+      if (pinch){ applyZoom(true); }
+      pinch = null;
+    }
+  });
 
   // ===== Navigasi panah keyboard (desktop) =====
-  // Sama seperti tap/swipe: panah KIRI = maju, panah KANAN = mundur.
   window.addEventListener("keydown", function(e){
     if (drawerOpen){
       if (e.key === "Escape") closeDrawer();
@@ -667,6 +801,9 @@
     }
     if (e.key === "ArrowLeft"){ nextPage(); }
     else if (e.key === "ArrowRight"){ prevPage(); }
+    else if (e.key === "+" || e.key === "="){ zoom.scale = Math.min(MAX_SCALE, zoom.scale + 0.5); clampPan(); applyZoom(true); }
+    else if (e.key === "-"){ zoom.scale = Math.max(MIN_SCALE, zoom.scale - 0.5); clampPan(); applyZoom(true); }
+    else if (e.key === "0"){ resetZoom(); }
   });
 
   initHint();
