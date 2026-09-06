@@ -487,10 +487,14 @@
     el.image.onload = function(){
       el.image.classList.remove("is-hidden");
       el.placeholder.classList.add("is-hidden");
+      if (el.image.naturalWidth && el.image.naturalHeight){
+        el.pageFrame.style.aspectRatio = (el.image.naturalWidth / el.image.naturalHeight);
+      }
     };
     el.image.onerror = function(){
       el.image.classList.add("is-hidden");
       el.placeholder.classList.remove("is-hidden");
+      el.pageFrame.style.aspectRatio = "0.708";
     };
     el.image.src = url;
 
