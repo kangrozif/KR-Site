@@ -390,7 +390,7 @@
   <div id="nav-hint">
     <div id="nav-hint-box">
       <h2>Cara membaca</h2>
-      <p>Geser (swipe) ke <strong>kiri</strong> untuk maju ke halaman berikutnya, geser ke <strong>kanan</strong> untuk kembali — mengikuti arah baca mushaf. Ketuk layar untuk menyembunyikan/menampilkan bilah info, dan ketuk dua kali untuk memperbesar halaman.</p>
+      <p>Geser (swipe) ke <strong>kanan</strong> untuk maju ke halaman berikutnya, geser ke <strong>kiri</strong> untuk kembali. Ketuk layar untuk menyembunyikan/menampilkan bilah info, dan ketuk dua kali untuk memperbesar halaman.</p>
       <button id="nav-hint-close">Mulai membaca</button>
     </div>
   </div>
@@ -736,7 +736,7 @@
 
     var isMostlyHorizontal = Math.abs(dx) > Math.abs(dy) * 1.5;
     if (isMostlyHorizontal && Math.abs(dx) > SWIPE_THRESHOLD){
-      if (dx < 0) { nextPage(); } else { prevPage(); }
+      if (dx < 0) { prevPage(); } else { nextPage(); }
       lastTap = null;
       return;
     }
@@ -798,8 +798,8 @@
       if (e.key === "Escape") closeDrawer();
       return;
     }
-    if (e.key === "ArrowLeft"){ nextPage(); }
-    else if (e.key === "ArrowRight"){ prevPage(); }
+    if (e.key === "ArrowLeft"){ prevPage(); }
+    else if (e.key === "ArrowRight"){ nextPage(); }
     else if (e.key === "+" || e.key === "="){ zoom.scale = Math.min(MAX_SCALE, zoom.scale + 0.5); clampPan(); applyZoom(true); }
     else if (e.key === "-"){ zoom.scale = Math.max(MIN_SCALE, zoom.scale - 0.5); clampPan(); applyZoom(true); }
     else if (e.key === "0"){ resetZoom(); }
