@@ -62,9 +62,9 @@
   /* ===== Bingkai halaman — satu elemen "berani" dalam desain: garis ganda prada ===== */
   #page-frame{
     position: relative;
-    height: 94dvh;
-    max-width: 92vw;
-    aspect-ratio: 0.708; /* rasio umum halaman mushaf */
+    height: 96dvh;
+    width: 92vw;
+    max-width: 480px;
     background: var(--paper-50);
     border-radius: 2px;
     box-shadow:
@@ -78,7 +78,8 @@
 
   #page-image{
     width:100%; height:100%;
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center;
     display:block;
     user-select:none;
     -webkit-user-drag:none;
@@ -330,7 +331,7 @@
   #resume-toast.is-visible{ opacity:1; transform: translateX(-50%) translateY(0); }
 
   @media (max-width: 520px){
-    #page-frame{ height: 90dvh; max-width: 96vw; }
+    #page-frame{ height: 94dvh; width: 96vw; max-width: none; }
     .chrome{ padding: 14px 16px; }
   }
 </style>
@@ -487,14 +488,10 @@
     el.image.onload = function(){
       el.image.classList.remove("is-hidden");
       el.placeholder.classList.add("is-hidden");
-      if (el.image.naturalWidth && el.image.naturalHeight){
-        el.pageFrame.style.aspectRatio = (el.image.naturalWidth / el.image.naturalHeight);
-      }
     };
     el.image.onerror = function(){
       el.image.classList.add("is-hidden");
       el.placeholder.classList.remove("is-hidden");
-      el.pageFrame.style.aspectRatio = "0.708";
     };
     el.image.src = url;
 
