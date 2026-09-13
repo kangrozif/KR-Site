@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Budidaya Cabai — Jadwal, Dosis &amp; Kebutuhan Pupuk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F6EE;
+    --panel:#FFFFFF;
+    --ink:#20291F;
+    --ink-soft:#5B6355;
+    --green-deep:#1F3A2E;
+    --green-mid:#3F6B4F;
+    --red-chili:#AF2B2B;
+    --gold:#B4791F;
+    --blue-tabur:#2C5C73;
+    --purple-semprot:#6A4E82;
+    --brown-persiapan:#7A5B3A;
+    --teal-belanja:#1F6E63;
+    --line:#DCDFCF;
+    --line-strong:#B9BFA7;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans',sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    color:var(--green-deep);
+    margin:0 0 0.4em;
+    letter-spacing:-0.01em;
+  }
+  a{color:var(--green-mid);}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
+
+  /* HERO */
+  .hero{background:var(--green-deep);color:#EFEFE4;padding:52px 0 44px;position:relative;overflow:hidden;}
+  .hero .wrap{position:relative;z-index:2;}
+  .hero-eyebrow{font-size:0.92rem;color:#B7C9B9;margin-bottom:10px;}
+  .hero h1{color:#F7F5EA;font-size:clamp(1.8rem,4vw,2.7rem);font-weight:600;max-width:20ch;}
+  .hero p{max-width:58ch;color:#D6DECB;font-size:1.02rem;margin-top:10px;}
+  .hero-chili{position:absolute;right:-40px;top:-30px;width:260px;opacity:0.18;transform:rotate(12deg);}
+
+  /* LAYOUT */
+  .layout{display:grid;grid-template-columns:340px 1fr;gap:26px;align-items:flex-start;padding:34px 0 70px;}
+  @media (max-width:880px){ .layout{grid-template-columns:1fr;} }
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px 22px 24px;}
+  .panel-input{position:sticky;top:20px;}
+  @media (max-width:880px){ .panel-input{position:static;} }
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:0.85rem;font-weight:600;color:var(--green-deep);margin-bottom:6px;}
+  .field .hint{font-size:0.78rem;color:var(--ink-soft);margin-top:4px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  input[type="date"],input[type="number"],select{
+    width:100%;padding:10px 11px;border:1px solid var(--line-strong);border-radius:7px;
+    font-family:'Work Sans',sans-serif;font-size:0.95rem;color:var(--ink);background:#FCFCF8;
+  }
+  input:focus,select:focus{outline:2px solid var(--green-mid);outline-offset:1px;}
+  .divider{border:none;border-top:1px solid var(--line);margin:18px 0;}
+  .subhead{font-size:0.78rem;font-weight:700;color:var(--teal-belanja);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 16px;border-radius:7px;border:none;font-family:'Work Sans',sans-serif;font-size:0.96rem;font-weight:600;cursor:pointer;transition:transform .08s ease;}
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--green-deep);color:#F7F5EA;}
+  .btn-primary:hover{background:var(--green-mid);}
+  .btn-secondary{background:#fff;color:var(--green-deep);border:1px solid var(--line-strong);margin-top:10px;}
+  .btn-secondary:hover{border-color:var(--green-mid);}
+
+  /* SUMMARY CARDS */
+  .summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+  @media (max-width:720px){ .summary-row{grid-template-columns:1fr 1fr;} }
+  .summary-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;}
+  .summary-card .label{font-size:0.72rem;color:var(--ink-soft);margin-bottom:4px;}
+  .summary-card .value{font-family:'Fraunces',serif;font-size:1.18rem;color:var(--green-deep);font-weight:600;}
+
+  /* EMPTY STATE */
+  .empty-state{border:1px dashed var(--line-strong);border-radius:var(--radius);padding:50px 24px;text-align:center;color:var(--ink-soft);}
+  .empty-state svg{width:46px;height:46px;margin-bottom:12px;opacity:0.5;}
+
+  /* SECTION HEAD */
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:32px 0 12px;border-bottom:1px solid var(--line-strong);padding-bottom:8px;}
+  .section-head h2{font-size:1.28rem;}
+  .section-head .count{font-size:0.82rem;color:var(--ink-soft);}
+  .section-note{font-size:0.83rem;color:var(--ink-soft);margin:-4px 0 14px;}
+
+  /* PRA-TANAM CHECKLIST */
+  .pretanam-list{list-style:none;margin:0;padding:0;}
+  .pretanam-list li{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .pretanam-list li:last-child{border-bottom:none;}
+  .pt-day{flex:0 0 auto;font-family:'Fraunces',serif;font-weight:600;color:var(--brown-persiapan);min-width:64px;}
+  .pt-body b{display:block;margin-bottom:2px;}
+  .pt-body .desc{font-size:0.88rem;color:var(--ink-soft);}
+  .pt-body .kebutuhan{font-size:0.85rem;color:var(--teal-belanja);margin-top:4px;font-weight:500;}
+
+  /* PUPUK DASAR TABLE */
+  .dasar-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:0.9rem;}
+  .dasar-table th,.dasar-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+  .dasar-table th{color:var(--ink-soft);font-weight:600;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .dasar-table td.qty{color:var(--teal-belanja);font-weight:600;white-space:nowrap;}
+
+  /* FILTER CHIPS */
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px;}
+  .chip{font-size:0.82rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--ink-soft);user-select:none;}
+  .chip.active{background:var(--green-deep);color:#F7F5EA;border-color:var(--green-deep);}
+
+  /* TIMELINE */
+  .timeline{margin-top:10px;}
+  .month-label{font-size:0.78rem;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.06em;margin:22px 0 6px;}
+  .agenda-item{display:grid;grid-template-columns:96px 92px 1fr;gap:14px;padding:13px 0;border-bottom:1px solid var(--line);align-items:start;}
+  @media (max-width:640px){
+    .agenda-item{grid-template-columns:1fr;gap:4px;}
+    .agenda-item .ai-date{order:1;} .agenda-item .ai-badge{order:2;} .agenda-item .ai-body{order:3;}
+  }
+  .agenda-item:last-child{border-bottom:none;}
+  .ai-date{font-size:0.85rem;color:var(--ink-soft);}
+  .ai-date .hst{display:block;font-size:0.72rem;color:var(--ink-soft);opacity:0.8;}
+  .ai-badge{align-self:start;font-size:0.72rem;font-weight:600;padding:3px 9px;border-radius:999px;text-align:center;color:#fff;white-space:nowrap;}
+  .b-kocor{background:var(--gold);} .b-tabur{background:var(--blue-tabur);} .b-semprot{background:var(--purple-semprot);}
+  .b-panen{background:var(--red-chili);} .b-pascapanen{background:var(--green-mid);} .b-persiapan{background:var(--brown-persiapan);}
+  .ai-body b{display:block;font-size:0.96rem;margin-bottom:3px;}
+  .ai-body .bahan{font-size:0.9rem;color:var(--ink);}
+  .ai-body .dosis{font-size:0.85rem;color:var(--ink-soft);margin-top:2px;}
+  .ai-body .catatan{font-size:0.82rem;color:var(--gold);margin-top:4px;font-style:italic;}
+  .ai-body .kebutuhan{font-size:0.85rem;color:var(--teal-belanja);margin-top:5px;font-weight:500;background:#EEF6F2;padding:6px 9px;border-radius:6px;display:inline-block;}
+
+  /* SHOPPING LIST */
+  .shop-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:0.92rem;}
+  .shop-table th,.shop-table td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);}
+  .shop-table th{color:var(--ink-soft);font-weight:600;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .shop-table tr:hover td{background:#FAFAF3;}
+  .shop-table td.total{color:var(--teal-belanja);font-weight:700;white-space:nowrap;}
+  .shop-table td.tag{font-size:0.75rem;color:#fff;padding:2px 8px;border-radius:999px;display:inline-block;}
+
+  /* REFERENCE */
+  .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  @media (max-width:720px){ .ref-grid{grid-template-columns:1fr;} }
+  .ref-card{border:1px solid var(--line);border-left:3px solid var(--red-chili);border-radius:6px;padding:14px 16px;background:#FBFAF4;}
+  .ref-card h3{font-size:0.98rem;margin-bottom:6px;}
+  .ref-card p{font-size:0.87rem;color:var(--ink-soft);margin:0;}
+
+  footer{text-align:center;padding:26px 0 40px;color:var(--ink-soft);font-size:0.82rem;}
+
+  @media print{
+    .panel-input,.filters,footer,.hero-chili{display:none;}
+    .hero{background:#fff;color:#000;padding:0 0 16px;}
+    .hero h1,.hero p,.hero-eyebrow{color:#000;}
+    body{background:#fff;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <svg class="hero-chili" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M60 20C55 35 50 55 60 75C70 95 95 105 110 130C125 155 120 175 100 185" stroke="#F7F5EA" stroke-width="6" stroke-linecap="round"/>
+    <path d="M58 18C50 10 40 8 32 12" stroke="#F7F5EA" stroke-width="6" stroke-linecap="round"/>
+    <path d="M60 20C68 14 78 14 84 20" stroke="#F7F5EA" stroke-width="6" stroke-linecap="round"/>
+  </svg>
+  <div class="wrap">
+    <div class="hero-eyebrow">Panduan Budidaya Cabai — KUA Pilangkenceng</div>
+    <h1>Kalkulator Jadwal, Dosis &amp; Kebutuhan Pupuk Cabai</h1>
+    <p>Masukkan tanggal tanam dan jumlah tanaman — kalkulator menyusun jadwal HST, dosis pupuk per aplikasi, sekaligus total kebutuhan belanja pupuk untuk satu musim tanam.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+
+    <!-- INPUT PANEL -->
+    <section class="panel panel-input">
+      <h2 style="font-size:1.1rem;">Data Penanaman</h2>
+
+      <div class="field">
+        <label for="tglTanam">Tanggal Tanam (pindah bibit ke lahan)</label>
+        <input type="date" id="tglTanam">
+        <div class="hint">Tanggal ini dihitung sebagai HST 0.</div>
+      </div>
+
+      <div class="field">
+        <label for="musim">Musim</label>
+        <select id="musim">
+          <option value="hujan">Musim Hujan</option>
+          <option value="kemarau">Musim Kemarau</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="kondisiLahan">Kondisi Lahan Sebelum Tanam</label>
+        <select id="kondisiLahan">
+          <option value="baru">Lahan Baru</option>
+          <option value="bekas">Bekas Tanam Cabai</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="dataran">Lokasi Dataran (untuk pupuk dasar)</label>
+        <select id="dataran">
+          <option value="tinggi">Dataran Tinggi</option>
+          <option value="rendah">Dataran Rendah</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="varietas">Varietas Cabai</label>
+        <select id="varietas">
+          <option value="tegak_besar">Rawit Tipe Tegak / Cabai Merah Besar</option>
+          <option value="merunduk_keriting">Rawit Tipe Merunduk / Cabai Merah Keriting</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="hstPanen">HST Panen Pertama</label>
+          <input type="number" id="hstPanen" value="80" min="65" max="100">
+        </div>
+        <div class="field">
+          <label for="intervalPanen">Interval Panen (hari)</label>
+          <input type="number" id="intervalPanen" value="5" min="1" max="30">
+        </div>
+      </div>
+      <div class="hint" style="margin-top:-10px;margin-bottom:16px;">Interval terisi otomatis sesuai varietas, dapat Anda sesuaikan dengan kondisi lapangan.</div>
+
+      <div class="field">
+        <label for="lamaPanen">Lama Masa Panen (hari, sejak panen pertama)</label>
+        <input type="number" id="lamaPanen" value="90" min="30" max="180">
+      </div>
+
+      <hr class="divider">
+      <div class="subhead">Untuk Hitung Dosis &amp; Belanja Pupuk</div>
+
+      <div class="field">
+        <label for="jumlahTanaman">Jumlah Tanaman</label>
+        <input type="number" id="jumlahTanaman" value="500" min="1">
+        <div class="hint">Dipakai untuk menghitung total larutan kocor, jumlah tangki, dan total kebutuhan tiap bahan pupuk.</div>
+      </div>
+
+      <button class="btn btn-primary" id="btnHitung">Buat Jadwal</button>
+      <button class="btn btn-secondary" id="btnIcs" disabled>Unduh ke Kalender (.ics)</button>
+      <button class="btn btn-secondary" id="btnPrint" disabled>Cetak / Simpan PDF</button>
+    </section>
+
+    <!-- OUTPUT PANEL -->
+    <section id="output">
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+        <div>Isi data penanaman di sebelah kiri, lalu klik <b>Buat Jadwal</b> untuk melihat jadwal HST, dosis, dan kebutuhan belanja pupuk.</div>
+      </div>
+
+      <div id="resultArea" style="display:none;">
+
+        <div class="summary-row" id="summaryRow"></div>
+
+        <div class="section-head"><h2>Persiapan Sebelum Tanam</h2></div>
+        <div class="section-note">Pupuk dasar dihitung dari perkiraan luas lahan (jumlah tanaman × jarak tanam 50×50 cm sesuai panduan).</div>
+        <table class="dasar-table" id="pupukDasarTable"></table>
+        <ul class="pretanam-list" id="pretanamList"></ul>
+
+        <div class="section-head">
+          <h2>Jadwal Agenda</h2>
+          <span class="count" id="agendaCount"></span>
+        </div>
+        <div class="section-note">Kebutuhan bahan pada tiap agenda dihitung dari dosis rata-rata pada panduan × jumlah tanaman.</div>
+        <div class="filters" id="filterChips"></div>
+        <div class="timeline" id="timeline"></div>
+
+        <div class="section-head"><h2>Ringkasan Total Kebutuhan Belanja Pupuk</h2></div>
+        <div class="section-note">Akumulasi seluruh bahan sepanjang satu musim tanam (di luar pupuk dasar &amp; bahan semprot, karena semprot tidak tergantung jumlah tanaman melainkan jumlah tangki di lapangan). Bulatkan ke atas sesuai kemasan saat membeli.</div>
+        <table class="shop-table" id="shopTable"></table>
+
+        <div class="section-head"><h2>Catatan Penting &amp; Penanganan Kondisi Khusus</h2></div>
+        <div class="ref-grid">
+          <div class="ref-card"><h3>Tanaman Roboh Terkena Angin</h3><p>Diberdirikan kembali saat tanah dalam keadaan basah agar akar serabut tidak putus.</p></div>
+          <div class="ref-card"><h3>Lahan Terendam Banjir</h3><p>Setelah surut, kocor fungisida Tembaga (Copcide77/Nordox/Kuproxat) 3 hari berturut-turut. Semprot Mancozeb + Azoksistrobin 2 hari sekali hingga normal.</p></div>
+          <div class="ref-card"><h3>Kekurangan Sinar Matahari</h3><p>Semprot fungisida sistemik Difenokonazole (15 ml/tangki) tunggal mulai usia 40 HST, interval 15 hari sekali, agar tanaman tidak terlalu tinggi/ruas panjang.</p></div>
+          <div class="ref-card"><h3>Rontok Bunga</h3><p>Akibat kekurangan Kalsium &amp; Boron. Aplikasikan unsur Ca &amp; B sejak muda via kocor/semprot.</p></div>
+          <div class="ref-card"><h3>Over Dosis Pestisida/Pupuk</h3><p>Semprot kalsium tunggal (3 sdm/tangki 16L) dan kocor kalsium tunggal (4 sdm/tangki 16L, 100–150 ml/tanaman).</p></div>
+          <div class="ref-card"><h3>Musim Kemarau — Pengairan</h3><p>Kondisi tanah mudah kering: lakukan pengairan selang drip/penyiraman biasa. Jangan menggenangi lahan kembali setelah tanam selesai.</p></div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<footer>Kalkulator Budidaya Cabai · Disusun berdasarkan Panduan Metode Budidaya Tanaman Cabai · kangrozif.my.id</footer>
+
+<script>
+/* ========================= DATA SUMBER (dari Panduan Metode Budidaya Tanaman Cabai) ========================= */
+
+function ing(nama, qty, unit, extra){ return Object.assign({ nama, qty, unit }, extra || {}); }
+
+// Pupuk dasar per 1000 m^2, dipakai saat pembuatan bedengan
+const PUPUK_DASAR = {
+  tinggi: [ ing('Kapur Dolomite (sak 25kg)', 5, 'sak'), ing('Pupuk Kandang Fermentasi (sak 25kg)', 30, 'sak'), ing('Phosphate Granul (sak 50kg)', 1, 'sak') ],
+  rendah: [ ing('Kapur Dolomite (sak 25kg)', 30, 'sak'), ing('Pupuk Kandang Fermentasi (sak 25kg)', 20, 'sak'), ing('Phosphate Granul (sak 50kg)', 1, 'sak') ]
+};
+const LUAS_PER_TANAMAN_M2 = 0.25; // asumsi jarak tanam 50 x 50 cm sesuai panduan
+
+// Item pra-tanam relatif terhadap tanggal tanam (offsetHst negatif = sebelum tanam)
+// calc.type 'kocor' -> dihitung via volume larutan (dosis per lubang tanam / liter air)
+function getPraTanamItems(kondisiLahan){
+  const items = [];
+  if(kondisiLahan === 'baru'){
+    items.push({ offsetHst:-3, label:'Pembenah Tanah (Kocor)',
+      desc:'Trichoderma 3 sdm + Asam Humat 3 sdm + Carbon 4 sdm dalam 20L air. Dosis 100–150 ml/lubang tanam.',
+      calc:{ type:'kocor', doseMin:100, doseMax:150,
+        ingredients:[ ing('Trichoderma',3,'sdm'), ing('Asam Humat',3,'sdm'), ing('Carbon',4,'sdm') ] } });
+    items.push({ offsetHst:-1, label:'Tunggu Sebelum Tanam', desc:'Tunggu 2–3 hari sebelum penanaman bibit.' });
+  } else {
+    items.push({ offsetHst:-8, label:'Sterilisasi Lahan (Kocor)',
+      desc:'Pilih salah satu: Dimethoat / Fipronil / Lamdasihalotrin (1 ml/liter air), dicampur Mancozeb 3 sdm/20L. Aplikasikan pada lubang tanam yang sudah ditugal.',
+      calc:{ type:'kocor', doseMin:100, doseMax:150,
+        ingredients:[ ing('Insektisida (Dimethoat/Fipronil/Lamdasihalotrin)', 1, 'ml', {perLiter:true}), ing('Mancozeb', 3, 'sdm') ] } });
+    items.push({ offsetHst:-5, label:'Pengocoran Susulan',
+      desc:'Asam Humat + Trichoderma + Carbon (dosis sama seperti lahan baru), 3 hari setelah sterilisasi.',
+      calc:{ type:'kocor', doseMin:100, doseMax:150,
+        ingredients:[ ing('Trichoderma',3,'sdm'), ing('Asam Humat',3,'sdm'), ing('Carbon',4,'sdm') ] } });
+    items.push({ offsetHst:-1, label:'Tunggu Sebelum Tanam', desc:'Tunggu 3–5 hari setelah pengocoran susulan sebelum lahan siap ditanami.' });
+  }
+  return items;
+}
+
+// Pemupukan kocor awal (5,10,15 HST) — berlaku untuk kedua musim
+const AWAL_TANAM = [5, 10, 15].map(hst => ({
+  hst, metode:'Kocor', kategori:'Vegetatif Awal', kegiatan:'Pemupukan Awal Pasca Tanam',
+  calc:{ type:'kocor', doseMin:100, doseMax:150,
+    ingredients:[ ing('Phosphate Kristal',3,'sdm'), ing('Asam Amino',50,'ml') ] }
+}));
+
+const PEMUPUKAN = {
+  hujan: [
+    { hst:20, metode:'Kocor', kategori:'Vegetatif',
+      calc:{ type:'kocor', doseMin:100, doseMax:150,
+        ingredients:[ ing('KNO3 Merah',200,'g'), ing('NPK 16-16-16',200,'g'), ing('Asam Humat',3,'sdm') ] } },
+    { hst:25, metode:'Tabur', kategori:'Vegetatif',
+      calc:{ type:'tabur', perUnitLabel:'lubang pupuk susulan',
+        ingredients:[ ing('NPK 16-16-16 + mikro TE (B,Cu,Zn,S,Ca,Mg)',1,'sdm') ] } },
+    { hst:50, metode:'Tabur', kategori:'Generatif', catatan:'Meningkatkan kualitas & warna buah',
+      calc:{ type:'tabur', perUnitLabel:'lubang pupuk susulan',
+        ingredients:[ ing('NPK 15-10-20 + mikro TE (B,Cu,Zn,S,Ca,Mg)',1,'sdm') ] } },
+    { hst:75, metode:'Tabur', kategori:'Generatif', catatan:'Memperkuat batang & daya simpan buah',
+      calc:{ type:'tabur', perUnitLabel:'tanaman',
+        ingredients:[ ing('KCL / K2O',1,'sdm') ] } }
+  ],
+  kemarau: [
+    { hst:20, metode:'Kocor', kategori:'Vegetatif',
+      calc:{ type:'kocor', doseMin:100, doseMax:150,
+        ingredients:[ ing('KNO3 Merah',200,'g'), ing('NPK 16-16-16',200,'g'), ing('Asam Humat',3,'sdm') ] } },
+    { hst:30, metode:'Kocor', kategori:'Vegetatif',
+      calc:{ type:'kocor', doseMin:100, doseMax:200,
+        ingredients:[ ing('Kalsium',3,'sdm'), ing('Magnesium',3,'sdm'), ing('Boron',3,'sdm') ] } },
+    { hst:40, metode:'Kocor', kategori:'Generatif',
+      calc:{ type:'kocor', doseMin:100, doseMax:200,
+        ingredients:[ ing('NPK 16-16-16',1,'gelas'), ing('KNO Nitrat',3,'sdm'), ing('MKP',3,'sdm') ] } },
+    { hst:50, metode:'Kocor', kategori:'Generatif',
+      calc:{ type:'kocor', doseMin:100, doseMax:200,
+        ingredients:[ ing('KCL',1,'gelas'), ing('Kalsium',3,'sdm'), ing('KNO Nitrat',3,'sdm') ] } },
+    { hst:60, metode:'Kocor', kategori:'Generatif',
+      calc:{ type:'kocor', doseMin:100, doseMax:200,
+        ingredients:[ ing('Decomposer',50,'ml'), ing('EM4',50,'ml'), ing('Tetes Tebu/Molase',200,'ml') ] } },
+    { hst:70, metode:'Kocor', kategori:'Generatif',
+      calc:{ type:'kocor', doseMin:100, doseMax:200,
+        ingredients:[ ing('NPK Grower',2,'gelas'), ing('Phosphate',3,'sdm'), ing('Boron',3,'sdm'), ing('Asam Humat',3,'sdm') ] } },
+    { hst:80, metode:'Kocor', kategori:'Generatif', catatan:'Jika tanaman sangat baik, kocor 90 HST boleh dihentikan & dilanjut setelah panen',
+      calc:{ type:'kocor', doseMin:100, doseMax:200,
+        ingredients:[ ing('Kalsium',3,'sdm'), ing('Mancozeb',3,'sdm'), ing('Asam Posfit',50,'ml') ] } },
+    { hst:90, metode:'Kocor', kategori:'Generatif',
+      calc:{ type:'kocor', doseMin:100, doseMax:200,
+        ingredients:[ ing('KCL',1,'gelas'), ing('MKP',3,'sdm'), ing('Asam Humat',3,'sdm') ] } }
+  ]
+};
+
+const PENYEMPROTAN = {
+  vegetatif: {
+    hujan:   { interval:4, bahan:'Abamectin 8–10 ml + Pupuk Pelengkap Cair 50 ml + Fungisida Propineb 2 sdm / tangki 16L', catatan:'Saat intensitas hujan tinggi, interval bisa dipercepat jadi 3 hari sekali' },
+    kemarau: { interval:4, bahan:'Imidacloprid 10–15 ml + Pupuk Daun 50 ml + Antracol (Propineb) 2 sdm / tangki 16L' }
+  },
+  generatif: {
+    hujan:   { interval:4, bahan:'Mancozeb 2 sdm + Azoksistrobin 10–15 ml + Sipermetrin 15–20 ml + Kalium Cair 50 ml + Phosphate (MKP) 3 sdm / tangki' },
+    kemarau: { interval:4, bahan:'Mancozeb 2 sdm + Azoksistrobin 10–15 ml (saat hujan) + Sipermetrin 15–20 ml + Kalium Cair 50 ml + Phosphate (MKP) 3 sdm / tangki' }
+  }
+};
+
+const VARIETAS = {
+  tegak_besar: {
+    label: 'Rawit Tipe Tegak / Cabai Merah Besar',
+    intervalPetikDefault: 5,
+    pascaPanen: {
+      hujan: { mulaiPetikKe:1, calc:{type:'tabur', perUnitLabel:'lubang susulan', ingredients:[ing('NPK 15-10-20',1,'sdm')]},
+               tambahanPetikKe:10, calcTambahan:{type:'tabur', perUnitLabel:'lubang susulan', ingredients:[ing('KCL',1,'sdm')]} },
+      kemarau: { mulaiSetelahPetikKe:5, interval:10 }
+    }
+  },
+  merunduk_keriting: {
+    label: 'Rawit Tipe Merunduk / Cabai Merah Keriting',
+    intervalPetikDefault: 3,
+    pascaPanen: {
+      hujan: { mulaiPetikKe:10, calc:{type:'tabur', perUnitLabel:'lubang susulan', ingredients:[ing('NPK 15-10-20',1,'sdm')]},
+               tambahanPetikKe:20, calcTambahan:{type:'tabur', perUnitLabel:'lubang susulan', ingredients:[ing('KCL',1,'sdm')]} },
+      kemarau: { mulaiSetelahPetikKe:10, interval:10 }
+    }
+  }
+};
+
+/* ========================= UTIL TANGGAL & FORMAT ========================= */
+
+function addDays(date, n){ const d = new Date(date); d.setDate(d.getDate() + n); return d; }
+function fmtShort(date){ return date.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); }
+function fmtMonthKey(date){ return date.toLocaleDateString('id-ID', { month:'long', year:'numeric' }); }
+function fmtICSDate(date){
+  const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
+  return `${y}${m}${d}`;
+}
+function fmtQty(qty, unit){
+  if(qty <= 0) return '';
+  switch(unit){
+    case 'g': return qty >= 1000 ? `${(qty/1000).toFixed(2)} kg` : `${Math.ceil(qty)} gram`;
+    case 'ml': return qty >= 1000 ? `${(qty/1000).toFixed(2)} liter` : `${Math.ceil(qty)} ml`;
+    case 'sdm': return `${(Math.round(qty*10)/10)} sdm`;
+    case 'gelas': return `${(Math.round(qty*10)/10)} gelas`;
+    case 'sak': return `${(Math.ceil(qty*2)/2).toFixed(1)} sak`;
+    default: return `${(Math.round(qty*10)/10)} ${unit}`;
+  }
+}
+
+/* ========================= KALKULASI KEBUTUHAN BAHAN ========================= */
+
+function computeKebutuhan(calc, jumlahTanaman){
+  if(!calc) return null;
+  if(calc.type === 'kocor'){
+    const avgDose = (calc.doseMin + calc.doseMax) / 2; // ml per tanaman/lubang
+    const totalMl = avgDose * jumlahTanaman;
+    const totalL = totalMl / 1000;
+    const multiplier = totalMl / 20000; // resep dasar per 20L air
+    const tangkiCount = Math.max(1, Math.ceil(multiplier));
+    const scaled = calc.ingredients.map(i => ({
+      nama: i.nama, unit: i.unit,
+      totalQty: i.perLiter ? totalL * i.qty : i.qty * multiplier
+    }));
+    return { type:'kocor', avgDose, totalL, tangkiCount, scaled };
+  }
+  if(calc.type === 'tabur'){
+    const scaled = calc.ingredients.map(i => ({ nama: i.nama, unit: i.unit, totalQty: i.qty * jumlahTanaman }));
+    return { type:'tabur', perUnitLabel: calc.perUnitLabel, scaled };
+  }
+  return null;
+}
+
+function renderKebutuhanHTML(kebutuhan, jumlahTanaman){
+  if(!kebutuhan) return '';
+  if(kebutuhan.type === 'kocor'){
+    const bahanStr = kebutuhan.scaled.map(s => `${s.nama} ${fmtQty(s.totalQty, s.unit)}`).join(' + ');
+    return `<div class="kebutuhan">Untuk ${jumlahTanaman} tanaman: ±${Math.round(kebutuhan.totalL)} L larutan (≈ ${kebutuhan.tangkiCount} tangki 20L) → ${bahanStr}</div>`;
+  }
+  if(kebutuhan.type === 'tabur'){
+    const bahanStr = kebutuhan.scaled.map(s => `${s.nama} ${fmtQty(s.totalQty, s.unit)}`).join(' + ');
+    return `<div class="kebutuhan">Untuk ${jumlahTanaman} ${kebutuhan.perUnitLabel}: ${bahanStr}</div>`;
+  }
+  return '';
+}
+
+/* ========================= LOGIKA UTAMA ========================= */
+
+let currentAgenda = [];
+let currentPraItems = [];
+let currentMeta = {};
+
+function hitungJadwal(){
+  const tglTanamVal = document.getElementById('tglTanam').value;
+  if(!tglTanamVal){ alert('Isi tanggal tanam terlebih dahulu.'); return; }
+  const T0 = new Date(tglTanamVal + 'T00:00:00');
+  const musim = document.getElementById('musim').value;
+  const kondisiLahan = document.getElementById('kondisiLahan').value;
+  const dataran = document.getElementById('dataran').value;
+  const varietasId = document.getElementById('varietas').value;
+  const hstPanenPertama = parseInt(document.getElementById('hstPanen').value, 10) || 80;
+  const intervalPanen = Math.max(1, parseInt(document.getElementById('intervalPanen').value, 10) || 5);
+  const lamaPanen = parseInt(document.getElementById('lamaPanen').value, 10) || 90;
+  const jumlahTanaman = Math.max(1, parseInt(document.getElementById('jumlahTanaman').value, 10) || 1);
+  const varietas = VARIETAS[varietasId];
+
+  const agenda = [];
+  function push(hst, kategori, metode, kegiatan, calc, catatan){
+    agenda.push({ hst, tanggal: addDays(T0, hst), kategori, metode, kegiatan, calc: calc || null,
+      kebutuhan: computeKebutuhan(calc, jumlahTanaman), catatan: catatan || '' });
+  }
+
+  AWAL_TANAM.forEach(e => push(e.hst, e.kategori, e.metode, e.kegiatan, e.calc));
+  PEMUPUKAN[musim].forEach(e => push(e.hst, e.kategori, e.metode, `Pemupukan ${e.metode} — ${e.hst} HST`, e.calc, e.catatan));
+
+  const vegConf = PENYEMPROTAN.vegetatif[musim];
+  for(let h = 15; h <= 50; h += vegConf.interval){
+    agenda.push({ hst:h, tanggal: addDays(T0,h), kategori:'Vegetatif', metode:'Semprot',
+      kegiatan:'Penyemprotan Hama & Penyakit (Vegetatif)', bahanTeks: vegConf.bahan, kebutuhan:null, catatan: vegConf.catatan||'' });
+  }
+  const genConf = PENYEMPROTAN.generatif[musim];
+  const genEnd = hstPanenPertama + lamaPanen;
+  for(let h = 50; h <= genEnd; h += genConf.interval){
+    agenda.push({ hst:h, tanggal: addDays(T0,h), kategori:'Generatif', metode:'Semprot',
+      kegiatan:'Penyemprotan Hama & Penyakit (Generatif)', bahanTeks: genConf.bahan, kebutuhan:null, catatan:'' });
+  }
+
+  // Panen (petik ke-N), interval sesuai input pengguna
+  const petikList = [];
+  let ke = 0;
+  for(let h = hstPanenPertama; h <= hstPanenPertama + lamaPanen; h += intervalPanen){
+    ke++;
+    petikList.push({ hst:h, ke });
+    agenda.push({ hst:h, tanggal: addDays(T0,h), kategori:'Panen', metode:'Panen',
+      kegiatan:`Panen / Petik ke-${ke}`, kebutuhan:null, catatan:'' });
+  }
+
+  // Pemupukan pasca panen
+  if(musim === 'hujan'){
+    const pp = varietas.pascaPanen.hujan;
+    petikList.forEach(p => {
+      if(p.ke >= pp.mulaiPetikKe){
+        const calc = p.ke === pp.tambahanPetikKe
+          ? { type:'tabur', perUnitLabel: pp.calc.perUnitLabel, ingredients:[...pp.calc.ingredients, ...pp.calcTambahan.ingredients] }
+          : pp.calc;
+        push(p.hst, 'Pasca Panen', 'Tabur', `Pemupukan Susulan (setelah Petik ke-${p.ke})`, calc);
+      }
+    });
+  } else {
+    const pp = varietas.pascaPanen.kemarau;
+    const trigger = petikList.find(p => p.ke === pp.mulaiSetelahPetikKe);
+    if(trigger){
+      const siklus = PEMUPUKAN.kemarau.filter(e => e.hst >= 40);
+      let idx = 0;
+      for(let h = trigger.hst; h <= hstPanenPertama + lamaPanen; h += pp.interval){
+        const f = siklus[idx % siklus.length];
+        push(h, 'Pasca Panen', 'Kocor', `Pemupukan Pasca Panen (siklus ${pp.interval} hari, mengacu pola 40–90 HST)`, f.calc);
+        idx++;
+      }
+    }
+  }
+
+  agenda.sort((a,b) => a.hst - b.hst);
+
+  currentAgenda = agenda;
+  currentPraItems = getPraTanamItems(kondisiLahan).map(it => ({ ...it, kebutuhan: computeKebutuhan(it.calc, jumlahTanaman) }));
+  currentMeta = { T0, musim, kondisiLahan, dataran, varietas, hstPanenPertama, intervalPanen, lamaPanen, jumlahTanaman };
+
+  renderResult();
+}
+
+/* ========================= RENDER ========================= */
+
+const KATEGORI_BADGE = { 'Kocor':'b-kocor', 'Tabur':'b-tabur', 'Semprot':'b-semprot', 'Panen':'b-panen' };
+function badgeClassFor(item){
+  if(item.kategori === 'Pasca Panen') return 'b-pascapanen';
+  return KATEGORI_BADGE[item.metode] || 'b-kocor';
+}
+
+function renderResult(){
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultArea').style.display = 'block';
+  document.getElementById('btnIcs').disabled = false;
+  document.getElementById('btnPrint').disabled = false;
+
+  const { T0, musim, dataran, varietas, hstPanenPertama, jumlahTanaman } = currentMeta;
+  const tglPanenPertama = addDays(T0, hstPanenPertama);
+  const luasM2 = Math.round(jumlahTanaman * LUAS_PER_TANAMAN_M2);
+
+  document.getElementById('summaryRow').innerHTML = `
+    <div class="summary-card"><div class="label">Tanggal Tanam</div><div class="value">${fmtShort(T0)}</div></div>
+    <div class="summary-card"><div class="label">Musim</div><div class="value">${musim === 'hujan' ? 'Hujan' : 'Kemarau'}</div></div>
+    <div class="summary-card"><div class="label">Jumlah Tanaman</div><div class="value">${jumlahTanaman.toLocaleString('id-ID')}</div></div>
+    <div class="summary-card"><div class="label">Perkiraan Luas Lahan</div><div class="value">${luasM2.toLocaleString('id-ID')} m²</div></div>
+  `;
+
+  // Pupuk dasar (scaled by luas)
+  const multiplierLuas = luasM2 / 1000;
+  const dasarRows = PUPUK_DASAR[dataran].map(i => `<tr><td>${i.nama}</td><td class="qty">${fmtQty(i.qty * multiplierLuas, i.unit)}</td><td>(basis: ${i.qty} ${i.unit} / 1000 m²)</td></tr>`).join('');
+  document.getElementById('pupukDasarTable').innerHTML = `<tr><th>Pupuk Dasar</th><th>Kebutuhan (±${luasM2} m²)</th><th>Referensi</th></tr>${dasarRows}`;
+
+  // Pra-tanam checklist
+  document.getElementById('pretanamList').innerHTML = currentPraItems.map(it => {
+    const tgl = addDays(T0, it.offsetHst);
+    return `<li>
+      <div class="pt-day">${fmtShort(tgl)}</div>
+      <div class="pt-body"><b>${it.label}</b><div class="desc">${it.desc}</div>${renderKebutuhanHTML(it.kebutuhan, jumlahTanaman)}</div>
+    </li>`;
+  }).join('');
+
+  // Filter chips
+  const kategoriUnik = ['Semua', ...new Set(currentAgenda.map(a => a.metode))];
+  document.getElementById('filterChips').innerHTML = kategoriUnik.map((k,i) =>
+    `<span class="chip ${i===0?'active':''}" data-filter="${k}">${k}</span>`
+  ).join('');
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderTimeline(chip.dataset.filter);
+    });
+  });
+  renderTimeline('Semua');
+
+  renderShoppingList();
+}
+
+function renderTimeline(filter){
+  const list = filter === 'Semua' ? currentAgenda : currentAgenda.filter(a => a.metode === filter);
+  document.getElementById('agendaCount').textContent = `${list.length} kegiatan`;
+
+  let html = '';
+  let lastMonth = '';
+  list.forEach(item => {
+    const monthKey = fmtMonthKey(item.tanggal);
+    if(monthKey !== lastMonth){ html += `<div class="month-label">${monthKey}</div>`; lastMonth = monthKey; }
+    const bahanLine = item.bahanTeks ? item.bahanTeks : (item.kebutuhan ? item.kebutuhan.scaled.map(s=>s.nama).join(' + ') : '-');
+    html += `
+      <div class="agenda-item">
+        <div class="ai-date">${fmtShort(item.tanggal)}<span class="hst">${item.hst} HST</span></div>
+        <div class="ai-badge ${badgeClassFor(item)}">${item.metode}</div>
+        <div class="ai-body">
+          <b>${item.kegiatan}</b>
+          <div class="bahan">${bahanLine}</div>
+          ${item.catatan ? `<div class="catatan">${item.catatan}</div>` : ''}
+          ${renderKebutuhanHTML(item.kebutuhan, currentMeta.jumlahTanaman)}
+        </div>
+      </div>`;
+  });
+  document.getElementById('timeline').innerHTML = html;
+}
+
+const UNIT_TAG = { g:'bentuk gram/kg', ml:'bentuk cair (ml/L)', sdm:'bentuk sendok makan', gelas:'bentuk gelas takar' };
+
+function renderShoppingList(){
+  const map = new Map();
+  const allItems = [...currentAgenda, ...currentPraItems];
+  allItems.forEach(item => {
+    if(!item.kebutuhan) return;
+    item.kebutuhan.scaled.forEach(ing => {
+      const key = ing.nama + '|' + ing.unit;
+      map.set(key, (map.get(key) || 0) + ing.totalQty);
+    });
+  });
+
+  // deteksi bahan dengan nama sama tapi satuan berbeda, agar diberi label pembeda
+  const byName = new Map();
+  [...map.entries()].forEach(([key, totalQty]) => {
+    const [nama, unit] = key.split('|');
+    if(!byName.has(nama)) byName.set(nama, []);
+    byName.get(nama).push({ unit, totalQty });
+  });
+
+  const rows = [...byName.entries()].sort((a,b) => a[0].localeCompare(b[0])).map(([nama, variants]) => {
+    return variants.map(v => {
+      const label = variants.length > 1 ? `${nama} <span style="color:var(--ink-soft);font-size:0.8em;">(${UNIT_TAG[v.unit] || v.unit})</span>` : nama;
+      return `<tr><td>${label}</td><td class="total">${fmtQty(v.totalQty, v.unit)}</td></tr>`;
+    }).join('');
+  }).join('');
+  document.getElementById('shopTable').innerHTML = `<tr><th>Nama Bahan</th><th>Total Kebutuhan Satu Musim</th></tr>${rows}`;
+}
+
+/* ========================= EXPORT ICS ========================= */
+
+function unduhICS(){
+  if(currentAgenda.length === 0) return;
+  const now = new Date();
+  const dtstamp = fmtICSDate(now) + 'T000000Z';
+  let events = '';
+  let uidCounter = 0;
+
+  function escapeICS(text){
+    return String(text).replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');
+  }
+  function addVEVENT(date, summary, description){
+    uidCounter++;
+    const dt = fmtICSDate(date);
+    events += [
+      'BEGIN:VEVENT', `UID:cabai-${dt}-${uidCounter}@kangrozif.my.id`, `DTSTAMP:${dtstamp}`,
+      `DTSTART;VALUE=DATE:${dt}`, `SUMMARY:${escapeICS(summary)}`, `DESCRIPTION:${escapeICS(description)}`,
+      'BEGIN:VALARM', 'TRIGGER:-PT8H', 'ACTION:DISPLAY', `DESCRIPTION:${escapeICS(summary)}`, 'END:VALARM', 'END:VEVENT'
+    ].join('\r\n') + '\r\n';
+  }
+
+  currentPraItems.forEach(it => {
+    const keb = it.kebutuhan ? '\\n' + renderKebutuhanHTML(it.kebutuhan, currentMeta.jumlahTanaman).replace(/<[^>]+>/g,'') : '';
+    addVEVENT(addDays(currentMeta.T0, it.offsetHst), `Cabai: ${it.label}`, it.desc + keb);
+  });
+
+  currentAgenda.forEach(item => {
+    const summary = `Cabai (${item.hst} HST): ${item.kegiatan}`;
+    const bahanLine = item.bahanTeks ? item.bahanTeks : (item.kebutuhan ? item.kebutuhan.scaled.map(s=>`${s.nama} ${fmtQty(s.totalQty,s.unit)}`).join(' + ') : '-');
+    const desc = `Metode: ${item.metode}\\nBahan: ${bahanLine}${item.catatan ? '\\nCatatan: ' + item.catatan : ''}`;
+    addVEVENT(item.tanggal, summary, desc);
+  });
+
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Kalkulator Budidaya Cabai//kangrozif.my.id//ID','CALSCALE:GREGORIAN', events.trim(), 'END:VCALENDAR'].join('\r\n');
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `jadwal-cabai-${fmtICSDate(currentMeta.T0)}.ics`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ========================= INIT ========================= */
+
+document.getElementById('btnHitung').addEventListener('click', hitungJadwal);
+document.getElementById('btnIcs').addEventListener('click', unduhICS);
+document.getElementById('btnPrint').addEventListener('click', () => window.print());
+
+document.getElementById('varietas').addEventListener('change', function(){
+  document.getElementById('intervalPanen').value = VARIETAS[this.value].intervalPetikDefault;
+});
+document.getElementById('intervalPanen').value = VARIETAS[document.getElementById('varietas').value].intervalPetikDefault;
+document.getElementById('tglTanam').valueAsDate = new Date();
+</script>
+</body>
+</html>
