@@ -121,6 +121,7 @@
   .breakdown .item .k{font-size:12.5px;color:#B6C7BC;}
   .breakdown .item .v{font-family:var(--font-display);font-size:22px;font-weight:600;}
   .breakdown .final .v{font-size:40px;color:var(--gold-soft);}
+  .klasemen{flex:1;min-width:280px;}
   .klasemen h2{font-family:var(--font-display);font-size:20px;font-weight:600;margin:0 0 16px;color:var(--gold-soft);}
   .rank-row{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.12);}
   .rank-row .pos{font-family:var(--font-display);font-size:20px;width:30px;color:var(--gold-soft);}
@@ -200,6 +201,8 @@ function buildPayload_(name, args){
     case 'submitNilai':            return { no: args[0], cat: args[1], value: args[2], catatan: args[3] };
     case 'savePesertaNames':       return { list: args[0] }; // otomatis di-JSON.stringify di jsonpCall
     case 'lockPeserta':            return { no: args[0] };
+    case 'getScoresByCategory':    return { cat: args[0] };
+    case 'addPeserta':             return { nama: args[0], gender: args[1] };
     default:                       return {};
   }
 }
@@ -211,6 +214,7 @@ const KATEGORI = {
   lagu:     { label:'Lagu & Suara',      max:100, bobotPersen:30 }
 };
 const KAT_KEYS = ['tajwid','fashahah','lagu'];
+const GENDER_LABELS = { L: 'Putra', P: 'Putri' };
 
 async function getPesertaList(){
   return await gs('getPesertaList');
@@ -279,34 +283,51 @@ async function renderJuri(catParam){
   }
   const cat = catParam;
   const kat = KATEGORI[cat];
-  const peserta = await getPesertaList();
   app.innerHTML = topbar('Juri ' + kat.label, '#/juri') + `<div class="wrap" id="juriBody">Memuat data peserta...</div>`;
 
-  const statuses = {};
-  for(const p of peserta){
-    const entry = await gs('getScore', p.no);
-    statuses[p.no] = !!(entry && entry[cat]);
+  // 1x panggilan backend untuk status SEMUA peserta pada kategori ini
+  // (menggantikan loop 10x request yang lambat).
+  currentJuriCat = cat;
+  currentJuriData = await gs('getScoresByCategory', cat);
+
+  const putra = currentJuriData.filter(p=>p.gender!=='P');
+  const putri = currentJuriData.filter(p=>p.gender==='P');
+
+  function gridHtml(list){
+    return `<div class="grid-btns">
+      ${list.map(p=>`<button class="num-btn ${p.done?'done':''}" data-no="${p.no}" onclick="selectPeserta(${p.no}, '${cat}')">${p.no}</button>`).join('')}
+    </div>`;
   }
 
   document.getElementById('juriBody').innerHTML = `
     <div class="kategori-note">Anda menilai kategori <strong>${kat.label}</strong> (bobot ${kat.bobotPersen}% dari nilai akhir), skala 0–${kat.max} untuk setiap peserta.</div>
-    <div class="section-label">Pilih peserta yang baru tampil</div>
-    <div class="grid-btns" id="pesertaGrid">
-      ${peserta.map(p=>`<button class="num-btn ${statuses[p.no]?'done':''}" data-no="${p.no}" onclick="selectPeserta(${p.no}, '${cat}')">${p.no}</button>`).join('')}
-    </div>
+    <div class="section-label">Peserta Putra</div>
+    ${putra.length ? gridHtml(putra) : '<div class="empty-note" style="color:#7A7568">Belum ada peserta putra.</div>'}
+    <div class="section-label">Peserta Putri</div>
+    ${putri.length ? gridHtml(putri) : '<div class="empty-note" style="color:#7A7568">Belum ada peserta putri.</div>'}
     <div id="formArea"></div>`;
 }
 
+let currentJuriCat = null;
+let currentJuriData = [];
+
 function selectPeserta(no, cat){
   const kat = KATEGORI[cat];
-  document.querySelectorAll('#pesertaGrid .num-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector('#pesertaGrid .num-btn[data-no="'+no+'"]').classList.add('active');
+  document.querySelectorAll('#juriBody .num-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('#juriBody .num-btn[data-no="'+no+'"]').classList.add('active');
+
+  // Data sudah tersedia dari pemanggilan getScoresByCategory di renderJuri,
+  // tidak perlu request tambahan untuk prefill nilai yang sudah ada.
+  const existing = currentJuriData.find(p=>p.no===no);
+  const prevVal = existing && existing.done ? existing.value : '';
+  const prevCatatan = existing && existing.done ? (existing.catatan||'') : '';
+
   document.getElementById('formArea').innerHTML = `
     <div class="section-label">Nilai ${kat.label} — Peserta No. ${no} <span style="color:#7A7568;font-weight:400">(bobot ${kat.bobotPersen}%)</span></div>
     <div class="field"><label>${kat.label} <span class="max">maks ${kat.max}</span></label>
-      <input type="number" id="f_val" min="0" max="${kat.max}" placeholder="0-${kat.max}"></div>
+      <input type="number" id="f_val" min="0" max="${kat.max}" placeholder="0-${kat.max}" value="${prevVal}"></div>
     <div class="field"><label>Catatan (opsional)</label>
-      <textarea id="f_catatan" placeholder="Mis: salah makhraj di ayat ke-3"></textarea></div>
+      <textarea id="f_catatan" placeholder="Mis: salah makhraj di ayat ke-3">${prevCatatan}</textarea></div>
     <button class="btn-primary" id="f_submit" onclick="submitNilai(${no}, '${cat}')">Simpan Nilai</button>
     <div id="formMsg"></div>`;
 }
@@ -329,8 +350,10 @@ async function submitNilai(no, cat){
     const res = await gs('submitNilai', no, cat, v, c);
     if(res && res.ok){
       msg.innerHTML = '<div class="msg-ok">Nilai '+kat.label+' untuk peserta No. '+no+' tersimpan.</div>';
-      const btn = document.querySelector('#pesertaGrid .num-btn[data-no="'+no+'"]');
+      const btn = document.querySelector('#juriBody .num-btn[data-no="'+no+'"]');
       if(btn) btn.classList.add('done');
+      const entry = currentJuriData.find(p=>p.no===no);
+      if(entry){ entry.done = true; entry.value = v; entry.catatan = c; }
     } else {
       msg.innerHTML = '<div class="msg-err">'+(res && res.error ? res.error : 'Gagal menyimpan, coba lagi.')+'</div>';
     }
@@ -348,28 +371,52 @@ async function renderKoordinator(){
   await refreshKoordinator();
 }
 
+let lastKoordPesertaNos = [];
+
 async function refreshKoordinator(){
-  const peserta = await getPesertaList();
-  const rows = await gs('getAllScoresForKoordinator');
+  // 1x panggilan backend (gabungan peserta + rekap nilai), menggantikan
+  // 2 request berurutan sebelumnya.
+  const data = await gs('getKoordinatorData');
+  const peserta = data.peserta;
+  const rows = data.rows;
+  lastKoordPesertaNos = peserta.map(p=>p.no);
 
   const body = document.getElementById('koordBody');
   body.innerHTML = `
-    <div class="kategori-note">Bobot nilai akhir: Tajwid 35% · Fashahah &amp; Adab 35% · Lagu &amp; Suara 30% (masing-masing skala 0–100).</div>
+    <div class="kategori-note">Bobot nilai akhir: Tajwid 35% · Fashahah &amp; Adab 35% · Lagu &amp; Suara 30% (masing-masing skala 0–100). Peserta putra &amp; putri diranking terpisah.</div>
 
-    <div class="section-label">Nama Peserta</div>
-    <div id="nameFields">
-      ${peserta.map(p=>`<div class="field" style="margin-bottom:8px"><input class="name-input" id="nm_${p.no}" value="${String(p.nama).replace(/"/g,'&quot;')}" placeholder="Nama peserta No. ${p.no}"></div>`).join('')}
+    <div class="section-label">Tambah Peserta Baru</div>
+    <div class="field" style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
+      <input class="name-input" id="newPesertaNama" style="flex:1;min-width:160px" placeholder="Nama peserta baru">
+      <select class="name-input" id="newPesertaGender" style="width:110px">
+        <option value="L">Putra</option>
+        <option value="P">Putri</option>
+      </select>
+      <button class="btn-secondary" onclick="addPeserta()">+ Tambah</button>
     </div>
-    <button class="btn-secondary" onclick="savePesertaNames()">Simpan Nama Peserta</button>
+    <div id="addMsg"></div>
+
+    <div class="section-label" style="margin-top:28px">Nama &amp; Kategori Peserta</div>
+    <div id="nameFields">
+      ${peserta.map(p=>`<div class="field" style="display:flex;gap:8px;margin-bottom:8px">
+          <input class="name-input" id="nm_${p.no}" style="flex:1" value="${String(p.nama).replace(/"/g,'&quot;')}" placeholder="Nama peserta No. ${p.no}">
+          <select class="name-input" id="gd_${p.no}" style="width:100px">
+            <option value="L" ${p.gender==='L'?'selected':''}>Putra</option>
+            <option value="P" ${p.gender==='P'?'selected':''}>Putri</option>
+          </select>
+        </div>`).join('')}
+    </div>
+    <button class="btn-secondary" onclick="savePesertaNames()">Simpan Nama &amp; Kategori</button>
     <div id="nameMsg"></div>
 
     <div class="section-label" style="margin-top:32px">Rekap Nilai</div>
     <table>
-      <tr><th>No</th><th>Nama</th><th>Tajwid (35%)</th><th>Fashahah (35%)</th><th>Lagu (30%)</th><th>Akhir</th><th>Status</th><th></th></tr>
+      <tr><th>No</th><th>Nama</th><th>Kat.</th><th>Tajwid (35%)</th><th>Fashahah (35%)</th><th>Lagu (30%)</th><th>Akhir</th><th>Status</th><th></th></tr>
       ${rows.map(r=>`
         <tr>
           <td>${r.no}</td>
           <td>${r.nama}</td>
+          <td>${GENDER_LABELS[r.gender]||'Putra'}</td>
           ${KAT_KEYS.map(k=>`<td><span class="jstat ${r.vals[k]!==null?'on':'off'}">${r.vals[k]!==null? r.vals[k] : '–'}</span></td>`).join('')}
           <td>${r.final!==null ? r.final : '–'}</td>
           <td>${r.locked ? '<span class="tag locked">Terkunci</span>' : (r.count===3? '<span class="tag ready">Siap</span>' : r.count+'/3 kategori')}</td>
@@ -380,18 +427,42 @@ async function refreshKoordinator(){
   `;
 }
 
+async function addPeserta(){
+  const namaEl = document.getElementById('newPesertaNama');
+  const genderEl = document.getElementById('newPesertaGender');
+  const msgEl = document.getElementById('addMsg');
+  const nama = namaEl.value.trim();
+  if(!nama){
+    msgEl.innerHTML = '<div class="msg-err">Isi nama peserta terlebih dahulu.</div>';
+    return;
+  }
+  try{
+    const res = await gs('addPeserta', nama, genderEl.value);
+    if(res && res.ok){
+      msgEl.innerHTML = '<div class="msg-ok">Peserta No. '+res.no+' ('+GENDER_LABELS[res.gender]+') ditambahkan.</div>';
+      namaEl.value = '';
+      await refreshKoordinator();
+    } else {
+      msgEl.innerHTML = '<div class="msg-err">Gagal menambah peserta.</div>';
+    }
+  } catch(e){
+    msgEl.innerHTML = '<div class="msg-err">Gagal menambah peserta.</div>';
+  }
+}
+
 async function savePesertaNames(){
   const list = [];
-  for(let no=1; no<=10; no++){
+  lastKoordPesertaNos.forEach(function(no){
     const val = document.getElementById('nm_'+no);
-    if(!val) continue;
-    list.push({no, nama: (val.value.trim() || ('Peserta '+no))});
-  }
+    const gd = document.getElementById('gd_'+no);
+    if(!val) return;
+    list.push({ no, nama: (val.value.trim() || ('Peserta '+no)), gender: gd ? gd.value : undefined });
+  });
   const msgEl = document.getElementById('nameMsg');
   try{
     const res = await gs('savePesertaNames', list);
     msgEl.innerHTML = res && res.ok
-      ? '<div class="msg-ok">Nama peserta tersimpan.</div>'
+      ? '<div class="msg-ok">Nama &amp; kategori peserta tersimpan.</div>'
       : '<div class="msg-err">Gagal menyimpan nama.</div>';
   } catch(e){
     msgEl.innerHTML = '<div class="msg-err">Gagal menyimpan nama.</div>';
@@ -426,12 +497,22 @@ async function refreshDisplay(){
     return;
   }
   const last = locked.slice().sort((a,b)=> b.ts-a.ts)[0];
-  const ranked = locked.slice().sort((a,b)=> b.final-a.final);
+  const putra = locked.filter(r=>r.gender!=='P').sort((a,b)=> b.final-a.final);
+  const putri = locked.filter(r=>r.gender==='P').sort((a,b)=> b.final-a.final);
+
+  function klasemenHtml(title, list){
+    if(list.length===0){
+      return `<div class="klasemen"><h2>${title}</h2><div class="empty-note">Belum ada peserta ${title.toLowerCase()} yang tampil.</div></div>`;
+    }
+    return `<div class="klasemen"><h2>${title}</h2>
+      ${list.map((r,i)=>`<div class="rank-row"><div class="pos">${i+1}</div><div class="nm">${r.nama} <span style="color:#8FA396;font-size:13px">No. ${r.no}</span></div><div class="sc">${r.final}</div></div>`).join('')}
+    </div>`;
+  }
 
   board.innerHTML = `
     <div class="head"><h1>Klasemen Sementara</h1><div class="progress">${locked.length} dari ${peserta.length} peserta tampil</div></div>
     <div class="now-card">
-      <div class="eyebrow">Tampil Terakhir · No. ${last.no}</div>
+      <div class="eyebrow">Tampil Terakhir · No. ${last.no} · ${GENDER_LABELS[last.gender]||'Putra'}</div>
       <div class="name">${last.nama}</div>
       <div class="breakdown">
         <div class="item"><div class="k">Tajwid (35%)</div><div class="v">${last.tajwid}</div></div>
@@ -440,9 +521,9 @@ async function refreshDisplay(){
         <div class="item final"><div class="k">Nilai Akhir</div><div class="v">${last.final}</div></div>
       </div>
     </div>
-    <div class="klasemen">
-      <h2>Peringkat Sementara</h2>
-      ${ranked.map((r,i)=>`<div class="rank-row"><div class="pos">${i+1}</div><div class="nm">${r.nama} <span style="color:#8FA396;font-size:13px">No. ${r.no}</span></div><div class="sc">${r.final}</div></div>`).join('')}
+    <div style="display:flex;gap:48px;flex-wrap:wrap">
+      ${klasemenHtml('Putra', putra)}
+      ${klasemenHtml('Putri', putri)}
     </div>`;
 }
 </script>
