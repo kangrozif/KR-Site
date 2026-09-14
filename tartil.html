@@ -283,33 +283,52 @@ async function renderJuri(catParam){
   }
   const cat = catParam;
   const kat = KATEGORI[cat];
-  app.innerHTML = topbar('Juri ' + kat.label, '#/juri') + `<div class="wrap" id="juriBody">Memuat data peserta...</div>`;
-
-  // 1x panggilan backend untuk status SEMUA peserta pada kategori ini
-  // (menggantikan loop 10x request yang lambat).
   currentJuriCat = cat;
-  currentJuriData = await gs('getScoresByCategory', cat);
-
-  const putra = currentJuriData.filter(p=>p.gender!=='P');
-  const putri = currentJuriData.filter(p=>p.gender==='P');
 
   function gridHtml(list){
-    return `<div class="grid-btns">
-      ${list.map(p=>`<button class="num-btn ${p.done?'done':''}" data-no="${p.no}" onclick="selectPeserta(${p.no}, '${cat}')">${p.no}</button>`).join('')}
-    </div>`;
+    const putra = list.filter(p=>p.gender!=='P');
+    const putri = list.filter(p=>p.gender==='P');
+    function grid(l){
+      return `<div class="grid-btns">
+        ${l.map(p=>`<button class="num-btn ${p.done?'done':''}" data-no="${p.no}" onclick="selectPeserta(${p.no}, '${cat}')">${p.no}</button>`).join('')}
+      </div>`;
+    }
+    return `
+      <div class="section-label">Peserta Putra</div>
+      ${putra.length ? grid(putra) : '<div class="empty-note" style="color:#7A7568">Belum ada peserta putra.</div>'}
+      <div class="section-label">Peserta Putri</div>
+      ${putri.length ? grid(putri) : '<div class="empty-note" style="color:#7A7568">Belum ada peserta putri.</div>'}`;
   }
+
+  // Stale-while-revalidate: kalau kategori ini pernah dimuat sebelumnya di
+  // sesi ini, tampilkan langsung dari memori (instan) sambil diam-diam
+  // ambil data terbaru di background — jadi terasa lebih cepat.
+  const isCached = juriCache[cat] !== undefined;
+  if(isCached){
+    currentJuriCat = cat;
+    currentJuriData = juriCache[cat];
+    app.innerHTML = topbar('Juri ' + kat.label, '#/juri') + `<div class="wrap" id="juriBody">
+      <div class="kategori-note">Anda menilai kategori <strong>${kat.label}</strong> (bobot ${kat.bobotPersen}% dari nilai akhir), skala 0–${kat.max} untuk setiap peserta.</div>
+      ${gridHtml(currentJuriData)}
+      <div id="formArea"></div>`;
+  } else {
+    app.innerHTML = topbar('Juri ' + kat.label, '#/juri') + `<div class="wrap" id="juriBody">Memuat data peserta...</div>`;
+  }
+
+  const fresh = await gs('getScoresByCategory', cat);
+  juriCache[cat] = fresh;
+  if(currentJuriCat !== cat || location.hash !== '#/juri/'+cat) return; // sudah pindah halaman, jangan render lagi
+  currentJuriData = fresh;
 
   document.getElementById('juriBody').innerHTML = `
     <div class="kategori-note">Anda menilai kategori <strong>${kat.label}</strong> (bobot ${kat.bobotPersen}% dari nilai akhir), skala 0–${kat.max} untuk setiap peserta.</div>
-    <div class="section-label">Peserta Putra</div>
-    ${putra.length ? gridHtml(putra) : '<div class="empty-note" style="color:#7A7568">Belum ada peserta putra.</div>'}
-    <div class="section-label">Peserta Putri</div>
-    ${putri.length ? gridHtml(putri) : '<div class="empty-note" style="color:#7A7568">Belum ada peserta putri.</div>'}
+    ${gridHtml(currentJuriData)}
     <div id="formArea"></div>`;
 }
 
 let currentJuriCat = null;
 let currentJuriData = [];
+const juriCache = {}; // { tajwid: [...], fashahah: [...], lagu: [...] } — cache di memori tab ini
 
 function selectPeserta(no, cat){
   const kat = KATEGORI[cat];
