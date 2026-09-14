@@ -137,59 +137,68 @@
 <div id="app"></div>
 <script>
 /** =========================================================
- *  Jembatan ke backend Google Apps Script (Code.gs) via fetch()
- *  Dipakai karena index.html ini dihosting sendiri (bukan di-serve
- *  langsung oleh Apps Script), sehingga google.script.run TIDAK bisa
- *  dipakai. Ganti API_URL di bawah dengan URL deployment Web App kamu
- *  (Apps Script -> Deploy -> Manage deployments -> salin URL yang
- *  berakhiran /exec).
+ *  Jembatan ke backend Google Apps Script (Code.gs) via JSONP
+ *  Dipakai karena index.html ini dihosting sendiri di domain lain
+ *  (kangrozif.my.id), sehingga fetch() biasa terhalang CORS oleh
+ *  redirect Apps Script (/exec -> googleusercontent.com). JSONP
+ *  memakai tag <script> yang tidak terkena aturan CORS.
+ *  Ganti API_URL di bawah dengan URL deployment Web App kamu
+ *  (Apps Script -> Deploy -> Manage deployments -> salin URL /exec).
  *  Bobot nilai akhir: Tajwid 35% | Fashahah & Adab 35% | Lagu & Suara 30%
  * ========================================================= */
-const API_URL = 'https://script.google.com/macros/s/AKfycbyXUiJF3YNYeuQIBvEop4ZAH0DCXupnOEk-hxQYjEufORgpgH0AJwkeJENs3YLgevj1fw/exec;' // contoh: https://script.google.com/macros/s/AKfycb.../exec
+const API_URL = 'https://script.google.com/macros/s/AKfycbyXUiJF3YNYeuQIBvEop4ZAH0DCXupnOEk-hxQYjEufORgpgH0AJwkeJENs3YLgevj1fw/exec'; // contoh: https://script.google.com/macros/s/AKfycb.../exec
 
-async function apiGet(action, params){
+let jsonpCounter = 0;
+function jsonpCall(action, params){
   params = params || {};
-  const url = new URL(API_URL);
-  url.searchParams.set('action', action);
-  Object.keys(params).forEach(function(k){
-    if(params[k] !== undefined && params[k] !== null) url.searchParams.set(k, params[k]);
-  });
-  const res = await fetch(url.toString());
-  const json = await res.json();
-  if(!json.ok) throw new Error(json.error || 'Terjadi kesalahan pada server.');
-  return json.data;
-}
+  return new Promise((resolve, reject)=>{
+    const cbName = '__gasCb_' + (jsonpCounter++) + '_' + Date.now();
+    const url = new URL(API_URL);
+    url.searchParams.set('action', action);
+    url.searchParams.set('callback', cbName);
+    Object.keys(params).forEach(function(k){
+      let v = params[k];
+      if(v === undefined || v === null) return;
+      if(typeof v === 'object') v = JSON.stringify(v);
+      url.searchParams.set(k, v);
+    });
 
-async function apiPost(action, payload){
-  payload = payload || {};
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    // text/plain dipakai agar tidak memicu CORS preflight (OPTIONS),
-    // karena Apps Script Web App tidak menangani preflight.
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action: action }, payload))
+    const timeoutId = setTimeout(function(){
+      cleanup();
+      reject(new Error('Waktu permintaan habis, coba lagi.'));
+    }, 15000);
+
+    function cleanup(){
+      clearTimeout(timeoutId);
+      delete window[cbName];
+      if(script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = function(json){
+      cleanup();
+      if(json && json.ok) resolve(json.data);
+      else reject(new Error(json && json.error ? json.error : 'Terjadi kesalahan pada server.'));
+    };
+
+    const script = document.createElement('script');
+    script.src = url.toString();
+    script.onerror = function(){
+      cleanup();
+      reject(new Error('Gagal menghubungi server. Cek API_URL & deployment Apps Script.'));
+    };
+    document.body.appendChild(script);
   });
-  const json = await res.json();
-  if(!json.ok) throw new Error(json.error || 'Terjadi kesalahan pada server.');
-  return json.data;
 }
 
 // gs() dipertahankan sebagai alias supaya sisa kode di bawah tidak perlu diubah.
-// Aturan pemetaan: GET untuk baca data, POST untuk aksi yang menulis data.
-const WRITE_ACTIONS = ['submitNilai','savePesertaNames','lockPeserta'];
 function gs(name, ...args){
-  if(WRITE_ACTIONS.includes(name)){
-    const payload = buildPayload_(name, args);
-    return apiPost(name, payload);
-  }
-  const payload = buildPayload_(name, args);
-  return apiGet(name, payload);
+  return jsonpCall(name, buildPayload_(name, args));
 }
 function buildPayload_(name, args){
   switch(name){
     case 'getScore':               return { no: args[0] };
     case 'submitNilai':            return { no: args[0], cat: args[1], value: args[2], catatan: args[3] };
-    case 'savePesertaNames':       return { list: args[0] };
+    case 'savePesertaNames':       return { list: args[0] }; // otomatis di-JSON.stringify di jsonpCall
     case 'lockPeserta':            return { no: args[0] };
     default:                       return {};
   }
