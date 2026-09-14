@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seleksi Tartil Al-Qur'an</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16241F;
+    --green-deep:#1B4235;
+    --green-mid:#2F6B54;
+    --green-pale:#E1E9DF;
+    --gold:#B8923B;
+    --gold-soft:#D9C58B;
+    --paper:#F5F2E7;
+    --paper-dim:#EBE6D3;
+    --line:#D3CBAE;
+    --red:#A73B2A;
+    --font-display:'Fraunces', serif;
+    --font-ui:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font-ui);color:var(--ink);background:var(--paper);}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:var(--font-ui);cursor:pointer;}
+  input,textarea{font-family:var(--font-ui);}
+
+  /* ---------- HOME ---------- */
+  .home{
+    min-height:100vh;
+    background:radial-gradient(circle at 30% 0%, #234E3F 0%, var(--green-deep) 55%, #123128 100%);
+    color:var(--paper);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:48px 24px;text-align:center;
+  }
+  .home .eyebrow{color:var(--gold-soft);font-size:14px;letter-spacing:.02em;margin-bottom:10px;}
+  .home h1{font-family:var(--font-display);font-weight:600;font-size:clamp(30px,6vw,46px);margin:0 0 8px;}
+  .home p.sub{color:#C9D6CC;font-size:15px;margin:0 0 40px;max-width:360px;}
+  .role-group{margin-bottom:28px;width:100%;max-width:380px;}
+  .role-group h2{font-size:12px;text-transform:none;color:var(--gold-soft);margin:0 0 10px;font-weight:600;letter-spacing:.02em;}
+  .role-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .pill{
+    border:1px solid rgba(217,197,139,.5);background:transparent;color:var(--paper);
+    padding:12px 18px;border-radius:3px;font-size:15px;font-weight:500;
+    transition:background .15s,border-color .15s;
+  }
+  .pill:hover{background:rgba(217,197,139,.12);border-color:var(--gold);}
+  .pill.wide{flex:1 1 100%;}
+  .home .note{margin-top:36px;font-size:12.5px;color:#9FB2A5;max-width:360px;line-height:1.5;}
+
+  /* ---------- TOPBAR (functional screens) ---------- */
+  .topbar{
+    background:var(--green-deep);color:var(--paper);
+    padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:5;
+  }
+  .topbar .back{font-size:14px;color:var(--gold-soft);}
+  .topbar h1{font-family:var(--font-display);font-size:19px;margin:0;font-weight:600;}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 18px 60px;}
+
+  /* ---------- generic ---------- */
+  .section-label{font-size:12px;color:var(--green-mid);font-weight:600;margin:24px 0 10px;}
+  .grid-btns{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .num-btn{
+    aspect-ratio:1;border:1px solid var(--line);background:var(--paper-dim);
+    border-radius:3px;font-size:16px;font-weight:600;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .num-btn.done{background:var(--green-pale);border-color:var(--green-mid);}
+  .num-btn.done::after{content:'✓';position:absolute;top:2px;right:4px;font-size:10px;color:var(--green-mid);}
+  .num-btn.active{outline:2px solid var(--gold);outline-offset:1px;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:6px;}
+  .field label .max{font-weight:400;color:#7A7568;font-size:12.5px;}
+  .field input[type=number]{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:3px;
+    font-size:16px;background:#fff;
+  }
+  .field textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:3px;
+    font-size:14px;background:#fff;min-height:64px;resize:vertical;
+  }
+  .btn-primary{
+    background:var(--green-deep);color:var(--paper);border:none;padding:13px 20px;
+    border-radius:3px;font-size:15px;font-weight:600;width:100%;
+  }
+  .btn-primary:disabled{background:#B7BDB6;color:#fff;}
+  .btn-secondary{
+    background:transparent;border:1px solid var(--green-deep);color:var(--green-deep);
+    padding:10px 16px;border-radius:3px;font-size:14px;font-weight:600;
+  }
+  .msg-ok{color:var(--green-mid);font-size:13.5px;margin-top:10px;}
+  .msg-err{color:var(--red);font-size:13.5px;margin-top:10px;}
+
+  /* ---------- koordinator table ---------- */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;}
+  th{font-size:11.5px;text-transform:none;color:var(--green-mid);font-weight:600;}
+  .jstat{display:inline-block;width:18px;text-align:center;font-size:12px;}
+  .jstat.on{color:var(--green-mid);font-weight:700;}
+  .jstat.off{color:#C9C2AC;}
+  .tag{font-size:11px;padding:2px 7px;border-radius:20px;border:1px solid var(--line);}
+  .tag.locked{background:var(--green-pale);border-color:var(--green-mid);color:var(--green-deep);}
+  .tag.ready{background:var(--paper-dim);border-color:var(--gold);color:#8A6A1F;}
+  .warn{font-size:11.5px;color:var(--red);margin-top:2px;}
+  .lock-btn{background:var(--gold);border:none;color:#3A2C0A;font-weight:700;font-size:12px;padding:6px 10px;border-radius:3px;}
+  .lock-btn:disabled{background:#DAD5C2;color:#9A9683;}
+  .name-input{width:100%;border:1px solid var(--line);border-radius:3px;padding:5px 7px;font-size:13px;}
+
+  /* ---------- display board ---------- */
+  .board{min-height:100vh;background:var(--green-deep);color:var(--paper);padding:40px 6vw;}
+  .board .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:34px;flex-wrap:wrap;gap:10px;}
+  .board .head h1{font-family:var(--font-display);font-size:clamp(24px,3vw,34px);margin:0;font-weight:600;}
+  .board .progress{color:var(--gold-soft);font-size:15px;}
+  .now-card{
+    border:1px solid rgba(217,197,139,.4);border-radius:4px;padding:28px 30px;margin-bottom:40px;
+    background:rgba(255,255,255,.03);
+  }
+  .now-card .eyebrow{color:var(--gold-soft);font-size:13px;margin-bottom:8px;}
+  .now-card .name{font-family:var(--font-display);font-size:clamp(28px,5vw,44px);font-weight:600;margin:0 0 18px;}
+  .breakdown{display:flex;gap:36px;flex-wrap:wrap;align-items:baseline;}
+  .breakdown .item .k{font-size:12.5px;color:#B6C7BC;}
+  .breakdown .item .v{font-family:var(--font-display);font-size:22px;font-weight:600;}
+  .breakdown .final .v{font-size:40px;color:var(--gold-soft);}
+  .klasemen h2{font-family:var(--font-display);font-size:20px;font-weight:600;margin:0 0 16px;color:var(--gold-soft);}
+  .rank-row{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.12);}
+  .rank-row .pos{font-family:var(--font-display);font-size:20px;width:30px;color:var(--gold-soft);}
+  .rank-row .nm{flex:1;font-size:17px;}
+  .rank-row .sc{font-family:var(--font-display);font-size:22px;font-weight:600;}
+  .empty-note{color:#A9BBAF;font-size:14px;margin-top:10px;}
+  .refresh-fab{
+    position:fixed;bottom:20px;right:20px;background:var(--gold);border:none;color:#3A2C0A;
+    font-weight:700;padding:12px 16px;border-radius:30px;font-size:13px;box-shadow:0 2px 10px rgba(0,0,0,.3);
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------------- storage helpers ---------------- */
+async function sGet(key){
+  try{
+    const r = await window.storage.get(key, true);
+    return r ? JSON.parse(r.value) : null;
+  }catch(e){ return null; }
+}
+async function sSet(key, val){
+  try{ await window.storage.set(key, JSON.stringify(val), true); return true; }
+  catch(e){ console.error('storage set failed', e); return false; }
+}
+
+const BIDANG_MAX = { tajwid:30, fashahah:30, lagu:40 };
+
+async function getPesertaList(){
+  let d = await sGet('peserta-list');
+  if(!d || !d.list){
+    d = { list: Array.from({length:10}, (_,i)=>({no:i+1, nama:'Peserta '+(i+1)})) };
+  }
+  return d.list;
+}
+
+function totalOf(entry){
+  if(!entry) return null;
+  return (entry.tajwid||0)+(entry.fashahah||0)+(entry.lagu||0);
+}
+
+/* ---------------- router ---------------- */
+window.addEventListener('hashchange', route);
+route();
+
+function route(){
+  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  if(parts[0]==='juri') renderJuri(parts[1]);
+  else if(parts[0]==='koordinator') renderKoordinator();
+  else if(parts[0]==='display') renderDisplay();
+  else renderHome();
+}
+
+/* ---------------- HOME ---------------- */
+function renderHome(){
+  document.getElementById('app').innerHTML = `
+    <div class="home">
+      <div class="eyebrow">Musabaqoh Tilawatil Qur'an</div>
+      <h1>Seleksi Tartil Al-Qur'an</h1>
+      <p class="sub">Sistem penilaian juri, rekap panitia, dan layar tampilan tersinkron otomatis.</p>
+
+      <div class="role-group">
+        <h2>Untuk Juri</h2>
+        <div class="role-row">
+          <a class="pill" href="#/juri/1">Juri 1</a>
+          <a class="pill" href="#/juri/2">Juri 2</a>
+          <a class="pill" href="#/juri/3">Juri 3</a>
+          <a class="pill" href="#/juri/4">Juri 4</a>
+        </div>
+      </div>
+
+      <div class="role-group">
+        <h2>Untuk Panitia</h2>
+        <div class="role-row"><a class="pill wide" href="#/koordinator">Panel Koordinator</a></div>
+      </div>
+
+      <div class="role-group">
+        <h2>Untuk Layar Tampilan</h2>
+        <div class="role-row"><a class="pill wide" href="#/display">Buka Display Booth</a></div>
+      </div>
+
+      <p class="note">Semua nilai tersimpan bersama dan dapat dilihat dari perangkat mana pun yang membuka aplikasi ini (juri, panitia, layar tampilan).</p>
+    </div>`;
+}
+
+function topbar(title, backHash){
+  return `<div class="topbar">
+    <a class="back" href="${backHash||'#/'}">&larr; Beranda</a>
+    <h1>${title}</h1>
+    <span style="width:60px"></span>
+  </div>`;
+}
+
+/* ---------------- JURI VIEW ---------------- */
+async function renderJuri(idParam){
+  const app = document.getElementById('app');
+  if(!idParam){
+    app.innerHTML = topbar('Pilih Juri') + `<div class="wrap">
+      <div class="section-label">Anda juri ke berapa?</div>
+      <div class="role-row" style="justify-content:flex-start">
+        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/1">Juri 1</a>
+        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/2">Juri 2</a>
+        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/3">Juri 3</a>
+        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/4">Juri 4</a>
+      </div></div>`;
+    return;
+  }
+  const juriId = String(idParam);
+  const peserta = await getPesertaList();
+  app.innerHTML = topbar('Juri ' + juriId, '#/juri') + `<div class="wrap" id="juriBody">Memuat data peserta...</div>`;
+
+  const statuses = {};
+  for(const p of peserta){
+    const entry = await sGet('score:'+p.no);
+    statuses[p.no] = !!(entry && entry[juriId]);
+  }
+
+  document.getElementById('juriBody').innerHTML = `
+    <div class="section-label">Pilih peserta yang baru tampil</div>
+    <div class="grid-btns" id="pesertaGrid">
+      ${peserta.map(p=>`<button class="num-btn ${statuses[p.no]?'done':''}" data-no="${p.no}" onclick="selectPeserta(${p.no}, '${juriId}')">${p.no}</button>`).join('')}
+    </div>
+    <div id="formArea"></div>`;
+}
+
+function selectPeserta(no, juriId){
+  document.querySelectorAll('#pesertaGrid .num-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('#pesertaGrid .num-btn[data-no="'+no+'"]').classList.add('active');
+  document.getElementById('formArea').innerHTML = `
+    <div class="section-label">Nilai Peserta No. ${no}</div>
+    <div class="field"><label>Tajwid <span class="max">maks ${BIDANG_MAX.tajwid}</span></label>
+      <input type="number" id="f_tajwid" min="0" max="${BIDANG_MAX.tajwid}" placeholder="0-${BIDANG_MAX.tajwid}"></div>
+    <div class="field"><label>Fashahah &amp; Adab <span class="max">maks ${BIDANG_MAX.fashahah}</span></label>
+      <input type="number" id="f_fashahah" min="0" max="${BIDANG_MAX.fashahah}" placeholder="0-${BIDANG_MAX.fashahah}"></div>
+    <div class="field"><label>Lagu &amp; Suara <span class="max">maks ${BIDANG_MAX.lagu}</span></label>
+      <input type="number" id="f_lagu" min="0" max="${BIDANG_MAX.lagu}" placeholder="0-${BIDANG_MAX.lagu}"></div>
+    <div class="field"><label>Catatan (opsional)</label>
+      <textarea id="f_catatan" placeholder="Mis: salah makhraj di ayat ke-3"></textarea></div>
+    <button class="btn-primary" onclick="submitNilai(${no}, '${juriId}')">Simpan Nilai</button>
+    <div id="formMsg"></div>`;
+}
+
+async function submitNilai(no, juriId){
+  const t = Number(document.getElementById('f_tajwid').value);
+  const f = Number(document.getElementById('f_fashahah').value);
+  const l = Number(document.getElementById('f_lagu').value);
+  const c = document.getElementById('f_catatan').value.trim();
+  const msg = document.getElementById('formMsg');
+
+  if([t,f,l].some(v=>isNaN(v)) || t<0||t>BIDANG_MAX.tajwid || f<0||f>BIDANG_MAX.fashahah || l<0||l>BIDANG_MAX.lagu){
+    msg.innerHTML = '<div class="msg-err">Periksa kembali nilai, pastikan tidak melebihi batas maksimal.</div>';
+    return;
+  }
+  const existing = (await sGet('score:'+no)) || {};
+  existing[juriId] = { tajwid:t, fashahah:f, lagu:l, catatan:c, ts: Date.now() };
+  const ok = await sSet('score:'+no, existing);
+  msg.innerHTML = ok
+    ? '<div class="msg-ok">Nilai peserta No. '+no+' tersimpan.</div>'
+    : '<div class="msg-err">Gagal menyimpan, coba lagi.</div>';
+  if(ok){
+    const btn = document.querySelector('#pesertaGrid .num-btn[data-no="'+no+'"]');
+    if(btn) btn.classList.add('done');
+  }
+}
+
+/* ---------------- KOORDINATOR VIEW ---------------- */
+async function renderKoordinator(){
+  const app = document.getElementById('app');
+  app.innerHTML = topbar('Panel Koordinator') + `<div class="wrap" id="koordBody">Memuat...</div>`;
+  await refreshKoordinator();
+}
+
+async function refreshKoordinator(){
+  const peserta = await getPesertaList();
+  const publishAll = (await sGet('publish-all')) || {};
+  const rows = [];
+  for(const p of peserta){
+    const entry = (await sGet('score:'+p.no)) || {};
+    const totals = ['1','2','3','4'].map(j=> entry[j] ? totalOf(entry[j]) : null);
+    const count = totals.filter(v=>v!==null).length;
+    const avgFinal = count>0 ? totals.filter(v=>v!==null).reduce((a,b)=>a+b,0)/count : null;
+    let outlier = null;
+    if(count===4){
+      totals.forEach((v,i)=>{
+        const others = totals.filter((_,j2)=>j2!==i);
+        const othersAvg = others.reduce((a,b)=>a+b,0)/others.length;
+        if(Math.abs(v-othersAvg) > 10) outlier = 'Nilai Juri '+(i+1)+' menyimpang lebih dari 10 poin dari juri lain.';
+      });
+    }
+    rows.push({no:p.no, nama:p.nama, entry, totals, count, avgFinal, outlier, locked: !!(publishAll[p.no]&&publishAll[p.no].locked)});
+  }
+
+  const body = document.getElementById('koordBody');
+  body.innerHTML = `
+    <div class="section-label">Nama Peserta</div>
+    <div id="nameFields">
+      ${peserta.map(p=>`<div class="field" style="margin-bottom:8px"><input class="name-input" id="nm_${p.no}" value="${p.nama.replace(/"/g,'&quot;')}" placeholder="Nama peserta No. ${p.no}"></div>`).join('')}
+    </div>
+    <button class="btn-secondary" onclick="savePesertaNames()">Simpan Nama Peserta</button>
+    <div id="nameMsg"></div>
+
+    <div class="section-label" style="margin-top:32px">Rekap Nilai</div>
+    <table>
+      <tr><th>No</th><th>Nama</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>Rata²</th><th>Status</th><th></th></tr>
+      ${rows.map(r=>`
+        <tr>
+          <td>${r.no}</td>
+          <td>${r.nama}</td>
+          ${[0,1,2,3].map(i=>`<td><span class="jstat ${r.totals[i]!==null?'on':'off'}">${r.totals[i]!==null? r.totals[i] : '–'}</span></td>`).join('')}
+          <td>${r.avgFinal!==null ? r.avgFinal.toFixed(1) : '–'}</td>
+          <td>${r.locked ? '<span class="tag locked">Terkunci</span>' : (r.count===4? '<span class="tag ready">Siap</span>' : r.count+'/4 juri')}
+            ${r.outlier && !r.locked ? '<div class="warn">'+r.outlier+'</div>' : ''}</td>
+          <td><button class="lock-btn" ${r.count<4 || r.locked ? 'disabled':''} onclick="lockPeserta(${r.no})">${r.locked?'✓':'Kunci'}</button></td>
+        </tr>`).join('')}
+    </table>
+    <button class="btn-secondary" style="margin-top:20px" onclick="refreshKoordinator()">Muat Ulang</button>
+  `;
+}
+
+async function savePesertaNames(){
+  const list = [];
+  for(let no=1; no<=10; no++){
+    const val = document.getElementById('nm_'+no);
+    list.push({no, nama: (val.value.trim() || ('Peserta '+no))});
+  }
+  const ok = await sSet('peserta-list', {list});
+  document.getElementById('nameMsg').innerHTML = ok
+    ? '<div class="msg-ok">Nama peserta tersimpan.</div>'
+    : '<div class="msg-err">Gagal menyimpan nama.</div>';
+}
+
+async function lockPeserta(no){
+  const entry = (await sGet('score:'+no)) || {};
+  const bidangAvg = {tajwid:0, fashahah:0, lagu:0};
+  ['tajwid','fashahah','lagu'].forEach(b=>{
+    const vals = ['1','2','3','4'].map(j=> entry[j] ? entry[j][b] : null).filter(v=>v!==null);
+    bidangAvg[b] = vals.length ? vals.reduce((a,c)=>a+c,0)/vals.length : 0;
+  });
+  const final = bidangAvg.tajwid + bidangAvg.fashahah + bidangAvg.lagu;
+  const publishAll = (await sGet('publish-all')) || {};
+  publishAll[no] = {
+    tajwid_avg: Math.round(bidangAvg.tajwid*10)/10,
+    fashahah_avg: Math.round(bidangAvg.fashahah*10)/10,
+    lagu_avg: Math.round(bidangAvg.lagu*10)/10,
+    final: Math.round(final*10)/10,
+    locked: true,
+    ts: Date.now()
+  };
+  await sSet('publish-all', publishAll);
+  await refreshKoordinator();
+}
+
+/* ---------------- DISPLAY VIEW ---------------- */
+let displayTimer = null;
+async function renderDisplay(){
+  const app = document.getElementById('app');
+  app.innerHTML = `<div class="board" id="boardBody">Memuat papan nilai...</div>
+    <button class="refresh-fab" onclick="refreshDisplay()">Perbarui</button>`;
+  await refreshDisplay();
+  if(displayTimer) clearInterval(displayTimer);
+  displayTimer = setInterval(refreshDisplay, 90000);
+}
+
+async function refreshDisplay(){
+  if(!location.hash.startsWith('#/display')) { if(displayTimer) clearInterval(displayTimer); return; }
+  const peserta = await getPesertaList();
+  const nameOf = {}; peserta.forEach(p=> nameOf[p.no]=p.nama);
+  const publishAll = (await sGet('publish-all')) || {};
+  const locked = Object.keys(publishAll)
+    .filter(no=> publishAll[no].locked)
+    .map(no=> ({no:Number(no), nama: nameOf[no] || ('Peserta '+no), ...publishAll[no]}));
+
+  const board = document.getElementById('boardBody');
+  if(locked.length===0){
+    board.innerHTML = `<div class="head"><h1>Klasemen Sementara</h1><div class="progress">0 dari ${peserta.length} peserta tampil</div></div>
+      <div class="empty-note">Menunggu hasil penilaian peserta pertama...</div>`;
+    return;
+  }
+  const last = locked.slice().sort((a,b)=> b.ts-a.ts)[0];
+  const ranked = locked.slice().sort((a,b)=> b.final-a.final);
+
+  board.innerHTML = `
+    <div class="head"><h1>Klasemen Sementara</h1><div class="progress">${locked.length} dari ${peserta.length} peserta tampil</div></div>
+    <div class="now-card">
+      <div class="eyebrow">Tampil Terakhir · No. ${last.no}</div>
+      <div class="name">${last.nama}</div>
+      <div class="breakdown">
+        <div class="item"><div class="k">Tajwid</div><div class="v">${last.tajwid_avg}</div></div>
+        <div class="item"><div class="k">Fashahah &amp; Adab</div><div class="v">${last.fashahah_avg}</div></div>
+        <div class="item"><div class="k">Lagu &amp; Suara</div><div class="v">${last.lagu_avg}</div></div>
+        <div class="item final"><div class="k">Nilai Akhir</div><div class="v">${last.final}</div></div>
+      </div>
+    </div>
+    <div class="klasemen">
+      <h2>Peringkat Sementara</h2>
+      ${ranked.map((r,i)=>`<div class="rank-row"><div class="pos">${i+1}</div><div class="nm">${r.nama} <span style="color:#8FA396;font-size:13px">No. ${r.no}</span></div><div class="sc">${r.final}</div></div>`).join('')}
+    </div>`;
+}
+</script>
+</body>
+</html>
