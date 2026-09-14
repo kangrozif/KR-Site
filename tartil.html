@@ -28,7 +28,6 @@
   button{font-family:var(--font-ui);cursor:pointer;}
   input,textarea{font-family:var(--font-ui);}
 
-  /* ---------- HOME ---------- */
   .home{
     min-height:100vh;
     background:radial-gradient(circle at 30% 0%, #234E3F 0%, var(--green-deep) 55%, #123128 100%);
@@ -51,17 +50,15 @@
   .pill.wide{flex:1 1 100%;}
   .home .note{margin-top:36px;font-size:12.5px;color:#9FB2A5;max-width:360px;line-height:1.5;}
 
-  /* ---------- TOPBAR (functional screens) ---------- */
   .topbar{
     background:var(--green-deep);color:var(--paper);
     padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
     position:sticky;top:0;z-index:5;
   }
-  .topbar .back{font-size:14px;color:var(--gold-soft);}
+  .topbar .back{font-size:14px;color:var(--gold-soft);background:none;border:none;}
   .topbar h1{font-family:var(--font-display);font-size:19px;margin:0;font-weight:600;}
   .wrap{max-width:640px;margin:0 auto;padding:20px 18px 60px;}
 
-  /* ---------- generic ---------- */
   .section-label{font-size:12px;color:var(--green-mid);font-weight:600;margin:24px 0 10px;}
   .grid-btns{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
   .num-btn{
@@ -88,30 +85,28 @@
     background:var(--green-deep);color:var(--paper);border:none;padding:13px 20px;
     border-radius:3px;font-size:15px;font-weight:600;width:100%;
   }
-  .btn-primary:disabled{background:#B7BDB6;color:#fff;}
+  .btn-primary:disabled{opacity:.6;}
   .btn-secondary{
     background:transparent;border:1px solid var(--green-deep);color:var(--green-deep);
     padding:10px 16px;border-radius:3px;font-size:14px;font-weight:600;
   }
   .msg-ok{color:var(--green-mid);font-size:13.5px;margin-top:10px;}
   .msg-err{color:var(--red);font-size:13.5px;margin-top:10px;}
+  .kategori-note{background:var(--paper-dim);border:1px solid var(--line);border-radius:3px;padding:10px 12px;font-size:13px;margin-bottom:20px;color:#4A5A50;}
 
-  /* ---------- koordinator table ---------- */
   table{width:100%;border-collapse:collapse;font-size:13.5px;}
   th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;}
   th{font-size:11.5px;text-transform:none;color:var(--green-mid);font-weight:600;}
-  .jstat{display:inline-block;width:18px;text-align:center;font-size:12px;}
+  .jstat{display:inline-block;text-align:center;font-size:12px;}
   .jstat.on{color:var(--green-mid);font-weight:700;}
   .jstat.off{color:#C9C2AC;}
   .tag{font-size:11px;padding:2px 7px;border-radius:20px;border:1px solid var(--line);}
   .tag.locked{background:var(--green-pale);border-color:var(--green-mid);color:var(--green-deep);}
   .tag.ready{background:var(--paper-dim);border-color:var(--gold);color:#8A6A1F;}
-  .warn{font-size:11.5px;color:var(--red);margin-top:2px;}
   .lock-btn{background:var(--gold);border:none;color:#3A2C0A;font-weight:700;font-size:12px;padding:6px 10px;border-radius:3px;}
   .lock-btn:disabled{background:#DAD5C2;color:#9A9683;}
   .name-input{width:100%;border:1px solid var(--line);border-radius:3px;padding:5px 7px;font-size:13px;}
 
-  /* ---------- display board ---------- */
   .board{min-height:100vh;background:var(--green-deep);color:var(--paper);padding:40px 6vw;}
   .board .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:34px;flex-wrap:wrap;gap:10px;}
   .board .head h1{font-family:var(--font-display);font-size:clamp(24px,3vw,34px);margin:0;font-weight:600;}
@@ -141,34 +136,31 @@
 <body>
 <div id="app"></div>
 <script>
-/* ---------------- storage helpers ---------------- */
-async function sGet(key){
-  try{
-    const r = await window.storage.get(key, true);
-    return r ? JSON.parse(r.value) : null;
-  }catch(e){ return null; }
-}
-async function sSet(key, val){
-  try{ await window.storage.set(key, JSON.stringify(val), true); return true; }
-  catch(e){ console.error('storage set failed', e); return false; }
+/** =========================================================
+ *  Jembatan ke backend Google Apps Script (Code.gs)
+ *  Bobot nilai akhir: Tajwid 35% | Fashahah & Adab 35% | Lagu & Suara 30%
+ * ========================================================= */
+function gs(name, ...args){
+  return new Promise((resolve, reject)=>{
+    google.script.run
+      .withSuccessHandler(resolve)
+      .withFailureHandler(err=> reject(err))
+      [name](...args);
+  });
 }
 
-const BIDANG_MAX = { tajwid:30, fashahah:30, lagu:40 };
+// Kategori & bobot (harus sinkron dengan Code.gs)
+const KATEGORI = {
+  tajwid:   { label:'Tajwid',            max:100, bobotPersen:35 },
+  fashahah: { label:'Fashahah & Adab',   max:100, bobotPersen:35 },
+  lagu:     { label:'Lagu & Suara',      max:100, bobotPersen:30 }
+};
+const KAT_KEYS = ['tajwid','fashahah','lagu'];
 
 async function getPesertaList(){
-  let d = await sGet('peserta-list');
-  if(!d || !d.list){
-    d = { list: Array.from({length:10}, (_,i)=>({no:i+1, nama:'Peserta '+(i+1)})) };
-  }
-  return d.list;
+  return await gs('getPesertaList');
 }
 
-function totalOf(entry){
-  if(!entry) return null;
-  return (entry.tajwid||0)+(entry.fashahah||0)+(entry.lagu||0);
-}
-
-/* ---------------- router ---------------- */
 window.addEventListener('hashchange', route);
 route();
 
@@ -180,21 +172,19 @@ function route(){
   else renderHome();
 }
 
-/* ---------------- HOME ---------------- */
 function renderHome(){
   document.getElementById('app').innerHTML = `
     <div class="home">
       <div class="eyebrow">Musabaqoh Tilawatil Qur'an</div>
       <h1>Seleksi Tartil Al-Qur'an</h1>
-      <p class="sub">Sistem penilaian juri, rekap panitia, dan layar tampilan tersinkron otomatis.</p>
+      <p class="sub">3 juri, masing-masing menilai 1 kategori (Tajwid 35% · Fashahah 35% · Lagu 30%). Rekap panitia dan layar tampilan tersinkron otomatis.</p>
 
       <div class="role-group">
         <h2>Untuk Juri</h2>
         <div class="role-row">
-          <a class="pill" href="#/juri/1">Juri 1</a>
-          <a class="pill" href="#/juri/2">Juri 2</a>
-          <a class="pill" href="#/juri/3">Juri 3</a>
-          <a class="pill" href="#/juri/4">Juri 4</a>
+          <a class="pill" href="#/juri/tajwid">Juri Tajwid</a>
+          <a class="pill" href="#/juri/fashahah">Juri Fashahah &amp; Adab</a>
+          <a class="pill" href="#/juri/lagu">Juri Lagu &amp; Suara</a>
         </div>
       </div>
 
@@ -208,7 +198,7 @@ function renderHome(){
         <div class="role-row"><a class="pill wide" href="#/display">Buka Display Booth</a></div>
       </div>
 
-      <p class="note">Semua nilai tersimpan bersama dan dapat dilihat dari perangkat mana pun yang membuka aplikasi ini (juri, panitia, layar tampilan).</p>
+      <p class="note">Semua nilai tersimpan di Google Spreadsheet dan dapat dilihat dari perangkat mana pun yang membuka aplikasi ini (juri, panitia, layar tampilan).</p>
     </div>`;
 }
 
@@ -220,79 +210,83 @@ function topbar(title, backHash){
   </div>`;
 }
 
-/* ---------------- JURI VIEW ---------------- */
-async function renderJuri(idParam){
+async function renderJuri(catParam){
   const app = document.getElementById('app');
-  if(!idParam){
-    app.innerHTML = topbar('Pilih Juri') + `<div class="wrap">
-      <div class="section-label">Anda juri ke berapa?</div>
+  if(!catParam || !KATEGORI[catParam]){
+    app.innerHTML = topbar('Pilih Kategori Juri') + `<div class="wrap">
+      <div class="section-label">Anda juri kategori apa?</div>
       <div class="role-row" style="justify-content:flex-start">
-        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/1">Juri 1</a>
-        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/2">Juri 2</a>
-        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/3">Juri 3</a>
-        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/4">Juri 4</a>
+        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/tajwid">Juri Tajwid</a>
+        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/fashahah">Juri Fashahah &amp; Adab</a>
+        <a class="pill" style="border-color:var(--green-deep);color:var(--green-deep)" href="#/juri/lagu">Juri Lagu &amp; Suara</a>
       </div></div>`;
     return;
   }
-  const juriId = String(idParam);
+  const cat = catParam;
+  const kat = KATEGORI[cat];
   const peserta = await getPesertaList();
-  app.innerHTML = topbar('Juri ' + juriId, '#/juri') + `<div class="wrap" id="juriBody">Memuat data peserta...</div>`;
+  app.innerHTML = topbar('Juri ' + kat.label, '#/juri') + `<div class="wrap" id="juriBody">Memuat data peserta...</div>`;
 
   const statuses = {};
   for(const p of peserta){
-    const entry = await sGet('score:'+p.no);
-    statuses[p.no] = !!(entry && entry[juriId]);
+    const entry = await gs('getScore', p.no);
+    statuses[p.no] = !!(entry && entry[cat]);
   }
 
   document.getElementById('juriBody').innerHTML = `
+    <div class="kategori-note">Anda menilai kategori <strong>${kat.label}</strong> (bobot ${kat.bobotPersen}% dari nilai akhir), skala 0–${kat.max} untuk setiap peserta.</div>
     <div class="section-label">Pilih peserta yang baru tampil</div>
     <div class="grid-btns" id="pesertaGrid">
-      ${peserta.map(p=>`<button class="num-btn ${statuses[p.no]?'done':''}" data-no="${p.no}" onclick="selectPeserta(${p.no}, '${juriId}')">${p.no}</button>`).join('')}
+      ${peserta.map(p=>`<button class="num-btn ${statuses[p.no]?'done':''}" data-no="${p.no}" onclick="selectPeserta(${p.no}, '${cat}')">${p.no}</button>`).join('')}
     </div>
     <div id="formArea"></div>`;
 }
 
-function selectPeserta(no, juriId){
+function selectPeserta(no, cat){
+  const kat = KATEGORI[cat];
   document.querySelectorAll('#pesertaGrid .num-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector('#pesertaGrid .num-btn[data-no="'+no+'"]').classList.add('active');
   document.getElementById('formArea').innerHTML = `
-    <div class="section-label">Nilai Peserta No. ${no}</div>
-    <div class="field"><label>Tajwid <span class="max">maks ${BIDANG_MAX.tajwid}</span></label>
-      <input type="number" id="f_tajwid" min="0" max="${BIDANG_MAX.tajwid}" placeholder="0-${BIDANG_MAX.tajwid}"></div>
-    <div class="field"><label>Fashahah &amp; Adab <span class="max">maks ${BIDANG_MAX.fashahah}</span></label>
-      <input type="number" id="f_fashahah" min="0" max="${BIDANG_MAX.fashahah}" placeholder="0-${BIDANG_MAX.fashahah}"></div>
-    <div class="field"><label>Lagu &amp; Suara <span class="max">maks ${BIDANG_MAX.lagu}</span></label>
-      <input type="number" id="f_lagu" min="0" max="${BIDANG_MAX.lagu}" placeholder="0-${BIDANG_MAX.lagu}"></div>
+    <div class="section-label">Nilai ${kat.label} — Peserta No. ${no} <span style="color:#7A7568;font-weight:400">(bobot ${kat.bobotPersen}%)</span></div>
+    <div class="field"><label>${kat.label} <span class="max">maks ${kat.max}</span></label>
+      <input type="number" id="f_val" min="0" max="${kat.max}" placeholder="0-${kat.max}"></div>
     <div class="field"><label>Catatan (opsional)</label>
       <textarea id="f_catatan" placeholder="Mis: salah makhraj di ayat ke-3"></textarea></div>
-    <button class="btn-primary" onclick="submitNilai(${no}, '${juriId}')">Simpan Nilai</button>
+    <button class="btn-primary" id="f_submit" onclick="submitNilai(${no}, '${cat}')">Simpan Nilai</button>
     <div id="formMsg"></div>`;
 }
 
-async function submitNilai(no, juriId){
-  const t = Number(document.getElementById('f_tajwid').value);
-  const f = Number(document.getElementById('f_fashahah').value);
-  const l = Number(document.getElementById('f_lagu').value);
+async function submitNilai(no, cat){
+  const kat = KATEGORI[cat];
+  const v = Number(document.getElementById('f_val').value);
   const c = document.getElementById('f_catatan').value.trim();
   const msg = document.getElementById('formMsg');
+  const btnSubmit = document.getElementById('f_submit');
 
-  if([t,f,l].some(v=>isNaN(v)) || t<0||t>BIDANG_MAX.tajwid || f<0||f>BIDANG_MAX.fashahah || l<0||l>BIDANG_MAX.lagu){
-    msg.innerHTML = '<div class="msg-err">Periksa kembali nilai, pastikan tidak melebihi batas maksimal.</div>';
+  if(isNaN(v) || v<0 || v>kat.max){
+    msg.innerHTML = '<div class="msg-err">Periksa kembali nilai, batas maksimal '+kat.max+'.</div>';
     return;
   }
-  const existing = (await sGet('score:'+no)) || {};
-  existing[juriId] = { tajwid:t, fashahah:f, lagu:l, catatan:c, ts: Date.now() };
-  const ok = await sSet('score:'+no, existing);
-  msg.innerHTML = ok
-    ? '<div class="msg-ok">Nilai peserta No. '+no+' tersimpan.</div>'
-    : '<div class="msg-err">Gagal menyimpan, coba lagi.</div>';
-  if(ok){
-    const btn = document.querySelector('#pesertaGrid .num-btn[data-no="'+no+'"]');
-    if(btn) btn.classList.add('done');
+
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = 'Menyimpan...';
+  try{
+    const res = await gs('submitNilai', no, cat, v, c);
+    if(res && res.ok){
+      msg.innerHTML = '<div class="msg-ok">Nilai '+kat.label+' untuk peserta No. '+no+' tersimpan.</div>';
+      const btn = document.querySelector('#pesertaGrid .num-btn[data-no="'+no+'"]');
+      if(btn) btn.classList.add('done');
+    } else {
+      msg.innerHTML = '<div class="msg-err">'+(res && res.error ? res.error : 'Gagal menyimpan, coba lagi.')+'</div>';
+    }
+  } catch(e){
+    msg.innerHTML = '<div class="msg-err">Gagal menyimpan, coba lagi.</div>';
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = 'Simpan Nilai';
   }
 }
 
-/* ---------------- KOORDINATOR VIEW ---------------- */
 async function renderKoordinator(){
   const app = document.getElementById('app');
   app.innerHTML = topbar('Panel Koordinator') + `<div class="wrap" id="koordBody">Memuat...</div>`;
@@ -301,45 +295,30 @@ async function renderKoordinator(){
 
 async function refreshKoordinator(){
   const peserta = await getPesertaList();
-  const publishAll = (await sGet('publish-all')) || {};
-  const rows = [];
-  for(const p of peserta){
-    const entry = (await sGet('score:'+p.no)) || {};
-    const totals = ['1','2','3','4'].map(j=> entry[j] ? totalOf(entry[j]) : null);
-    const count = totals.filter(v=>v!==null).length;
-    const avgFinal = count>0 ? totals.filter(v=>v!==null).reduce((a,b)=>a+b,0)/count : null;
-    let outlier = null;
-    if(count===4){
-      totals.forEach((v,i)=>{
-        const others = totals.filter((_,j2)=>j2!==i);
-        const othersAvg = others.reduce((a,b)=>a+b,0)/others.length;
-        if(Math.abs(v-othersAvg) > 10) outlier = 'Nilai Juri '+(i+1)+' menyimpang lebih dari 10 poin dari juri lain.';
-      });
-    }
-    rows.push({no:p.no, nama:p.nama, entry, totals, count, avgFinal, outlier, locked: !!(publishAll[p.no]&&publishAll[p.no].locked)});
-  }
+  const rows = await gs('getAllScoresForKoordinator');
 
   const body = document.getElementById('koordBody');
   body.innerHTML = `
+    <div class="kategori-note">Bobot nilai akhir: Tajwid 35% · Fashahah &amp; Adab 35% · Lagu &amp; Suara 30% (masing-masing skala 0–100).</div>
+
     <div class="section-label">Nama Peserta</div>
     <div id="nameFields">
-      ${peserta.map(p=>`<div class="field" style="margin-bottom:8px"><input class="name-input" id="nm_${p.no}" value="${p.nama.replace(/"/g,'&quot;')}" placeholder="Nama peserta No. ${p.no}"></div>`).join('')}
+      ${peserta.map(p=>`<div class="field" style="margin-bottom:8px"><input class="name-input" id="nm_${p.no}" value="${String(p.nama).replace(/"/g,'&quot;')}" placeholder="Nama peserta No. ${p.no}"></div>`).join('')}
     </div>
     <button class="btn-secondary" onclick="savePesertaNames()">Simpan Nama Peserta</button>
     <div id="nameMsg"></div>
 
     <div class="section-label" style="margin-top:32px">Rekap Nilai</div>
     <table>
-      <tr><th>No</th><th>Nama</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>Rata²</th><th>Status</th><th></th></tr>
+      <tr><th>No</th><th>Nama</th><th>Tajwid (35%)</th><th>Fashahah (35%)</th><th>Lagu (30%)</th><th>Akhir</th><th>Status</th><th></th></tr>
       ${rows.map(r=>`
         <tr>
           <td>${r.no}</td>
           <td>${r.nama}</td>
-          ${[0,1,2,3].map(i=>`<td><span class="jstat ${r.totals[i]!==null?'on':'off'}">${r.totals[i]!==null? r.totals[i] : '–'}</span></td>`).join('')}
-          <td>${r.avgFinal!==null ? r.avgFinal.toFixed(1) : '–'}</td>
-          <td>${r.locked ? '<span class="tag locked">Terkunci</span>' : (r.count===4? '<span class="tag ready">Siap</span>' : r.count+'/4 juri')}
-            ${r.outlier && !r.locked ? '<div class="warn">'+r.outlier+'</div>' : ''}</td>
-          <td><button class="lock-btn" ${r.count<4 || r.locked ? 'disabled':''} onclick="lockPeserta(${r.no})">${r.locked?'✓':'Kunci'}</button></td>
+          ${KAT_KEYS.map(k=>`<td><span class="jstat ${r.vals[k]!==null?'on':'off'}">${r.vals[k]!==null? r.vals[k] : '–'}</span></td>`).join('')}
+          <td>${r.final!==null ? r.final : '–'}</td>
+          <td>${r.locked ? '<span class="tag locked">Terkunci</span>' : (r.count===3? '<span class="tag ready">Siap</span>' : r.count+'/3 kategori')}</td>
+          <td><button class="lock-btn" ${r.count<3 || r.locked ? 'disabled':''} onclick="lockPeserta(${r.no})">${r.locked?'✓':'Kunci'}</button></td>
         </tr>`).join('')}
     </table>
     <button class="btn-secondary" style="margin-top:20px" onclick="refreshKoordinator()">Muat Ulang</button>
@@ -350,36 +329,25 @@ async function savePesertaNames(){
   const list = [];
   for(let no=1; no<=10; no++){
     const val = document.getElementById('nm_'+no);
+    if(!val) continue;
     list.push({no, nama: (val.value.trim() || ('Peserta '+no))});
   }
-  const ok = await sSet('peserta-list', {list});
-  document.getElementById('nameMsg').innerHTML = ok
-    ? '<div class="msg-ok">Nama peserta tersimpan.</div>'
-    : '<div class="msg-err">Gagal menyimpan nama.</div>';
+  const msgEl = document.getElementById('nameMsg');
+  try{
+    const res = await gs('savePesertaNames', list);
+    msgEl.innerHTML = res && res.ok
+      ? '<div class="msg-ok">Nama peserta tersimpan.</div>'
+      : '<div class="msg-err">Gagal menyimpan nama.</div>';
+  } catch(e){
+    msgEl.innerHTML = '<div class="msg-err">Gagal menyimpan nama.</div>';
+  }
 }
 
 async function lockPeserta(no){
-  const entry = (await sGet('score:'+no)) || {};
-  const bidangAvg = {tajwid:0, fashahah:0, lagu:0};
-  ['tajwid','fashahah','lagu'].forEach(b=>{
-    const vals = ['1','2','3','4'].map(j=> entry[j] ? entry[j][b] : null).filter(v=>v!==null);
-    bidangAvg[b] = vals.length ? vals.reduce((a,c)=>a+c,0)/vals.length : 0;
-  });
-  const final = bidangAvg.tajwid + bidangAvg.fashahah + bidangAvg.lagu;
-  const publishAll = (await sGet('publish-all')) || {};
-  publishAll[no] = {
-    tajwid_avg: Math.round(bidangAvg.tajwid*10)/10,
-    fashahah_avg: Math.round(bidangAvg.fashahah*10)/10,
-    lagu_avg: Math.round(bidangAvg.lagu*10)/10,
-    final: Math.round(final*10)/10,
-    locked: true,
-    ts: Date.now()
-  };
-  await sSet('publish-all', publishAll);
+  await gs('lockPeserta', no);
   await refreshKoordinator();
 }
 
-/* ---------------- DISPLAY VIEW ---------------- */
 let displayTimer = null;
 async function renderDisplay(){
   const app = document.getElementById('app');
@@ -392,12 +360,9 @@ async function renderDisplay(){
 
 async function refreshDisplay(){
   if(!location.hash.startsWith('#/display')) { if(displayTimer) clearInterval(displayTimer); return; }
-  const peserta = await getPesertaList();
-  const nameOf = {}; peserta.forEach(p=> nameOf[p.no]=p.nama);
-  const publishAll = (await sGet('publish-all')) || {};
-  const locked = Object.keys(publishAll)
-    .filter(no=> publishAll[no].locked)
-    .map(no=> ({no:Number(no), nama: nameOf[no] || ('Peserta '+no), ...publishAll[no]}));
+  const data = await gs('getPublishAll');
+  const peserta = data.peserta;
+  const locked = data.locked;
 
   const board = document.getElementById('boardBody');
   if(locked.length===0){
@@ -414,9 +379,9 @@ async function refreshDisplay(){
       <div class="eyebrow">Tampil Terakhir · No. ${last.no}</div>
       <div class="name">${last.nama}</div>
       <div class="breakdown">
-        <div class="item"><div class="k">Tajwid</div><div class="v">${last.tajwid_avg}</div></div>
-        <div class="item"><div class="k">Fashahah &amp; Adab</div><div class="v">${last.fashahah_avg}</div></div>
-        <div class="item"><div class="k">Lagu &amp; Suara</div><div class="v">${last.lagu_avg}</div></div>
+        <div class="item"><div class="k">Tajwid (35%)</div><div class="v">${last.tajwid}</div></div>
+        <div class="item"><div class="k">Fashahah &amp; Adab (35%)</div><div class="v">${last.fashahah}</div></div>
+        <div class="item"><div class="k">Lagu &amp; Suara (30%)</div><div class="v">${last.lagu}</div></div>
         <div class="item final"><div class="k">Nilai Akhir</div><div class="v">${last.final}</div></div>
       </div>
     </div>
