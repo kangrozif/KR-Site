@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Generator Latihan Membaca Suku Kata</title>
+<style>
+  :root{
+    --bg:#fffdf5; --card:#ffffff; --ink:#2b2b2b; --muted:#6c757d;
+    --accent:#e85d04; --accent2:#023047; --b-color:#219ebc; --c-color:#fb8500;
+    --panel:#fff8e7; --border:#ffb703; --soft-border:#ffe08a;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1b1a17; --card:#262420; --ink:#f2ead6; --muted:#b9b2a0;
+      --panel:#2e2a22; --border:#e2a100; --soft-border:#4a3f22;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1b1a17; --card:#262420; --ink:#f2ead6; --muted:#b9b2a0;
+    --panel:#2e2a22; --border:#e2a100; --soft-border:#4a3f22;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100%; background:var(--bg); color:var(--ink);
+    font-family:'Trebuchet MS','Comic Sans MS',Verdana,sans-serif;
+    padding:18px 14px 40px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-size:clamp(20px,4vw,28px);color:var(--accent);text-align:center;margin:4px 0 2px;}
+  .subtitle{text-align:center;color:var(--muted);margin:0 0 18px;font-size:14px;}
+
+  .panel{
+    background:var(--panel); border:3px dashed var(--border); border-radius:18px;
+    padding:16px; margin-bottom:18px;
+  }
+  .panel h2{margin:0 0 10px;font-size:16px;color:var(--accent2);}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .row:last-child{margin-bottom:0;}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--card); border:2px solid var(--soft-border); border-radius:999px;
+    padding:6px 12px; font-size:15px; cursor:pointer; user-select:none;
+  }
+  .chip input{accent-color:var(--accent);}
+  .chip.active{border-color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, var(--card));}
+  label.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:140px;}
+  select,input[type=number]{
+    font-size:15px;padding:7px 8px;border-radius:10px;border:2px solid var(--soft-border);
+    background:var(--card); color:var(--ink);
+  }
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
+  button{
+    font-family:inherit; font-size:16px; font-weight:bold; cursor:pointer;
+    border:none; border-radius:12px; padding:10px 20px; color:white;
+  }
+  #genBtn{background:var(--accent);}
+  #genBtn:active{transform:scale(0.98);}
+  #printBtn{background:var(--accent2);}
+  #selAllCons,#clearCons{background:var(--muted);}
+
+  .grid{
+    display:grid; gap:14px;
+    grid-template-columns:repeat(var(--cols,3),1fr);
+    margin-bottom:6px;
+  }
+  .card{
+    border:3px dashed var(--border); border-radius:16px; padding:16px 6px;
+    text-align:center; background:var(--card);
+  }
+  .card .word{font-size:clamp(22px,4vw,30px);font-weight:bold;letter-spacing:1px;color:var(--accent2);}
+  .card .hint{margin-top:5px;font-size:12px;color:var(--muted);}
+  .empty-msg{text-align:center;color:var(--muted);padding:30px 10px;}
+
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:14px;}
+
+  @media print{
+    .panel,.btnrow{display:none !important;}
+    body{padding:0;background:white;color:#000;}
+    .card{border-color:#e85d04;}
+  }
+  @media (max-width:480px){
+    .grid{grid-template-columns:repeat(min(var(--cols,3),2),1fr) !important;}
+    label.field{min-width:100px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📖 Generator Latihan Membaca</h1>
+  <p class="subtitle">Pilih huruf konsonan, huruf vokal, dan jumlah suku kata — lalu buat halaman latihan sendiri</p>
+
+  <div class="panel">
+    <h2>1. Pilih huruf konsonan</h2>
+    <div class="row" id="consRow"></div>
+    <div class="btnrow" style="justify-content:flex-start;margin-top:2px;">
+      <button id="selAllCons" type="button">Pilih Semua</button>
+      <button id="clearCons" type="button">Kosongkan</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>2. Pilih huruf vokal</h2>
+    <div class="row" id="vowelRow"></div>
+  </div>
+
+  <div class="panel">
+    <h2>3. Pengaturan latihan</h2>
+    <div class="row">
+      <label class="field">Jumlah suku kata per kata
+        <select id="syllCount">
+          <option value="2" selected>2 suku kata</option>
+          <option value="3">3 suku kata</option>
+          <option value="4">4 suku kata</option>
+        </select>
+      </label>
+      <label class="field">Jumlah kata
+        <input type="number" id="wordCount" value="15" min="4" max="40" step="1">
+      </label>
+      <label class="field">Jumlah kolom
+        <select id="colCount">
+          <option value="2">2 kolom</option>
+          <option value="3" selected>3 kolom</option>
+          <option value="4">4 kolom</option>
+          <option value="5">5 kolom</option>
+        </select>
+      </label>
+      <label class="field">Sertakan kata latihan (gabungan bunyi)
+        <select id="drillMode">
+          <option value="fill" selected>Isi kekurangan dengan latihan</option>
+          <option value="only-real">Hanya kata nyata (jika cukup)</option>
+          <option value="only-drill">Hanya latihan gabungan bunyi</option>
+        </select>
+      </label>
+    </div>
+    <div class="btnrow">
+      <button id="genBtn" type="button">🔀 Buat Halaman Latihan</button>
+      <button id="printBtn" type="button">🖨️ Cetak / Simpan PDF</button>
+    </div>
+  </div>
+
+  <div id="result">
+    <div class="empty-msg">Atur pilihan di atas lalu tekan "Buat Halaman Latihan".</div>
+  </div>
+
+  <footer>Dampingi anak: eja huruf per huruf → gabung jadi suku kata → gabung jadi kata utuh.</footer>
+</div>
+
+<script>
+const VOWELS = ['a','i','u','e','o'];
+const CONSONANTS = ['b','c','d','f','g','h','j','k','l','m','n','p','r','s','t','v','w','y','z'];
+
+// Word bank: kata nyata bahasa Indonesia, dipecah per suku kata (suku kata terbuka/CV bila memungkinkan)
+const WORD_BANK = [
+  // 2 suku kata
+  ['baca',['ba','ca']], ['bibi',['bi','bi']], ['bobo',['bo','bo']], ['cuci',['cu','ci']],
+  ['coba',['co','ba']], ['babi',['ba','bi']], ['dada',['da','da']], ['duda',['du','da']],
+  ['foto',['fo','to']], ['gagu',['ga','gu']], ['gigi',['gi','gi']], ['gula',['gu','la']],
+  ['guru',['gu','ru']], ['haha',['ha','ha']], ['jaga',['ja','ga']], ['jari',['ja','ri']],
+  ['juga',['ju','ga']], ['kaki',['ka','ki']], ['kuku',['ku','ku']], ['kaca',['ka','ca']],
+  ['lidi',['li','di']], ['lele',['le','le']], ['lucu',['lu','cu']], ['luka',['lu','ka']],
+  ['mama',['ma','ma']], ['madu',['ma','du']], ['mata',['ma','ta']], ['meja',['me','ja']],
+  ['muda',['mu','da']], ['nasi',['na','si']], ['nada',['na','da']], ['naga',['na','ga']],
+  ['nona',['no','na']], ['papa',['pa','pa']], ['pipi',['pi','pi']], ['padi',['pa','di']],
+  ['paku',['pa','ku']], ['peta',['pe','ta']], ['pita',['pi','ta']], ['raja',['ra','ja']],
+  ['rusa',['ru','sa']], ['roda',['ro','da']], ['sapi',['sa','pi']], ['sepi',['se','pi']],
+  ['susu',['su','su']], ['soto',['so','to']], ['sisi',['si','si']], ['tali',['ta','li']],
+  ['topi',['to','pi']], ['satu',['sa','tu']], ['yuyu',['yu','yu']], ['cuka',['cu','ka']],
+  ['dahi',['da','hi']], ['hari',['ha','ri']],
+  ['hela',['he','la']], ['jala',['ja','la']], ['kayu',['ka','yu']], ['leher',['le','her']],
+  ['loka',['lo','ka']], ['masa',['ma','sa']], ['misa',['mi','sa']], ['piso',['pi','so']],
+  ['rasa',['ra','sa']], ['sari',['sa','ri']], ['sate',['sa','te']], ['siku',['si','ku']],
+  ['sisa',['si','sa']], ['tahu',['ta','hu']], ['tiba',['ti','ba']], ['tikus',['ti','kus']],
+  // 3 suku kata
+  ['kelapa',['ke','la','pa']], ['kepala',['ke','pa','la']], ['kereta',['ke','re','ta']],
+  ['sepatu',['se','pa','tu']], ['celana',['ce','la','na']], ['kepiting',['ke','pi','ting']],
+  ['bahasa',['ba','ha','sa']], ['budaya',['bu','da','ya']], ['gembira',['gem','bi','ra']],
+  ['harimau',['ha','ri','mau']], ['jendela',['jen','de','la']],
+  ['kacamata',['ka','ca','ma','ta']], ['matahari',['ma','ta','ha','ri']], ['selamat',['se','la','mat']],
+  ['sederhana',['se','der','ha','na']], ['pelangi',['pe','lang','i']],
+  ['merdeka',['mer','de','ka']], ['tetangga',['te','tang','ga']],
+  ['bicara',['bi','ca','ra']], ['makanan',['ma','ka','nan']]
+];
+
+function letters(str){ return str.split(''); }
+function consonantsOf(word){ return letters(word).filter(ch => CONSONANTS.includes(ch)); }
+function vowelsOf(word){ return letters(word).filter(ch => VOWELS.includes(ch)); }
+
+function buildChips(container, items, prefix){
+  container.innerHTML = '';
+  items.forEach(ch => {
+    const label = document.createElement('label');
+    label.className = 'chip active';
+    label.innerHTML = `<input type="checkbox" checked data-val="${ch}"> ${ch}`;
+    const input = label.querySelector('input');
+    input.addEventListener('change', () => {
+      label.classList.toggle('active', input.checked);
+    });
+    container.appendChild(label);
+  });
+}
+
+buildChips(document.getElementById('consRow'), CONSONANTS, 'c');
+buildChips(document.getElementById('vowelRow'), VOWELS, 'v');
+
+document.getElementById('selAllCons').addEventListener('click', () => {
+  document.querySelectorAll('#consRow input').forEach(i => { i.checked = true; i.closest('.chip').classList.add('active'); });
+});
+document.getElementById('clearCons').addEventListener('click', () => {
+  document.querySelectorAll('#consRow input').forEach(i => { i.checked = false; i.closest('.chip').classList.remove('active'); });
+});
+
+function getChecked(containerId){
+  return Array.from(document.querySelectorAll('#'+containerId+' input:checked')).map(i => i.dataset.val);
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function generateDrillWord(selCons, selVow, syllCount){
+  if(selCons.length===0 || selVow.length===0) return null;
+  const syllables = [];
+  for(let i=0;i<syllCount;i++){
+    const c = selCons[Math.floor(Math.random()*selCons.length)];
+    const v = selVow[Math.floor(Math.random()*selVow.length)];
+    syllables.push(c+v);
+  }
+  return syllables;
+}
+
+function render(cards){
+  const result = document.getElementById('result');
+  if(cards.length===0){
+    result.innerHTML = '<div class="empty-msg">Belum ada kata yang cocok. Coba tambah huruf konsonan/vokal yang dipilih.</div>';
+    return;
+  }
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  cards.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const wordHtml = c.syllables.map(s => `<span>${s}</span>`).join('-');
+    card.innerHTML = `<div class="word">${wordHtml}</div><div class="hint">${c.hint}</div>`;
+    grid.appendChild(card);
+  });
+  result.innerHTML = '';
+  result.appendChild(grid);
+}
+
+document.getElementById('genBtn').addEventListener('click', () => {
+  const selCons = getChecked('consRow');
+  const selVow = getChecked('vowelRow');
+  const syllCount = parseInt(document.getElementById('syllCount').value, 10);
+  const wordCount = Math.max(4, Math.min(40, parseInt(document.getElementById('wordCount').value, 10) || 15));
+  const cols = document.getElementById('colCount').value;
+  const mode = document.getElementById('drillMode').value;
+  document.documentElement.style.setProperty('--cols', cols);
+  document.querySelector('.wrap').style.setProperty('--cols', cols);
+  document.getElementById('result').style.setProperty('--cols', cols);
+
+  // cari kata nyata yang cocok
+  let realMatches = [];
+  if(mode !== 'only-drill'){
+    realMatches = WORD_BANK.filter(([word, syll]) => {
+      if(syll.length !== syllCount) return false;
+      const cons = consonantsOf(word);
+      const vow = vowelsOf(word);
+      const consOk = cons.every(ch => selCons.includes(ch));
+      const vowOk = vow.every(ch => selVow.includes(ch));
+      return consOk && vowOk;
+    });
+    realMatches = shuffle(realMatches);
+  }
+
+  let cards = [];
+  if(mode === 'only-real'){
+    cards = realMatches.slice(0, wordCount).map(([word, syll]) => ({syllables: syll, hint: word}));
+  } else if(mode === 'only-drill'){
+    for(let i=0;i<wordCount;i++){
+      const d = generateDrillWord(selCons, selVow, syllCount);
+      if(!d) break;
+      cards.push({syllables: d, hint: 'latihan gabung bunyi'});
+    }
+  } else {
+    // fill: kata nyata dulu, sisanya latihan
+    const takeReal = realMatches.slice(0, wordCount);
+    cards = takeReal.map(([word, syll]) => ({syllables: syll, hint: word}));
+    let guard = 0;
+    while(cards.length < wordCount && guard < 200){
+      const d = generateDrillWord(selCons, selVow, syllCount);
+      guard++;
+      if(!d) break;
+      cards.push({syllables: d, hint: 'latihan gabung bunyi'});
+    }
+  }
+
+  render(cards);
+  document.getElementById('result').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+// buat halaman pertama otomatis saat load (b-c, vokal semua, 2 suku kata, 15 kata)
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#consRow input').forEach(i => {
+    const on = ['b','c'].includes(i.dataset.val);
+    i.checked = on;
+    i.closest('.chip').classList.toggle('active', on);
+  });
+  document.getElementById('genBtn').click();
+});
+</script>
+</body>
+</html>
