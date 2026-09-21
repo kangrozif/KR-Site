@@ -3,559 +3,376 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Modul Belajar Membaca Abjad — Adaptasi Metode Yanbu'a</title>
+<title>Modul Baca Abjad — Adaptasi Yanbu'a</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#1D3557;
-    --teal:#2A9D8F;
-    --amber:#F0A202;
-    --paper:#FAF8F3;
-    --line:#D8D3C5;
-    --trace:#CBD1C9;
-    --card:#FFFFFF;
+    --navy:#1D3557; --teal:#2A9D8F; --amber:#F0A202;
+    --paper:#FAF8F3; --line:#D8D3C5; --card:#FFFFFF; --muted:#7a8a86;
   }
   *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:'Nunito',sans-serif;
-    background:var(--paper);
-    color:var(--navy);
-    padding-bottom:60px;
-  }
-  .toolbar{
-    position:sticky; top:0; z-index:50;
-    background:var(--navy);
-    color:#fff;
-    padding:16px 24px;
-    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-  }
-  .toolbar h1{
-    font-family:'Baloo 2',sans-serif;
-    font-size:1.05rem;
-    margin:0 16px 0 0;
-    font-weight:700;
-    flex:1 1 220px;
-  }
-  .toolbar button{
-    font-family:'Nunito',sans-serif;
-    font-weight:700;
-    font-size:.85rem;
-    border:none;
-    border-radius:8px;
-    padding:9px 14px;
-    cursor:pointer;
-    background:var(--teal);
-    color:#fff;
-  }
-  .toolbar button.all{ background:var(--amber); color:var(--navy); }
-  .toolbar button:hover{ filter:brightness(1.08); }
+  body{margin:0;font-family:'Nunito',sans-serif;background:var(--paper);color:var(--navy);padding-bottom:50px;}
 
-  .identitas{
-    max-width:900px; margin:22px auto 0; padding:0 24px;
-    display:flex; flex-wrap:wrap; gap:24px;
-    font-size:.95rem;
-  }
-  .identitas span{ border-bottom:1px solid var(--navy); padding:2px 6px 4px; min-width:160px; display:inline-block; }
+  .toolbar{position:sticky;top:0;z-index:50;background:var(--navy);color:#fff;padding:10px 16px;
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .toolbar h1{font-family:'Baloo 2',sans-serif;font-size:.95rem;margin:0 10px 0 0;font-weight:700;flex:1 1 180px;}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .tabs button{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:.85rem;border:none;border-radius:8px;
+    padding:8px 14px;cursor:pointer;background:#2c4a73;color:#cfe0f5;}
+  .tabs button.active{background:var(--teal);color:#fff;}
+  .actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .actions button{font-family:'Nunito',sans-serif;font-weight:700;font-size:.8rem;border:none;border-radius:8px;
+    padding:8px 12px;cursor:pointer;background:var(--amber);color:var(--navy);}
 
-  main{ max-width:900px; margin:0 auto; padding:24px; }
+  .identitas{max-width:960px;margin:10px auto 0;padding:0 16px;font-size:.85rem;display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);}
+  .identitas span{border-bottom:1px solid var(--navy);padding:1px 6px;min-width:130px;display:inline-block;color:var(--navy);}
 
-  .tahap{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:28px 30px;
-    margin-bottom:34px;
-  }
-  .tahap-head{
-    display:flex; align-items:baseline; gap:14px;
-    border-bottom:2px solid var(--teal);
-    padding-bottom:10px; margin-bottom:16px;
-  }
-  .tahap-num{
-    font-family:'Baloo 2',sans-serif;
-    font-weight:800;
-    font-size:2rem;
-    color:var(--teal);
-    line-height:1;
-  }
-  .tahap-title{
-    font-family:'Baloo 2',sans-serif;
-    font-weight:700;
-    font-size:1.35rem;
-    margin:0;
-  }
-  .tahap-sub{
-    font-size:.9rem; color:#556; margin-top:2px;
-  }
-  .tujuan{
-    background:#F2F7F5; border-left:4px solid var(--teal);
-    padding:10px 14px; border-radius:0 8px 8px 0;
-    font-size:.92rem; margin-bottom:20px;
-  }
-  h3.section-label{
-    font-family:'Baloo 2',sans-serif;
-    font-size:1rem; font-weight:700;
-    margin:22px 0 10px;
-    color:var(--navy);
-  }
+  main{max-width:960px;margin:0 auto;padding:16px;}
+  .tahap{display:none;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+  .tahap.active{display:block;}
 
-  /* Tracing rows (Tahap 1) */
-  .vokal-row{
-    display:flex; align-items:center; gap:18px;
-    padding:10px 0; border-bottom:1px dashed var(--line);
-  }
-  .vokal-row:last-child{ border-bottom:none; }
-  .trace-set{ display:flex; gap:10px; }
-  .trace-letter{
-    font-family:'Baloo 2',sans-serif;
-    font-weight:700;
-    font-size:2.6rem;
-    color:var(--trace);
-    width:56px; text-align:center;
-  }
-  .write-box{
-    width:56px; height:56px;
-    border:1.5px dashed #B9C4BC;
-    border-radius:8px;
-  }
-  .write-set{ display:flex; gap:10px; }
+  .tahap-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--teal);padding-bottom:8px;margin-bottom:6px;}
+  .tahap-num{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.7rem;color:var(--teal);line-height:1;}
+  .tahap-title{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.2rem;margin:0;}
+  .caption{font-size:.82rem;color:var(--muted);margin:0 0 14px;}
 
-  .random-grid{
-    display:grid; grid-template-columns:repeat(8,1fr);
-    gap:10px; margin-top:8px;
-  }
-  .random-grid div{
-    text-align:center; font-family:'Baloo 2',sans-serif;
-    font-weight:700; font-size:1.3rem;
-    background:#F2F7F5; border-radius:8px; padding:10px 0;
-  }
+  .controls{background:#F2F7F5;border-radius:10px;padding:12px 14px;margin-bottom:14px;}
+  .ctrl-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center;}
+  .ctrl-row:last-child{margin-bottom:0;}
+  .ctrl-label{font-size:.75rem;color:var(--muted);width:100%;margin-bottom:2px;}
+  .chip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:2px solid #cfe3dd;border-radius:999px;
+    padding:3px 9px;font-size:.85rem;cursor:pointer;user-select:none;font-family:'Baloo 2',sans-serif;font-weight:600;}
+  .chip.active{border-color:var(--teal);background:#e1f2ee;}
+  .chip input{accent-color:var(--teal);}
+  .num-field{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted);}
+  .num-field input,.num-field select{font-size:.9rem;padding:4px 6px;border-radius:6px;border:1.5px solid #cfe3dd;width:60px;}
+  .num-field select{width:auto;}
+  .gen-btn{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:.85rem;border:none;border-radius:8px;
+    padding:8px 16px;cursor:pointer;background:var(--teal);color:#fff;margin-top:4px;}
+  .mini-btn{font-size:.72rem;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;background:#dfe7e4;color:var(--navy);}
 
-  /* Tahap 2 & 4 card grid */
-  .kartu-grid{
-    display:grid; grid-template-columns:repeat(3,1fr);
-    gap:14px;
-  }
-  .kartu{
-    border:1px solid var(--line); border-radius:10px;
-    padding:12px; text-align:center;
-    break-inside:avoid;
-  }
-  .kartu .besar{
-    font-family:'Baloo 2',sans-serif; font-weight:700;
-    font-size:1.9rem; color:var(--trace);
-    margin-bottom:6px;
-  }
-  .kartu .garis{
-    height:32px; border-bottom:1.5px dashed #B9C4BC;
-    margin-top:6px;
-  }
+  .grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:10px;}
+  .card{border:2px dashed var(--amber);border-radius:12px;padding:10px 4px 8px;text-align:center;background:#fff;break-inside:avoid;}
+  .card .word{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(1.6rem,5vw,2.4rem);color:var(--navy);letter-spacing:.5px;}
+  .card .write-line{height:26px;border-bottom:1.5px dashed #b9c4bc;margin-top:6px;}
+  .card .hint{font-size:.65rem;color:var(--muted);margin-top:3px;}
+  [contenteditable="true"]{cursor:text;}
+  [contenteditable="true"]:hover{outline:1px dashed var(--teal);}
+  [contenteditable="true"]:focus{outline:2px solid var(--amber);background:#fff7e0;}
 
-  /* Tahap 3 table */
-  table.variasi{
-    width:100%; border-collapse:collapse; font-size:.95rem;
-  }
-  table.variasi th, table.variasi td{
-    border:1px solid var(--line); padding:8px 6px; text-align:center;
-  }
-  table.variasi th{
-    background:var(--navy); color:#fff; font-family:'Baloo 2',sans-serif; font-weight:600;
-  }
-  table.variasi td.konsonan{
-    font-weight:800; background:#F2F7F5;
-  }
-  table.variasi td{ font-family:'Baloo 2',sans-serif; font-weight:600; }
+  .blank-lines{margin-top:6px;}
+  .blank-lines .baris{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .blank-lines .no{font-weight:800;width:16px;font-size:.85rem;}
+  .blank-lines .garis{flex:1;border-bottom:1.5px solid #b9c4bc;height:24px;}
 
-  /* Tahap 4 groups */
-  .akhiran-group{ margin-bottom:16px; break-inside:avoid; }
-  .akhiran-group h4{
-    font-family:'Baloo 2',sans-serif; font-size:.95rem;
-    background:var(--amber); color:var(--navy);
-    display:inline-block; padding:3px 12px; border-radius:6px 6px 0 0;
-    margin:0;
-  }
-  .akhiran-row{
-    display:flex; flex-wrap:wrap; gap:8px;
-    border:1px solid var(--line); border-top:3px solid var(--amber);
-    border-radius:0 8px 8px 8px; padding:10px;
-  }
-  .akhiran-row span{
-    font-family:'Baloo 2',sans-serif; font-weight:700;
-    background:#FFF6E3; border-radius:6px; padding:6px 12px;
-    font-size:1.05rem;
-  }
-
-  .dikte-lines{ margin-top:10px; }
-  .dikte-lines .baris{
-    display:flex; align-items:center; gap:10px; margin-bottom:10px;
-  }
-  .dikte-lines .no{ font-weight:800; width:20px; }
-  .dikte-lines .garis-panjang{
-    flex:1; border-bottom:1.5px solid #B9C4BC; height:26px;
-  }
-
-  /* Tahap 5 */
-  table.kata{
-    width:100%; border-collapse:collapse; margin-bottom:10px;
-  }
-  table.kata td{
-    border:1px solid var(--line); padding:10px;
-    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:1.15rem;
-  }
-  table.kata td.no{
-    width:30px; font-weight:400; font-family:'Nunito',sans-serif; color:#778;
-    text-align:center;
-  }
-  .kalimat-list{ margin-top:6px; }
-  .kalimat-list .baris{
-    display:flex; align-items:center; gap:10px; margin-bottom:14px;
-  }
-  .kalimat-list .no{ font-weight:800; width:22px; }
-  .kalimat-list .garis-panjang{
-    flex:1; border-bottom:1.5px solid #B9C4BC; height:30px;
-  }
-
-  .indikator{
-    margin-top:20px; background:#FFF6E3; border:1px dashed var(--amber);
-    border-radius:8px; padding:12px 16px; font-size:.88rem;
-  }
-  .indikator b{ color:#8a5b00; }
-
-  .catatan{
-    font-size:.8rem; color:#667; font-style:italic; margin-top:6px;
-  }
-
-  footer{
-    text-align:center; font-size:.78rem; color:#889;
-    padding:20px; max-width:900px; margin:0 auto;
-  }
+  footer{text-align:center;font-size:.72rem;color:var(--muted);padding:16px;}
 
   @media print{
-    .toolbar, footer{ display:none !important; }
-    body{ background:#fff; padding:0; }
-    .tahap{ box-shadow:none; border:none; padding:0; margin:0; }
-    .tahap-head{ border-bottom:2px solid #000; }
-    main{ max-width:100%; padding:14px; }
-    .identitas{ padding:0 14px; }
-    .trace-letter{ color:#aaa; }
-    table.variasi th{ background:#eee !important; color:#000 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .akhiran-group h4{ background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .kartu, .akhiran-row, table.variasi, table.kata { break-inside:avoid; }
-    body.mode-single .tahap{ display:none; }
-    body.mode-single .tahap.show{ display:block; }
-    .tahap{ page-break-after:always; }
-    .tahap:last-of-type{ page-break-after:auto; }
+    .toolbar,.identitas,footer,.controls{display:none !important;}
+    body{background:#fff;padding:0;}
+    main{max-width:100%;padding:10px;}
+    .tahap{display:none;border:none;padding:0;margin:0;}
+    body.print-all .tahap{display:block !important;page-break-after:always;}
+    body.print-all .tahap:last-of-type{page-break-after:auto;}
+    body.print-one .tahap.print-target{display:block !important;}
+    .card{break-inside:avoid;}
   }
 </style>
 </head>
 <body>
 
 <div class="toolbar">
-  <h1>Modul Baca Abjad — Adaptasi Yanbu'a</h1>
-  <button class="all" onclick="cetakSemua()">Cetak Semua Tahap</button>
-  <button onclick="cetakTahap(1)">Cetak Tahap 1</button>
-  <button onclick="cetakTahap(2)">Cetak Tahap 2</button>
-  <button onclick="cetakTahap(3)">Cetak Tahap 3</button>
-  <button onclick="cetakTahap(4)">Cetak Tahap 4</button>
-  <button onclick="cetakTahap(5)">Cetak Tahap 5</button>
+  <h1>Modul Baca Abjad — Yanbu'a</h1>
+  <div class="tabs" id="tabs"></div>
+  <div class="actions">
+    <button onclick="cetakSatu()">Cetak Tahap Ini</button>
+    <button onclick="cetakSemua()">Cetak Semua</button>
+  </div>
 </div>
 
 <div class="identitas">
-  <div>Nama Anak: <span>&nbsp;</span></div>
-  <div>Mulai Tanggal: <span>&nbsp;</span></div>
-  <div>Pendamping: <span>&nbsp;</span></div>
+  <div>Nama: <span contenteditable="true">&nbsp;</span></div>
+  <div>Tanggal: <span contenteditable="true">&nbsp;</span></div>
 </div>
 
 <main>
 
-<!-- ===================== TAHAP 1 ===================== -->
-<section class="tahap" id="tahap1">
-  <div class="tahap-head">
-    <div class="tahap-num">1</div>
-    <div>
-      <p class="tahap-title">Pengenalan Vokal Dasar</p>
-      <p class="tahap-sub">a — i — u — e — o</p>
+<!-- TAHAP 1 -->
+<section class="tahap" id="tahap1" data-num="1">
+  <div class="tahap-head"><div class="tahap-num">1</div><p class="tahap-title">Vokal Dasar</p></div>
+  <p class="caption">a i u e o — langsung bunyi, bukan nama huruf.</p>
+  <div class="controls">
+    <div class="ctrl-row">
+      <div class="num-field">Jumlah sel: <input type="number" id="t1-count" value="18" min="5" max="40"></div>
+      <button class="gen-btn" onclick="genT1()">🔀 Acak</button>
     </div>
   </div>
-
-  <div class="tujuan">
-    Anak mengenali bentuk huruf dan langsung melafalkan bunyinya (bukan nama huruf), lalu bisa membedakan kelima vokal secara acak tanpa mengeja.
-  </div>
-
-  <h3 class="section-label">1. Jiplak &amp; Tulis Sendiri</h3>
-  <div class="vokal-row">
-    <div class="trace-set">
-      <div class="trace-letter">a</div><div class="trace-letter">a</div><div class="trace-letter">a</div>
-    </div>
-    <div class="write-set">
-      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
-    </div>
-  </div>
-  <div class="vokal-row">
-    <div class="trace-set">
-      <div class="trace-letter">i</div><div class="trace-letter">i</div><div class="trace-letter">i</div>
-    </div>
-    <div class="write-set">
-      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
-    </div>
-  </div>
-  <div class="vokal-row">
-    <div class="trace-set">
-      <div class="trace-letter">u</div><div class="trace-letter">u</div><div class="trace-letter">u</div>
-    </div>
-    <div class="write-set">
-      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
-    </div>
-  </div>
-  <div class="vokal-row">
-    <div class="trace-set">
-      <div class="trace-letter">e</div><div class="trace-letter">e</div><div class="trace-letter">e</div>
-    </div>
-    <div class="write-set">
-      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
-    </div>
-  </div>
-  <div class="vokal-row">
-    <div class="trace-set">
-      <div class="trace-letter">o</div><div class="trace-letter">o</div><div class="trace-letter">o</div>
-    </div>
-    <div class="write-set">
-      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
-    </div>
-  </div>
-
-  <h3 class="section-label">2. Latihan Baca Acak (tunjuk sembarang, anak membaca)</h3>
-  <div class="random-grid">
-    <div>u</div><div>a</div><div>e</div><div>i</div><div>o</div><div>a</div><div>u</div><div>i</div>
-    <div>i</div><div>o</div><div>a</div><div>u</div><div>e</div><div>i</div><div>a</div><div>o</div>
-    <div>e</div><div>u</div><div>o</div><div>a</div><div>i</div><div>o</div><div>e</div><div>u</div>
-  </div>
-  <p class="catatan">Ganti urutan sel acak ini setiap sesi latihan agar anak membaca bunyi, bukan menghafal posisi.</p>
-
-  <div class="indikator">
-    <b>Indikator lulus:</b> anak menyebut bunyi ke-5 vokal secara acak benar ≥ 9 dari 10 percobaan, tanpa jeda lama, tanpa menyebut nama huruf.
-  </div>
+  <div class="grid" id="t1-grid" style="--cols:6;"></div>
 </section>
 
-<!-- ===================== TAHAP 2 ===================== -->
-<section class="tahap" id="tahap2">
-  <div class="tahap-head">
-    <div class="tahap-num">2</div>
-    <div>
-      <p class="tahap-title">Konsonan + Vokal A</p>
-      <p class="tahap-sub">ba — ca — da — dst.</p>
+<!-- TAHAP 2 -->
+<section class="tahap" id="tahap2" data-num="2">
+  <div class="tahap-head"><div class="tahap-num">2</div><p class="tahap-title">Konsonan + A</p></div>
+  <p class="caption">ba ca da — pilih huruf, lalu buat kartu.</p>
+  <div class="controls">
+    <div class="ctrl-row"><div class="ctrl-label">Konsonan</div><div class="row" id="t2-cons"></div></div>
+    <div class="ctrl-row">
+      <button class="mini-btn" onclick="selAll('t2-cons')">Pilih Semua</button>
+      <button class="mini-btn" onclick="selNone('t2-cons')">Kosongkan</button>
+      <button class="gen-btn" onclick="genT2()">🔀 Buat Kartu</button>
     </div>
   </div>
-
-  <div class="tujuan">
-    Anak membaca suku kata terbuka pola Konsonan+A langsung sebagai satu bunyi utuh ("ba", bukan "b-a"). Perkenalkan 2-3 kartu baru per sesi, sisanya pengulangan.
-  </div>
-
-  <h3 class="section-label">Jiplak &amp; Tulis — Urutan Perkenalan</h3>
-  <div class="kartu-grid">
-    <div class="kartu"><div class="besar">ma</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">na</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ba</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">pa</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ta</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">da</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ka</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ga</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">la</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ra</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">sa</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ca</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ja</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ha</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">wa</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">ya</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">fa</div><div class="garis"></div></div>
-    <div class="kartu"><div class="besar">za</div><div class="garis"></div></div>
-  </div>
-  <p class="catatan">Urutan di atas dari yang paling mudah dilafalkan anak (m, n, b, p, t...) ke yang lebih jarang (w, y, f, z). Ikuti urutan ini per minggu, jangan lompat.</p>
-
-  <div class="indikator">
-    <b>Indikator lulus:</b> anak membaca seluruh 18 kartu di atas secara acak tanpa mengeja huruf demi huruf, dengan jeda wajar (bukan hafalan posisi kartu).
-  </div>
+  <div class="grid" id="t2-grid" style="--cols:4;"></div>
 </section>
 
-<!-- ===================== TAHAP 3 ===================== -->
-<section class="tahap" id="tahap3">
-  <div class="tahap-head">
-    <div class="tahap-num">3</div>
-    <div>
-      <p class="tahap-title">Variasi Vokal</p>
-      <p class="tahap-sub">bi — bu — be — bo — dst.</p>
+<!-- TAHAP 3 -->
+<section class="tahap" id="tahap3" data-num="3">
+  <div class="tahap-head"><div class="tahap-num">3</div><p class="tahap-title">Variasi Vokal</p></div>
+  <p class="caption">bi bu be bo — konsonan sama, vokal berganti.</p>
+  <div class="controls">
+    <div class="ctrl-row"><div class="ctrl-label">Konsonan</div><div class="row" id="t3-cons"></div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Vokal</div><div class="row" id="t3-vow"></div></div>
+    <div class="ctrl-row">
+      <div class="num-field">Jumlah kartu: <input type="number" id="t3-count" value="24" min="5" max="80"></div>
+      <button class="gen-btn" onclick="genT3()">🔀 Buat Kartu</button>
     </div>
   </div>
-
-  <div class="tujuan">
-    Konsonan yang sudah dikenal di Tahap 2 kini digabung dengan vokal i, u, e, o. Latih satu kolom (satu vokal) penuh dulu sebelum pindah kolom berikutnya — jangan langsung satu baris penuh.
-  </div>
-
-  <h3 class="section-label">Tabel Variasi Suku Kata</h3>
-  <table class="variasi">
-    <tr><th>Konsonan</th><th>+i</th><th>+u</th><th>+e</th><th>+o</th></tr>
-    <tr><td class="konsonan">m</td><td>mi</td><td>mu</td><td>me</td><td>mo</td></tr>
-    <tr><td class="konsonan">n</td><td>ni</td><td>nu</td><td>ne</td><td>no</td></tr>
-    <tr><td class="konsonan">b</td><td>bi</td><td>bu</td><td>be</td><td>bo</td></tr>
-    <tr><td class="konsonan">p</td><td>pi</td><td>pu</td><td>pe</td><td>po</td></tr>
-    <tr><td class="konsonan">t</td><td>ti</td><td>tu</td><td>te</td><td>to</td></tr>
-    <tr><td class="konsonan">d</td><td>di</td><td>du</td><td>de</td><td>do</td></tr>
-    <tr><td class="konsonan">k</td><td>ki</td><td>ku</td><td>ke</td><td>ko</td></tr>
-    <tr><td class="konsonan">g</td><td>gi</td><td>gu</td><td>ge</td><td>go</td></tr>
-    <tr><td class="konsonan">l</td><td>li</td><td>lu</td><td>le</td><td>lo</td></tr>
-    <tr><td class="konsonan">r</td><td>ri</td><td>ru</td><td>re</td><td>ro</td></tr>
-    <tr><td class="konsonan">s</td><td>si</td><td>su</td><td>se</td><td>so</td></tr>
-    <tr><td class="konsonan">c</td><td>ci</td><td>cu</td><td>ce</td><td>co</td></tr>
-    <tr><td class="konsonan">j</td><td>ji</td><td>ju</td><td>je</td><td>jo</td></tr>
-    <tr><td class="konsonan">h</td><td>hi</td><td>hu</td><td>he</td><td>ho</td></tr>
-    <tr><td class="konsonan">w</td><td>wi</td><td>wu</td><td>we</td><td>wo</td></tr>
-    <tr><td class="konsonan">y</td><td>yi</td><td>yu</td><td>ye</td><td>yo</td></tr>
-    <tr><td class="konsonan">f</td><td>fi</td><td>fu</td><td>fe</td><td>fo</td></tr>
-    <tr><td class="konsonan">z</td><td>zi</td><td>zu</td><td>ze</td><td>zo</td></tr>
-  </table>
-  <p class="catatan">Cara pakai: tutup 3 kolom lain dengan kertas/jari, latih 1 kolom vokal dulu sampai lancar, baru buka kolom berikutnya. Setelah semua kolom lancar, baca satu baris penuh (1 konsonan, 5 vokal) sebagai tes gabungan.</p>
-
-  <div class="indikator">
-    <b>Indikator lulus:</b> anak membaca satu baris penuh (5 suku kata: a-i-u-e-o dengan konsonan sama) untuk minimal 12 dari 18 konsonan, lancar tanpa mengeja.
-  </div>
+  <div class="grid" id="t3-grid" style="--cols:4;"></div>
 </section>
 
-<!-- ===================== TAHAP 4 ===================== -->
-<section class="tahap" id="tahap4">
-  <div class="tahap-head">
-    <div class="tahap-num">4</div>
-    <div>
-      <p class="tahap-title">Suku Kata Tertutup</p>
-      <p class="tahap-sub">berakhiran konsonan — pola mirip sukun di Yanbu'a</p>
+<!-- TAHAP 4 -->
+<section class="tahap" id="tahap4" data-num="4">
+  <div class="tahap-head"><div class="tahap-num">4</div><p class="tahap-title">Suku Kata Tertutup</p></div>
+  <p class="caption">bak ban bas — berakhiran konsonan.</p>
+  <div class="controls">
+    <div class="ctrl-row"><div class="ctrl-label">Awalan</div><div class="row" id="t4-awal"></div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Vokal</div><div class="row" id="t4-vow"></div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Akhiran</div><div class="row" id="t4-akhir"></div></div>
+    <div class="ctrl-row">
+      <div class="num-field">Jumlah kartu: <input type="number" id="t4-count" value="20" min="5" max="80"></div>
+      <button class="gen-btn" onclick="genT4()">🔀 Buat Kartu</button>
     </div>
   </div>
-
-  <div class="tujuan">
-    Anak berlatih suku kata yang ditutup konsonan (KVK). Bunyi vokal berhenti tegas di akhir, mirip cara Yanbu'a melatih bacaan sukun. Latih satu kelompok akhiran per sesi.
-  </div>
-
-  <h3 class="section-label">Latihan per Kelompok Akhiran</h3>
-
-  <div class="akhiran-group">
-    <h4>akhiran -k</h4>
-    <div class="akhiran-row"><span>bak</span><span>dak</span><span>gak</span><span>kak</span><span>mak</span><span>nak</span><span>pak</span><span>tak</span></div>
-  </div>
-  <div class="akhiran-group">
-    <h4>akhiran -n</h4>
-    <div class="akhiran-row"><span>ban</span><span>dan</span><span>kan</span><span>man</span><span>nan</span><span>pan</span><span>ran</span><span>san</span></div>
-  </div>
-  <div class="akhiran-group">
-    <h4>akhiran -s</h4>
-    <div class="akhiran-row"><span>bas</span><span>das</span><span>gas</span><span>kas</span><span>mas</span><span>pas</span><span>ras</span><span>tas</span></div>
-  </div>
-  <div class="akhiran-group">
-    <h4>akhiran -m</h4>
-    <div class="akhiran-row"><span>bam</span><span>dam</span><span>kam</span><span>lam</span><span>ram</span><span>sam</span><span>tam</span></div>
-  </div>
-  <div class="akhiran-group">
-    <h4>akhiran -l</h4>
-    <div class="akhiran-row"><span>bal</span><span>gal</span><span>kal</span><span>mal</span><span>sal</span><span>tal</span></div>
-  </div>
-  <div class="akhiran-group">
-    <h4>akhiran -r</h4>
-    <div class="akhiran-row"><span>bar</span><span>dar</span><span>kar</span><span>lar</span><span>mar</span><span>sar</span></div>
-  </div>
-  <div class="akhiran-group">
-    <h4>akhiran -p</h4>
-    <div class="akhiran-row"><span>cap</span><span>dap</span><span>gap</span><span>kap</span><span>lap</span><span>rap</span></div>
-  </div>
-  <div class="akhiran-group">
-    <h4>akhiran -t</h4>
-    <div class="akhiran-row"><span>bat</span><span>cat</span><span>lat</span><span>rat</span><span>sat</span></div>
-  </div>
-
-  <h3 class="section-label">Latihan Dikte (Orang Tua Ucapkan, Anak Menulis)</h3>
-  <div class="dikte-lines">
-    <div class="baris"><div class="no">1.</div><div class="garis-panjang"></div></div>
-    <div class="baris"><div class="no">2.</div><div class="garis-panjang"></div></div>
-    <div class="baris"><div class="no">3.</div><div class="garis-panjang"></div></div>
-    <div class="baris"><div class="no">4.</div><div class="garis-panjang"></div></div>
-    <div class="baris"><div class="no">5.</div><div class="garis-panjang"></div></div>
-  </div>
-  <p class="catatan">Pilih 5 suku kata acak dari tabel di atas, ucapkan satu per satu, minta anak menuliskannya tanpa melihat contoh.</p>
-
-  <div class="indikator">
-    <b>Indikator lulus:</b> anak membaca suku kata tertutup dari kelompok akhiran mana pun dengan benar ≥ 8 dari 10 percobaan, dan berhasil menulis ≥ 3 dari 5 pada latihan dikte.
-  </div>
+  <div class="grid" id="t4-grid" style="--cols:4;"></div>
+  <p class="caption" style="margin-top:14px;">Dikte (ucapkan, anak menulis):</p>
+  <div class="blank-lines" id="t4-dikte"></div>
 </section>
 
-<!-- ===================== TAHAP 5 ===================== -->
-<section class="tahap" id="tahap5">
-  <div class="tahap-head">
-    <div class="tahap-num">5</div>
-    <div>
-      <p class="tahap-title">Kata Utuh &amp; Kalimat Pendek</p>
-      <p class="tahap-sub">menggabungkan suku kata menjadi bacaan bermakna</p>
+<!-- TAHAP 5 -->
+<section class="tahap" id="tahap5" data-num="5">
+  <div class="tahap-head"><div class="tahap-num">5</div><p class="tahap-title">Kata &amp; Kalimat</p></div>
+  <p class="caption">gabungan suku kata jadi kata bermakna.</p>
+  <div class="controls">
+    <div class="ctrl-row"><div class="ctrl-label">Konsonan diizinkan</div><div class="row" id="t5-cons"></div></div>
+    <div class="ctrl-row"><div class="ctrl-label">Vokal diizinkan</div><div class="row" id="t5-vow"></div></div>
+    <div class="ctrl-row">
+      <div class="num-field">Suku kata: <select id="t5-syll"><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></div>
+      <div class="num-field">Jumlah kata: <input type="number" id="t5-count" value="16" min="4" max="40"></div>
+      <div class="num-field">Mode:
+        <select id="t5-mode">
+          <option value="fill" selected>Kata + latihan</option>
+          <option value="only-real">Hanya kata nyata</option>
+          <option value="only-drill">Hanya latihan</option>
+        </select>
+      </div>
     </div>
+    <div class="ctrl-row"><button class="gen-btn" onclick="genT5()">🔀 Buat Latihan</button></div>
   </div>
-
-  <div class="tujuan">
-    Anak menggabungkan suku kata yang sudah dikuasai menjadi kata bermakna, lalu membaca kalimat sangat pendek (2-3 kata). Ini tahap penggabungan, bukan materi baru.
-  </div>
-
-  <h3 class="section-label">Kata 2 Suku Kata Terbuka</h3>
-  <table class="kata">
-    <tr><td class="no">1</td><td>bola</td><td class="no">6</td><td>mata</td></tr>
-    <tr><td class="no">2</td><td>kuda</td><td class="no">7</td><td>sapi</td></tr>
-    <tr><td class="no">3</td><td>gula</td><td class="no">8</td><td>roti</td></tr>
-    <tr><td class="no">4</td><td>susu</td><td class="no">9</td><td>nasi</td></tr>
-    <tr><td class="no">5</td><td>baju</td><td class="no">10</td><td>lele</td></tr>
-  </table>
-
-  <h3 class="section-label">Kata dengan Suku Kata Tertutup</h3>
-  <table class="kata">
-    <tr><td class="no">1</td><td>ba-pak</td><td class="no">4</td><td>ta-ngan</td></tr>
-    <tr><td class="no">2</td><td>ma-kan</td><td class="no">5</td><td>ker-tas</td></tr>
-    <tr><td class="no">3</td><td>ma-sak</td><td class="no">6</td><td>pin-tar</td></tr>
-  </table>
-
-  <h3 class="section-label">Kalimat Sangat Pendek</h3>
-  <div class="kalimat-list">
-    <div class="baris"><div class="no">1.</div><div class="garis-panjang"></div></div>
-    <div class="baris"><div class="no">2.</div><div class="garis-panjang"></div></div>
-    <div class="baris"><div class="no">3.</div><div class="garis-panjang"></div></div>
-    <div class="baris"><div class="no">4.</div><div class="garis-panjang"></div></div>
-    <div class="baris"><div class="no">5.</div><div class="garis-panjang"></div></div>
-  </div>
-  <p class="catatan">Contoh kalimat yang bisa didiktekan: "ini bola" · "itu kuda" · "ibu masak" · "bapak makan" · "budi pintar". Anak menyalin dari contoh lisan orang tua ke garis di atas, lalu membacanya kembali sendiri.</p>
-
-  <div class="indikator">
-    <b>Indikator lulus:</b> anak membaca kata 2 suku kata (terbuka maupun tertutup) dengan lancar, dan mampu membaca kembali kalimat pendek yang baru saja ia tulis sendiri tanpa dituntun.
-  </div>
+  <div class="grid" id="t5-grid" style="--cols:4;"></div>
+  <p class="caption" style="margin-top:14px;">Kalimat pendek (dikte lisan):</p>
+  <div class="blank-lines" id="t5-kalimat"></div>
 </section>
 
 </main>
-
-<footer>
-  Modul disusun sebagai adaptasi prinsip metode Yanbu'a (sistem langsung bunyi &amp; bertahap) untuk pengenalan huruf abjad latin.
-</footer>
+<footer>Adaptasi prinsip Yanbu'a — sistem langsung bunyi &amp; bertahap.</footer>
 
 <script>
-function resetPrint(){
-  document.body.classList.remove('mode-single');
-  document.querySelectorAll('.tahap').forEach(function(el){ el.classList.remove('show'); });
+const VOWELS = ['a','i','u','e','o'];
+const CONS_ORDER = ['m','n','b','p','t','d','k','g','l','r','s','c','j','h','w','y','f','z','v'];
+const ENDINGS = ['k','n','s','m','l','r','p','t','d','g'];
+
+const WORD_BANK = [
+  ['baca',['ba','ca']], ['bibi',['bi','bi']], ['bobo',['bo','bo']], ['cuci',['cu','ci']],
+  ['coba',['co','ba']], ['babi',['ba','bi']], ['dada',['da','da']], ['duda',['du','da']],
+  ['foto',['fo','to']], ['gagu',['ga','gu']], ['gigi',['gi','gi']], ['gula',['gu','la']],
+  ['guru',['gu','ru']], ['haha',['ha','ha']], ['jaga',['ja','ga']], ['jari',['ja','ri']],
+  ['juga',['ju','ga']], ['kaki',['ka','ki']], ['kuku',['ku','ku']], ['kaca',['ka','ca']],
+  ['lidi',['li','di']], ['lele',['le','le']], ['lucu',['lu','cu']], ['luka',['lu','ka']],
+  ['mama',['ma','ma']], ['madu',['ma','du']], ['mata',['ma','ta']], ['meja',['me','ja']],
+  ['muda',['mu','da']], ['nasi',['na','si']], ['nada',['na','da']], ['naga',['na','ga']],
+  ['nona',['no','na']], ['papa',['pa','pa']], ['pipi',['pi','pi']], ['padi',['pa','di']],
+  ['paku',['pa','ku']], ['peta',['pe','ta']], ['pita',['pi','ta']], ['raja',['ra','ja']],
+  ['rusa',['ru','sa']], ['roda',['ro','da']], ['sapi',['sa','pi']], ['sepi',['se','pi']],
+  ['susu',['su','su']], ['soto',['so','to']], ['sisi',['si','si']], ['tali',['ta','li']],
+  ['topi',['to','pi']], ['satu',['sa','tu']], ['yuyu',['yu','yu']], ['cuka',['cu','ka']],
+  ['dahi',['da','hi']], ['hari',['ha','ri']],
+  ['hela',['he','la']], ['jala',['ja','la']], ['kayu',['ka','yu']], ['loka',['lo','ka']],
+  ['masa',['ma','sa']], ['misa',['mi','sa']], ['rasa',['ra','sa']], ['sari',['sa','ri']],
+  ['sate',['sa','te']], ['siku',['si','ku']], ['sisa',['si','sa']], ['tahu',['ta','hu']],
+  ['tiba',['ti','ba']],
+  ['kelapa',['ke','la','pa']], ['kepala',['ke','pa','la']], ['kereta',['ke','re','ta']],
+  ['sepatu',['se','pa','tu']], ['celana',['ce','la','na']],
+  ['bahasa',['ba','ha','sa']], ['budaya',['bu','da','ya']],
+  ['harimau',['ha','ri','mau']], ['jendela',['jen','de','la']],
+  ['kacamata',['ka','ca','ma','ta']], ['matahari',['ma','ta','ha','ri']],
+  ['bicara',['bi','ca','ra']]
+];
+
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function rand(a){return a[Math.floor(Math.random()*a.length)];}
+
+function buildChips(id, items, defaultOn){
+  const el = document.getElementById(id);
+  el.className = 'row';
+  el.innerHTML='';
+  items.forEach(ch=>{
+    const lbl=document.createElement('label');
+    lbl.className='chip'+(defaultOn?' active':'');
+    lbl.innerHTML=`<input type="checkbox" ${defaultOn?'checked':''} data-val="${ch}"> ${ch}`;
+    lbl.querySelector('input').addEventListener('change',e=>lbl.classList.toggle('active',e.target.checked));
+    el.appendChild(lbl);
+  });
 }
-function cetakTahap(n){
-  resetPrint();
-  document.body.classList.add('mode-single');
-  document.getElementById('tahap'+n).classList.add('show');
+function getChecked(id){return Array.from(document.querySelectorAll('#'+id+' input:checked')).map(i=>i.dataset.val);}
+function selAll(id){document.querySelectorAll('#'+id+' input').forEach(i=>{i.checked=true;i.closest('.chip').classList.add('active');});}
+function selNone(id){document.querySelectorAll('#'+id+' input').forEach(i=>{i.checked=false;i.closest('.chip').classList.remove('active');});}
+
+buildChips('t2-cons', CONS_ORDER, true);
+buildChips('t3-cons', CONS_ORDER, true);
+buildChips('t3-vow', VOWELS.filter(v=>v!=='a'), true);
+buildChips('t4-awal', CONS_ORDER, true);
+buildChips('t4-vow', VOWELS, true);
+buildChips('t4-akhir', ENDINGS, true);
+buildChips('t5-cons', CONS_ORDER, true);
+buildChips('t5-vow', VOWELS, true);
+
+function renderGrid(gridId, words, withHint){
+  const grid=document.getElementById(gridId);
+  grid.innerHTML='';
+  words.forEach(w=>{
+    const card=document.createElement('div');
+    card.className='card';
+    card.innerHTML=`<div class="word" contenteditable="true">${w.text}</div><div class="write-line"></div>${withHint&&w.hint?`<div class="hint">${w.hint}</div>`:''}`;
+    grid.appendChild(card);
+  });
+}
+
+function genT1(){
+  const n=parseInt(document.getElementById('t1-count').value,10)||18;
+  const arr=[]; for(let i=0;i<n;i++) arr.push({text:rand(VOWELS)});
+  renderGrid('t1-grid',arr,false);
+}
+function genT2(){
+  const cons=getChecked('t2-cons');
+  const ordered=CONS_ORDER.filter(c=>cons.includes(c));
+  renderGrid('t2-grid', ordered.map(c=>({text:c+'a'})), false);
+}
+function genT3(){
+  const cons=getChecked('t3-cons'), vow=getChecked('t3-vow');
+  const n=parseInt(document.getElementById('t3-count').value,10)||24;
+  if(cons.length===0||vow.length===0){renderGrid('t3-grid',[],false);return;}
+  const combos=[]; cons.forEach(c=>vow.forEach(v=>combos.push(c+v)));
+  const pick=shuffle(combos).slice(0,n);
+  renderGrid('t3-grid', pick.map(s=>({text:s})), false);
+}
+function genT4(){
+  const awal=getChecked('t4-awal'), vow=getChecked('t4-vow'), akhir=getChecked('t4-akhir');
+  const n=parseInt(document.getElementById('t4-count').value,10)||20;
+  if(awal.length===0||vow.length===0||akhir.length===0){renderGrid('t4-grid',[],false);return;}
+  const set=new Set(); const list=[]; let tries=0;
+  while(list.length<n && tries<600){
+    tries++;
+    const w=rand(awal)+rand(vow)+rand(akhir);
+    if(!set.has(w)){set.add(w);list.push(w);}
+  }
+  renderGrid('t4-grid', list.map(s=>({text:s})), false);
+  const dikte=document.getElementById('t4-dikte');
+  dikte.innerHTML='';
+  for(let i=1;i<=5;i++){
+    dikte.innerHTML+=`<div class="baris"><div class="no">${i}.</div><div class="garis"></div></div>`;
+  }
+}
+function consonantsOf(word){return word.split('').filter(ch=>CONS_ORDER.includes(ch));}
+function vowelsOf(word){return word.split('').filter(ch=>VOWELS.includes(ch));}
+function genT5(){
+  const cons=getChecked('t5-cons'), vow=getChecked('t5-vow');
+  const syll=parseInt(document.getElementById('t5-syll').value,10);
+  const count=Math.max(4,Math.min(40,parseInt(document.getElementById('t5-count').value,10)||16));
+  const mode=document.getElementById('t5-mode').value;
+  let real=[];
+  if(mode!=='only-drill'){
+    real=WORD_BANK.filter(([word,s])=>{
+      if(s.length!==syll) return false;
+      return consonantsOf(word).every(ch=>cons.includes(ch)) && vowelsOf(word).every(ch=>vow.includes(ch));
+    });
+    real=shuffle(real);
+  }
+  let cards=[];
+  if(mode==='only-real'){
+    cards=real.slice(0,count).map(([w,s])=>({text:s.join('-'),hint:w}));
+  } else if(mode==='only-drill'){
+    for(let i=0;i<count;i++){
+      if(cons.length===0||vow.length===0) break;
+      const s=[]; for(let k=0;k<syll;k++) s.push(rand(cons)+rand(vow));
+      cards.push({text:s.join('-'),hint:'latihan'});
+    }
+  } else {
+    cards=real.slice(0,count).map(([w,s])=>({text:s.join('-'),hint:w}));
+    let guard=0;
+    while(cards.length<count && guard<300 && cons.length>0 && vow.length>0){
+      guard++;
+      const s=[]; for(let k=0;k<syll;k++) s.push(rand(cons)+rand(vow));
+      cards.push({text:s.join('-'),hint:'latihan'});
+    }
+  }
+  renderGrid('t5-grid', cards, true);
+  const kal=document.getElementById('t5-kalimat');
+  kal.innerHTML='';
+  for(let i=1;i<=3;i++){
+    kal.innerHTML+=`<div class="baris"><div class="no">${i}.</div><div class="garis"></div></div>`;
+  }
+}
+
+// tabs
+const tabsEl=document.getElementById('tabs');
+for(let i=1;i<=5;i++){
+  const b=document.createElement('button');
+  b.textContent='Tahap '+i;
+  b.onclick=()=>showTab(i);
+  b.id='tabbtn'+i;
+  tabsEl.appendChild(b);
+}
+function showTab(n){
+  document.querySelectorAll('.tahap').forEach(s=>s.classList.toggle('active', s.id==='tahap'+n));
+  document.querySelectorAll('.tabs button').forEach((b,i)=>b.classList.toggle('active', i===n-1));
+}
+showTab(1);
+
+function cetakSatu(){
+  const active=document.querySelector('.tahap.active');
+  document.querySelectorAll('.tahap').forEach(s=>s.classList.remove('print-target'));
+  active.classList.add('print-target');
+  document.body.classList.add('print-one');
   window.print();
 }
 function cetakSemua(){
-  resetPrint();
+  if(!document.getElementById('t1-grid').children.length) genT1();
+  if(!document.getElementById('t2-grid').children.length) genT2();
+  if(!document.getElementById('t3-grid').children.length) genT3();
+  if(!document.getElementById('t4-grid').children.length) genT4();
+  if(!document.getElementById('t5-grid').children.length) genT5();
+  document.body.classList.add('print-all');
   window.print();
 }
-window.addEventListener('afterprint', resetPrint);
-</script>
+window.addEventListener('afterprint', ()=>{
+  document.body.classList.remove('print-one','print-all');
+  document.querySelectorAll('.tahap').forEach(s=>s.classList.remove('print-target'));
+});
 
+// auto-generate awal
+genT1(); genT2(); genT3(); genT4(); genT5();
+</script>
 </body>
 </html>
