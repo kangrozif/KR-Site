@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modul Belajar Membaca Abjad — Adaptasi Metode Yanbu'a</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1D3557;
+    --teal:#2A9D8F;
+    --amber:#F0A202;
+    --paper:#FAF8F3;
+    --line:#D8D3C5;
+    --trace:#CBD1C9;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Nunito',sans-serif;
+    background:var(--paper);
+    color:var(--navy);
+    padding-bottom:60px;
+  }
+  .toolbar{
+    position:sticky; top:0; z-index:50;
+    background:var(--navy);
+    color:#fff;
+    padding:16px 24px;
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  }
+  .toolbar h1{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.05rem;
+    margin:0 16px 0 0;
+    font-weight:700;
+    flex:1 1 220px;
+  }
+  .toolbar button{
+    font-family:'Nunito',sans-serif;
+    font-weight:700;
+    font-size:.85rem;
+    border:none;
+    border-radius:8px;
+    padding:9px 14px;
+    cursor:pointer;
+    background:var(--teal);
+    color:#fff;
+  }
+  .toolbar button.all{ background:var(--amber); color:var(--navy); }
+  .toolbar button:hover{ filter:brightness(1.08); }
+
+  .identitas{
+    max-width:900px; margin:22px auto 0; padding:0 24px;
+    display:flex; flex-wrap:wrap; gap:24px;
+    font-size:.95rem;
+  }
+  .identitas span{ border-bottom:1px solid var(--navy); padding:2px 6px 4px; min-width:160px; display:inline-block; }
+
+  main{ max-width:900px; margin:0 auto; padding:24px; }
+
+  .tahap{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px 30px;
+    margin-bottom:34px;
+  }
+  .tahap-head{
+    display:flex; align-items:baseline; gap:14px;
+    border-bottom:2px solid var(--teal);
+    padding-bottom:10px; margin-bottom:16px;
+  }
+  .tahap-num{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:2rem;
+    color:var(--teal);
+    line-height:1;
+  }
+  .tahap-title{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:1.35rem;
+    margin:0;
+  }
+  .tahap-sub{
+    font-size:.9rem; color:#556; margin-top:2px;
+  }
+  .tujuan{
+    background:#F2F7F5; border-left:4px solid var(--teal);
+    padding:10px 14px; border-radius:0 8px 8px 0;
+    font-size:.92rem; margin-bottom:20px;
+  }
+  h3.section-label{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1rem; font-weight:700;
+    margin:22px 0 10px;
+    color:var(--navy);
+  }
+
+  /* Tracing rows (Tahap 1) */
+  .vokal-row{
+    display:flex; align-items:center; gap:18px;
+    padding:10px 0; border-bottom:1px dashed var(--line);
+  }
+  .vokal-row:last-child{ border-bottom:none; }
+  .trace-set{ display:flex; gap:10px; }
+  .trace-letter{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:2.6rem;
+    color:var(--trace);
+    width:56px; text-align:center;
+  }
+  .write-box{
+    width:56px; height:56px;
+    border:1.5px dashed #B9C4BC;
+    border-radius:8px;
+  }
+  .write-set{ display:flex; gap:10px; }
+
+  .random-grid{
+    display:grid; grid-template-columns:repeat(8,1fr);
+    gap:10px; margin-top:8px;
+  }
+  .random-grid div{
+    text-align:center; font-family:'Baloo 2',sans-serif;
+    font-weight:700; font-size:1.3rem;
+    background:#F2F7F5; border-radius:8px; padding:10px 0;
+  }
+
+  /* Tahap 2 & 4 card grid */
+  .kartu-grid{
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  .kartu{
+    border:1px solid var(--line); border-radius:10px;
+    padding:12px; text-align:center;
+    break-inside:avoid;
+  }
+  .kartu .besar{
+    font-family:'Baloo 2',sans-serif; font-weight:700;
+    font-size:1.9rem; color:var(--trace);
+    margin-bottom:6px;
+  }
+  .kartu .garis{
+    height:32px; border-bottom:1.5px dashed #B9C4BC;
+    margin-top:6px;
+  }
+
+  /* Tahap 3 table */
+  table.variasi{
+    width:100%; border-collapse:collapse; font-size:.95rem;
+  }
+  table.variasi th, table.variasi td{
+    border:1px solid var(--line); padding:8px 6px; text-align:center;
+  }
+  table.variasi th{
+    background:var(--navy); color:#fff; font-family:'Baloo 2',sans-serif; font-weight:600;
+  }
+  table.variasi td.konsonan{
+    font-weight:800; background:#F2F7F5;
+  }
+  table.variasi td{ font-family:'Baloo 2',sans-serif; font-weight:600; }
+
+  /* Tahap 4 groups */
+  .akhiran-group{ margin-bottom:16px; break-inside:avoid; }
+  .akhiran-group h4{
+    font-family:'Baloo 2',sans-serif; font-size:.95rem;
+    background:var(--amber); color:var(--navy);
+    display:inline-block; padding:3px 12px; border-radius:6px 6px 0 0;
+    margin:0;
+  }
+  .akhiran-row{
+    display:flex; flex-wrap:wrap; gap:8px;
+    border:1px solid var(--line); border-top:3px solid var(--amber);
+    border-radius:0 8px 8px 8px; padding:10px;
+  }
+  .akhiran-row span{
+    font-family:'Baloo 2',sans-serif; font-weight:700;
+    background:#FFF6E3; border-radius:6px; padding:6px 12px;
+    font-size:1.05rem;
+  }
+
+  .dikte-lines{ margin-top:10px; }
+  .dikte-lines .baris{
+    display:flex; align-items:center; gap:10px; margin-bottom:10px;
+  }
+  .dikte-lines .no{ font-weight:800; width:20px; }
+  .dikte-lines .garis-panjang{
+    flex:1; border-bottom:1.5px solid #B9C4BC; height:26px;
+  }
+
+  /* Tahap 5 */
+  table.kata{
+    width:100%; border-collapse:collapse; margin-bottom:10px;
+  }
+  table.kata td{
+    border:1px solid var(--line); padding:10px;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:1.15rem;
+  }
+  table.kata td.no{
+    width:30px; font-weight:400; font-family:'Nunito',sans-serif; color:#778;
+    text-align:center;
+  }
+  .kalimat-list{ margin-top:6px; }
+  .kalimat-list .baris{
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .kalimat-list .no{ font-weight:800; width:22px; }
+  .kalimat-list .garis-panjang{
+    flex:1; border-bottom:1.5px solid #B9C4BC; height:30px;
+  }
+
+  .indikator{
+    margin-top:20px; background:#FFF6E3; border:1px dashed var(--amber);
+    border-radius:8px; padding:12px 16px; font-size:.88rem;
+  }
+  .indikator b{ color:#8a5b00; }
+
+  .catatan{
+    font-size:.8rem; color:#667; font-style:italic; margin-top:6px;
+  }
+
+  footer{
+    text-align:center; font-size:.78rem; color:#889;
+    padding:20px; max-width:900px; margin:0 auto;
+  }
+
+  @media print{
+    .toolbar, footer{ display:none !important; }
+    body{ background:#fff; padding:0; }
+    .tahap{ box-shadow:none; border:none; padding:0; margin:0; }
+    .tahap-head{ border-bottom:2px solid #000; }
+    main{ max-width:100%; padding:14px; }
+    .identitas{ padding:0 14px; }
+    .trace-letter{ color:#aaa; }
+    table.variasi th{ background:#eee !important; color:#000 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .akhiran-group h4{ background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .kartu, .akhiran-row, table.variasi, table.kata { break-inside:avoid; }
+    body.mode-single .tahap{ display:none; }
+    body.mode-single .tahap.show{ display:block; }
+    .tahap{ page-break-after:always; }
+    .tahap:last-of-type{ page-break-after:auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h1>Modul Baca Abjad — Adaptasi Yanbu'a</h1>
+  <button class="all" onclick="cetakSemua()">Cetak Semua Tahap</button>
+  <button onclick="cetakTahap(1)">Cetak Tahap 1</button>
+  <button onclick="cetakTahap(2)">Cetak Tahap 2</button>
+  <button onclick="cetakTahap(3)">Cetak Tahap 3</button>
+  <button onclick="cetakTahap(4)">Cetak Tahap 4</button>
+  <button onclick="cetakTahap(5)">Cetak Tahap 5</button>
+</div>
+
+<div class="identitas">
+  <div>Nama Anak: <span>&nbsp;</span></div>
+  <div>Mulai Tanggal: <span>&nbsp;</span></div>
+  <div>Pendamping: <span>&nbsp;</span></div>
+</div>
+
+<main>
+
+<!-- ===================== TAHAP 1 ===================== -->
+<section class="tahap" id="tahap1">
+  <div class="tahap-head">
+    <div class="tahap-num">1</div>
+    <div>
+      <p class="tahap-title">Pengenalan Vokal Dasar</p>
+      <p class="tahap-sub">a — i — u — e — o</p>
+    </div>
+  </div>
+
+  <div class="tujuan">
+    Anak mengenali bentuk huruf dan langsung melafalkan bunyinya (bukan nama huruf), lalu bisa membedakan kelima vokal secara acak tanpa mengeja.
+  </div>
+
+  <h3 class="section-label">1. Jiplak &amp; Tulis Sendiri</h3>
+  <div class="vokal-row">
+    <div class="trace-set">
+      <div class="trace-letter">a</div><div class="trace-letter">a</div><div class="trace-letter">a</div>
+    </div>
+    <div class="write-set">
+      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
+    </div>
+  </div>
+  <div class="vokal-row">
+    <div class="trace-set">
+      <div class="trace-letter">i</div><div class="trace-letter">i</div><div class="trace-letter">i</div>
+    </div>
+    <div class="write-set">
+      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
+    </div>
+  </div>
+  <div class="vokal-row">
+    <div class="trace-set">
+      <div class="trace-letter">u</div><div class="trace-letter">u</div><div class="trace-letter">u</div>
+    </div>
+    <div class="write-set">
+      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
+    </div>
+  </div>
+  <div class="vokal-row">
+    <div class="trace-set">
+      <div class="trace-letter">e</div><div class="trace-letter">e</div><div class="trace-letter">e</div>
+    </div>
+    <div class="write-set">
+      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
+    </div>
+  </div>
+  <div class="vokal-row">
+    <div class="trace-set">
+      <div class="trace-letter">o</div><div class="trace-letter">o</div><div class="trace-letter">o</div>
+    </div>
+    <div class="write-set">
+      <div class="write-box"></div><div class="write-box"></div><div class="write-box"></div>
+    </div>
+  </div>
+
+  <h3 class="section-label">2. Latihan Baca Acak (tunjuk sembarang, anak membaca)</h3>
+  <div class="random-grid">
+    <div>u</div><div>a</div><div>e</div><div>i</div><div>o</div><div>a</div><div>u</div><div>i</div>
+    <div>i</div><div>o</div><div>a</div><div>u</div><div>e</div><div>i</div><div>a</div><div>o</div>
+    <div>e</div><div>u</div><div>o</div><div>a</div><div>i</div><div>o</div><div>e</div><div>u</div>
+  </div>
+  <p class="catatan">Ganti urutan sel acak ini setiap sesi latihan agar anak membaca bunyi, bukan menghafal posisi.</p>
+
+  <div class="indikator">
+    <b>Indikator lulus:</b> anak menyebut bunyi ke-5 vokal secara acak benar ≥ 9 dari 10 percobaan, tanpa jeda lama, tanpa menyebut nama huruf.
+  </div>
+</section>
+
+<!-- ===================== TAHAP 2 ===================== -->
+<section class="tahap" id="tahap2">
+  <div class="tahap-head">
+    <div class="tahap-num">2</div>
+    <div>
+      <p class="tahap-title">Konsonan + Vokal A</p>
+      <p class="tahap-sub">ba — ca — da — dst.</p>
+    </div>
+  </div>
+
+  <div class="tujuan">
+    Anak membaca suku kata terbuka pola Konsonan+A langsung sebagai satu bunyi utuh ("ba", bukan "b-a"). Perkenalkan 2-3 kartu baru per sesi, sisanya pengulangan.
+  </div>
+
+  <h3 class="section-label">Jiplak &amp; Tulis — Urutan Perkenalan</h3>
+  <div class="kartu-grid">
+    <div class="kartu"><div class="besar">ma</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">na</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ba</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">pa</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ta</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">da</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ka</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ga</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">la</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ra</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">sa</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ca</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ja</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ha</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">wa</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">ya</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">fa</div><div class="garis"></div></div>
+    <div class="kartu"><div class="besar">za</div><div class="garis"></div></div>
+  </div>
+  <p class="catatan">Urutan di atas dari yang paling mudah dilafalkan anak (m, n, b, p, t...) ke yang lebih jarang (w, y, f, z). Ikuti urutan ini per minggu, jangan lompat.</p>
+
+  <div class="indikator">
+    <b>Indikator lulus:</b> anak membaca seluruh 18 kartu di atas secara acak tanpa mengeja huruf demi huruf, dengan jeda wajar (bukan hafalan posisi kartu).
+  </div>
+</section>
+
+<!-- ===================== TAHAP 3 ===================== -->
+<section class="tahap" id="tahap3">
+  <div class="tahap-head">
+    <div class="tahap-num">3</div>
+    <div>
+      <p class="tahap-title">Variasi Vokal</p>
+      <p class="tahap-sub">bi — bu — be — bo — dst.</p>
+    </div>
+  </div>
+
+  <div class="tujuan">
+    Konsonan yang sudah dikenal di Tahap 2 kini digabung dengan vokal i, u, e, o. Latih satu kolom (satu vokal) penuh dulu sebelum pindah kolom berikutnya — jangan langsung satu baris penuh.
+  </div>
+
+  <h3 class="section-label">Tabel Variasi Suku Kata</h3>
+  <table class="variasi">
+    <tr><th>Konsonan</th><th>+i</th><th>+u</th><th>+e</th><th>+o</th></tr>
+    <tr><td class="konsonan">m</td><td>mi</td><td>mu</td><td>me</td><td>mo</td></tr>
+    <tr><td class="konsonan">n</td><td>ni</td><td>nu</td><td>ne</td><td>no</td></tr>
+    <tr><td class="konsonan">b</td><td>bi</td><td>bu</td><td>be</td><td>bo</td></tr>
+    <tr><td class="konsonan">p</td><td>pi</td><td>pu</td><td>pe</td><td>po</td></tr>
+    <tr><td class="konsonan">t</td><td>ti</td><td>tu</td><td>te</td><td>to</td></tr>
+    <tr><td class="konsonan">d</td><td>di</td><td>du</td><td>de</td><td>do</td></tr>
+    <tr><td class="konsonan">k</td><td>ki</td><td>ku</td><td>ke</td><td>ko</td></tr>
+    <tr><td class="konsonan">g</td><td>gi</td><td>gu</td><td>ge</td><td>go</td></tr>
+    <tr><td class="konsonan">l</td><td>li</td><td>lu</td><td>le</td><td>lo</td></tr>
+    <tr><td class="konsonan">r</td><td>ri</td><td>ru</td><td>re</td><td>ro</td></tr>
+    <tr><td class="konsonan">s</td><td>si</td><td>su</td><td>se</td><td>so</td></tr>
+    <tr><td class="konsonan">c</td><td>ci</td><td>cu</td><td>ce</td><td>co</td></tr>
+    <tr><td class="konsonan">j</td><td>ji</td><td>ju</td><td>je</td><td>jo</td></tr>
+    <tr><td class="konsonan">h</td><td>hi</td><td>hu</td><td>he</td><td>ho</td></tr>
+    <tr><td class="konsonan">w</td><td>wi</td><td>wu</td><td>we</td><td>wo</td></tr>
+    <tr><td class="konsonan">y</td><td>yi</td><td>yu</td><td>ye</td><td>yo</td></tr>
+    <tr><td class="konsonan">f</td><td>fi</td><td>fu</td><td>fe</td><td>fo</td></tr>
+    <tr><td class="konsonan">z</td><td>zi</td><td>zu</td><td>ze</td><td>zo</td></tr>
+  </table>
+  <p class="catatan">Cara pakai: tutup 3 kolom lain dengan kertas/jari, latih 1 kolom vokal dulu sampai lancar, baru buka kolom berikutnya. Setelah semua kolom lancar, baca satu baris penuh (1 konsonan, 5 vokal) sebagai tes gabungan.</p>
+
+  <div class="indikator">
+    <b>Indikator lulus:</b> anak membaca satu baris penuh (5 suku kata: a-i-u-e-o dengan konsonan sama) untuk minimal 12 dari 18 konsonan, lancar tanpa mengeja.
+  </div>
+</section>
+
+<!-- ===================== TAHAP 4 ===================== -->
+<section class="tahap" id="tahap4">
+  <div class="tahap-head">
+    <div class="tahap-num">4</div>
+    <div>
+      <p class="tahap-title">Suku Kata Tertutup</p>
+      <p class="tahap-sub">berakhiran konsonan — pola mirip sukun di Yanbu'a</p>
+    </div>
+  </div>
+
+  <div class="tujuan">
+    Anak berlatih suku kata yang ditutup konsonan (KVK). Bunyi vokal berhenti tegas di akhir, mirip cara Yanbu'a melatih bacaan sukun. Latih satu kelompok akhiran per sesi.
+  </div>
+
+  <h3 class="section-label">Latihan per Kelompok Akhiran</h3>
+
+  <div class="akhiran-group">
+    <h4>akhiran -k</h4>
+    <div class="akhiran-row"><span>bak</span><span>dak</span><span>gak</span><span>kak</span><span>mak</span><span>nak</span><span>pak</span><span>tak</span></div>
+  </div>
+  <div class="akhiran-group">
+    <h4>akhiran -n</h4>
+    <div class="akhiran-row"><span>ban</span><span>dan</span><span>kan</span><span>man</span><span>nan</span><span>pan</span><span>ran</span><span>san</span></div>
+  </div>
+  <div class="akhiran-group">
+    <h4>akhiran -s</h4>
+    <div class="akhiran-row"><span>bas</span><span>das</span><span>gas</span><span>kas</span><span>mas</span><span>pas</span><span>ras</span><span>tas</span></div>
+  </div>
+  <div class="akhiran-group">
+    <h4>akhiran -m</h4>
+    <div class="akhiran-row"><span>bam</span><span>dam</span><span>kam</span><span>lam</span><span>ram</span><span>sam</span><span>tam</span></div>
+  </div>
+  <div class="akhiran-group">
+    <h4>akhiran -l</h4>
+    <div class="akhiran-row"><span>bal</span><span>gal</span><span>kal</span><span>mal</span><span>sal</span><span>tal</span></div>
+  </div>
+  <div class="akhiran-group">
+    <h4>akhiran -r</h4>
+    <div class="akhiran-row"><span>bar</span><span>dar</span><span>kar</span><span>lar</span><span>mar</span><span>sar</span></div>
+  </div>
+  <div class="akhiran-group">
+    <h4>akhiran -p</h4>
+    <div class="akhiran-row"><span>cap</span><span>dap</span><span>gap</span><span>kap</span><span>lap</span><span>rap</span></div>
+  </div>
+  <div class="akhiran-group">
+    <h4>akhiran -t</h4>
+    <div class="akhiran-row"><span>bat</span><span>cat</span><span>lat</span><span>rat</span><span>sat</span></div>
+  </div>
+
+  <h3 class="section-label">Latihan Dikte (Orang Tua Ucapkan, Anak Menulis)</h3>
+  <div class="dikte-lines">
+    <div class="baris"><div class="no">1.</div><div class="garis-panjang"></div></div>
+    <div class="baris"><div class="no">2.</div><div class="garis-panjang"></div></div>
+    <div class="baris"><div class="no">3.</div><div class="garis-panjang"></div></div>
+    <div class="baris"><div class="no">4.</div><div class="garis-panjang"></div></div>
+    <div class="baris"><div class="no">5.</div><div class="garis-panjang"></div></div>
+  </div>
+  <p class="catatan">Pilih 5 suku kata acak dari tabel di atas, ucapkan satu per satu, minta anak menuliskannya tanpa melihat contoh.</p>
+
+  <div class="indikator">
+    <b>Indikator lulus:</b> anak membaca suku kata tertutup dari kelompok akhiran mana pun dengan benar ≥ 8 dari 10 percobaan, dan berhasil menulis ≥ 3 dari 5 pada latihan dikte.
+  </div>
+</section>
+
+<!-- ===================== TAHAP 5 ===================== -->
+<section class="tahap" id="tahap5">
+  <div class="tahap-head">
+    <div class="tahap-num">5</div>
+    <div>
+      <p class="tahap-title">Kata Utuh &amp; Kalimat Pendek</p>
+      <p class="tahap-sub">menggabungkan suku kata menjadi bacaan bermakna</p>
+    </div>
+  </div>
+
+  <div class="tujuan">
+    Anak menggabungkan suku kata yang sudah dikuasai menjadi kata bermakna, lalu membaca kalimat sangat pendek (2-3 kata). Ini tahap penggabungan, bukan materi baru.
+  </div>
+
+  <h3 class="section-label">Kata 2 Suku Kata Terbuka</h3>
+  <table class="kata">
+    <tr><td class="no">1</td><td>bola</td><td class="no">6</td><td>mata</td></tr>
+    <tr><td class="no">2</td><td>kuda</td><td class="no">7</td><td>sapi</td></tr>
+    <tr><td class="no">3</td><td>gula</td><td class="no">8</td><td>roti</td></tr>
+    <tr><td class="no">4</td><td>susu</td><td class="no">9</td><td>nasi</td></tr>
+    <tr><td class="no">5</td><td>baju</td><td class="no">10</td><td>lele</td></tr>
+  </table>
+
+  <h3 class="section-label">Kata dengan Suku Kata Tertutup</h3>
+  <table class="kata">
+    <tr><td class="no">1</td><td>ba-pak</td><td class="no">4</td><td>ta-ngan</td></tr>
+    <tr><td class="no">2</td><td>ma-kan</td><td class="no">5</td><td>ker-tas</td></tr>
+    <tr><td class="no">3</td><td>ma-sak</td><td class="no">6</td><td>pin-tar</td></tr>
+  </table>
+
+  <h3 class="section-label">Kalimat Sangat Pendek</h3>
+  <div class="kalimat-list">
+    <div class="baris"><div class="no">1.</div><div class="garis-panjang"></div></div>
+    <div class="baris"><div class="no">2.</div><div class="garis-panjang"></div></div>
+    <div class="baris"><div class="no">3.</div><div class="garis-panjang"></div></div>
+    <div class="baris"><div class="no">4.</div><div class="garis-panjang"></div></div>
+    <div class="baris"><div class="no">5.</div><div class="garis-panjang"></div></div>
+  </div>
+  <p class="catatan">Contoh kalimat yang bisa didiktekan: "ini bola" · "itu kuda" · "ibu masak" · "bapak makan" · "budi pintar". Anak menyalin dari contoh lisan orang tua ke garis di atas, lalu membacanya kembali sendiri.</p>
+
+  <div class="indikator">
+    <b>Indikator lulus:</b> anak membaca kata 2 suku kata (terbuka maupun tertutup) dengan lancar, dan mampu membaca kembali kalimat pendek yang baru saja ia tulis sendiri tanpa dituntun.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Modul disusun sebagai adaptasi prinsip metode Yanbu'a (sistem langsung bunyi &amp; bertahap) untuk pengenalan huruf abjad latin.
+</footer>
+
+<script>
+function resetPrint(){
+  document.body.classList.remove('mode-single');
+  document.querySelectorAll('.tahap').forEach(function(el){ el.classList.remove('show'); });
+}
+function cetakTahap(n){
+  resetPrint();
+  document.body.classList.add('mode-single');
+  document.getElementById('tahap'+n).classList.add('show');
+  window.print();
+}
+function cetakSemua(){
+  resetPrint();
+  window.print();
+}
+window.addEventListener('afterprint', resetPrint);
+</script>
+
+</body>
+</html>
