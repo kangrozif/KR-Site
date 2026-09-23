@@ -66,6 +66,8 @@
   .blank-lines .baris{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
   .blank-lines .no{font-weight:800;width:16px;font-size:.85rem;}
   .blank-lines .garis{flex:1;border-bottom:1.5px solid #b9c4bc;height:24px;}
+  .grp-label{font-family:'Baloo 2',sans-serif;font-size:.8rem;font-weight:700;color:var(--teal);margin:14px 0 6px;}
+  .grp-label:first-of-type{margin-top:0;}
 
   footer{text-align:center;font-size:.72rem;color:var(--muted);padding:16px;}
 
@@ -183,6 +185,71 @@
   <div class="grid" id="t5-grid" style="--cols:4;"></div>
   <p class="caption" style="margin-top:14px;">Kalimat pendek (dikte lisan):</p>
   <div class="blank-lines" id="t5-kalimat"></div>
+</section>
+
+<!-- TAHAP 6 -->
+<section class="tahap" id="tahap6" data-num="6">
+  <div class="tahap-head"><div class="tahap-num">6</div><p class="tahap-title">Bunyi "ng"</p></div>
+  <p class="caption">satu bunyi sengau, bukan n+g terpisah.</p>
+  <div class="controls">
+    <div class="ctrl-row">
+      <div class="num-field">Jumlah kata: <input type="number" id="t6-count" value="16" min="4" max="22"></div>
+      <button class="gen-btn" onclick="genT6()">🔀 Acak</button>
+    </div>
+  </div>
+  <div class="grid" id="t6-grid" style="--cols:4;"></div>
+</section>
+
+<!-- TAHAP 7 -->
+<section class="tahap" id="tahap7" data-num="7">
+  <div class="tahap-head"><div class="tahap-num">7</div><p class="tahap-title">Bunyi "ny"</p></div>
+  <p class="caption">satu bunyi, bukan n+y terpisah.</p>
+  <div class="controls">
+    <div class="ctrl-row">
+      <div class="num-field">Jumlah kata: <input type="number" id="t7-count" value="11" min="4" max="11"></div>
+      <button class="gen-btn" onclick="genT7()">🔀 Acak</button>
+    </div>
+  </div>
+  <div class="grid" id="t7-grid" style="--cols:4;"></div>
+</section>
+
+<!-- TAHAP 8 -->
+<section class="tahap" id="tahap8" data-num="8">
+  <div class="tahap-head"><div class="tahap-num">8</div><p class="tahap-title">Campuran Vokal (Diftong)</p></div>
+  <p class="caption">ai au oi ui dibaca luncur jadi satu.</p>
+  <div class="controls">
+    <div class="ctrl-row">
+      <div class="num-field">Jumlah kata: <input type="number" id="t8-count" value="18" min="4" max="18"></div>
+      <button class="gen-btn" onclick="genT8()">🔀 Acak</button>
+    </div>
+  </div>
+  <div class="grid" id="t8-grid" style="--cols:4;"></div>
+</section>
+
+<!-- TAHAP 9 -->
+<section class="tahap" id="tahap9" data-num="9">
+  <div class="tahap-head"><div class="tahap-num">9</div><p class="tahap-title">Gugus Konsonan</p></div>
+  <p class="caption">dua-tiga huruf mati berdempet.</p>
+  <div class="controls">
+    <div class="ctrl-row">
+      <div class="num-field">Jumlah kata: <input type="number" id="t9-count" value="18" min="4" max="24"></div>
+      <button class="gen-btn" onclick="genT9()">🔀 Acak</button>
+    </div>
+  </div>
+  <div class="grid" id="t9-grid" style="--cols:4;"></div>
+</section>
+
+<!-- TAHAP 10 -->
+<section class="tahap" id="tahap10" data-num="10">
+  <div class="tahap-head"><div class="tahap-num">10</div><p class="tahap-title">Latihan Campuran</p></div>
+  <p class="caption">gabungan sengau, diftong, dan gugus konsonan — untuk pemantapan.</p>
+  <div class="controls">
+    <div class="ctrl-row">
+      <div class="num-field">Jumlah kata: <input type="number" id="t10-count" value="24" min="8" max="60"></div>
+      <button class="gen-btn" onclick="genT10()">🔀 Acak</button>
+    </div>
+  </div>
+  <div class="grid" id="t10-grid" style="--cols:4;"></div>
 </section>
 
 </main>
@@ -335,9 +402,29 @@ function genT5(){
   }
 }
 
+// ===== TAHAP 6-10: sengau, diftong, gugus konsonan, campuran =====
+const NG_WORDS = ['ngarai','ngengat','nganga','ngobrol','ngantuk','bunga','singa','sungai','tangan','jangan','hingga','dengan','kucing','pisang','kambing','gunung','goreng','bohong','hidung','kandang','burung','senang'];
+const NY_WORDS = ['nyamuk','nyanyi','nyaring','nyata','nyenyak','hanya','kunyit','tanya','sunyi','banyak','punya'];
+const DIF_WORDS = ['aula','aurat','aib','aus','saudara','saudagar','maulid','taufik','sauna','pandai','santai','sungai','kerbau','kalau','pulau','harimau','amboi','sepoi'];
+const GUGUS_WORDS = ['sambal','tambang','rambut','kompor','lampu','sampah','pintu','kantor','sendok','kandang','bangku','tangkap','mangkuk','mangga','tinggi','sungguh','bangsa','kancing','bank','eks','teks','kompleks','pers','korps'];
+
+function genFromBank(gridId, countId, bank, cap){
+  const n=Math.max(1,Math.min(cap||bank.length, parseInt(document.getElementById(countId).value,10)||bank.length));
+  const picked=shuffle(bank).slice(0,n);
+  renderGrid(gridId, picked.map(w=>({text:w})), false);
+}
+function genT6(){ genFromBank('t6-grid','t6-count', NG_WORDS); }
+function genT7(){ genFromBank('t7-grid','t7-count', NY_WORDS); }
+function genT8(){ genFromBank('t8-grid','t8-count', DIF_WORDS); }
+function genT9(){ genFromBank('t9-grid','t9-count', GUGUS_WORDS); }
+function genT10(){
+  const pool = NG_WORDS.concat(NY_WORDS, DIF_WORDS, GUGUS_WORDS);
+  genFromBank('t10-grid','t10-count', pool);
+}
+
 // tabs
 const tabsEl=document.getElementById('tabs');
-for(let i=1;i<=5;i++){
+for(let i=1;i<=10;i++){
   const b=document.createElement('button');
   b.textContent='Tahap '+i;
   b.onclick=()=>showTab(i);
@@ -363,6 +450,11 @@ function cetakSemua(){
   if(!document.getElementById('t3-grid').children.length) genT3();
   if(!document.getElementById('t4-grid').children.length) genT4();
   if(!document.getElementById('t5-grid').children.length) genT5();
+  if(!document.getElementById('t6-grid').children.length) genT6();
+  if(!document.getElementById('t7-grid').children.length) genT7();
+  if(!document.getElementById('t8-grid').children.length) genT8();
+  if(!document.getElementById('t9-grid').children.length) genT9();
+  if(!document.getElementById('t10-grid').children.length) genT10();
   document.body.classList.add('print-all');
   window.print();
 }
@@ -372,7 +464,7 @@ window.addEventListener('afterprint', ()=>{
 });
 
 // auto-generate awal
-genT1(); genT2(); genT3(); genT4(); genT5();
+genT1(); genT2(); genT3(); genT4(); genT5(); genT6(); genT7(); genT8(); genT9(); genT10();
 </script>
 </body>
 </html>
