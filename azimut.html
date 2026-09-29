@@ -24,11 +24,13 @@ th,td{padding:6px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical
 <h1>🕋 Generator Excel Arah Qiblat per Masjid</h1>
 <p class="sub">Isi daftar masjid, lalu unduh file Excel (sama persis dengan workbook Anda) yang sudah terisi lokasinya.</p>
 <div class="card"><h2>1. Daftar masjid</h2>
-<label for="inp">Satu masjid per baris: <b>Nama | Koordinat Google Earth | Elevation (m)</b> (bisa juga tempel dari Excel/Sheets)</label>
+<label for="inp">Satu masjid per baris: <b>Nama | Lintang | Bujur | Elevation (m)</b> atau <b>Nama | Koordinat | Elevation</b> (bisa juga tempel dari Excel/Sheets)</label>
 <textarea id="inp" spellcheck="false">Masjid Contoh | 7°31'05.51"S 111°37'58.76"E | 67.06</textarea>
 <div class="grid"><div><label for="tz">Zona waktu</label><select id="tz"><option value="7">WIB (UTC+7)</option><option value="8">WITA (UTC+8)</option><option value="9">WIT (UTC+9)</option></select></div>
 <div><label for="dt">Tanggal pengukuran</label><input id="dt" type="date" value="2026-07-16"></div>
-<div><label for="tm">Jam lokal</label><input id="tm" type="time" step="1" value="16:28:00"></div></div></div>
+<div><label for="tm">Jam lokal</label><input id="tm" type="time" step="1" value="16:28:00"></div>
+<div><label for="hl">Lintang tanpa huruf</label><select id="hl"><option value="-1">Selatan</option><option value="1">Utara</option></select></div>
+<div><label for="hb">Bujur tanpa huruf</label><select id="hb"><option value="1">Timur</option><option value="-1">Barat</option></select></div></div></div>
 <div class="card"><h2>2. Pratinjau &amp; unduh</h2><div class="tw"><table id="tb"></table></div>
 <p style="margin:10px 0 0"><button id="all" type="button">Unduh semua</button></p><div id="st" class="mut"></div></div>
 <p class="mut">Buka file di Excel lalu klik <b>Enable Editing</b> agar semua rumus dihitung ulang (Protected View menampilkan angka lama). Sel Hijriyah &amp; Ukur_Bangunan tetap <code>#NAME?</code> jika makronya tidak ada, seperti di file asli.</p>
@@ -56,12 +58,20 @@ function setCell(x,ref,val){
  const n=typeof val==="number"?'<c r="'+ref+'"'+at+'><v>'+val+'</v></c>':'<c r="'+ref+'"'+at+' t="inlineStr"><is><t xml:space="preserve">'+esc(val)+'</t></is></c>';
  return x.replace(re,()=>n)}
 function split(v){const t=Math.round(Math.abs(v)*360000);return[Math.floor(t/360000),Math.floor(t%360000/6000),(t%6000)/100]}
-function parseCoord(t){
- const re=/(\d+(?:\.\d+)?)\s*°\s*(?:(\d+(?:\.\d+)?)\s*['′’]\s*)?(?:(\d+(?:\.\d+)?)\s*(?:"|″|”|'')\s*)?([NSEW])/gi;let m,lat=null,lon=null;
- while((m=re.exec(t))){const v=+m[1]+(+m[2]||0)/60+(+m[3]||0)/3600,h=m[4].toUpperCase();
-  if(h=="N"||h=="S")lat=h=="S"?-v:v;else lon=h=="W"?-v:v}
+function parseCoord(t,dl,db){
+ dl=dl||-1;db=db||1;t=t.replace(/(\d),(\d)/g,"$1.$2");
+ const re=/(\d+(?:\.\d+)?)\s*°\s*(?:(\d+(?:\.\d+)?)\s*['′’´`]\s*)?(?:(\d+(?:\.\d+)?)\s*(?:"|″|”|''|′′)?)?\s*([NSEW])?(?![A-Za-z])/gi;let m,i=0,lat=null,lon=null;
+ while((m=re.exec(t))){const v=+m[1]+(+m[2]||0)/60+(+m[3]||0)/3600,h=(m[4]||"").toUpperCase();
+  if(h=="N"||h=="S")lat=h=="S"?-v:v;else if(h=="E"||h=="W")lon=h=="W"?-v:v;
+  else if(i==0)lat=v*-dl*-1;else if(i==1)lon=v*db;i++}
  if(lat===null||lon===null){const q=t.match(/(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)/);if(q){lat=+q[1];lon=+q[2]}}
  return lat===null||lon===null||Math.abs(lat)>90||Math.abs(lon)>180?null:{lat,lon}}
+function parseLine(l,dl,db){
+ l=l.replace(/\u00a0/g," ").trim();let name="",ce="",ev="";
+ if(/\t|\|/.test(l)){const f=l.split(/\t|\|/).map(s=>s.trim()).filter((s,i)=>i==0||s!=="");name=f[0]||"";ce=f.length>=4?f[1]+" "+f[2]:(f[1]||"");ev=f.length>=4?f[3]:(f[2]||"")}
+ else{const m=l.match(/^(.*?)\s+(\d+\s*°[\s\S]*?["″”'′]+)\s*(?:(-?\d+(?:[.,]\d+)?)\s*m?)?\s*$/i);
+  if(m){name=m[1].trim();ce=m[2];ev=m[3]||""}else name=l}
+ return{name,c:parseCoord(ce,dl,db),ev:ev.replace(/[^\d.,-]/g,"").replace(",",".")}}
 async function loadTpl(b64){const z=await JSZip.loadAsync(b64,{base64:true});
  return{z,s:await z.file("xl/worksheets/sheet1.xml").async("string"),w:await z.file("xl/workbook.xml").async("string")}}
 async function makeBook(t,m){
@@ -71,14 +81,13 @@ async function makeBook(t,m){
  t.z.file("xl/worksheets/sheet1.xml",x);
  t.z.file("xl/workbook.xml",t.w.replace("<calcPr/>",'<calcPr fullCalcOnLoad="1"/>'));
  return t.z.generateAsync({type:"uint8array",compression:"DEFLATE",compressionOptions:{level:6}})}
-if(typeof module!=="undefined")module.exports={parseCoord,loadTpl,makeBook};
+if(typeof module!=="undefined")module.exports={parseLine,parseCoord,loadTpl,makeBook};
 
 const $=id=>document.getElementById(id);let rows=[],tpl=null;
 const fn=n=>"Arah_Qiblat_"+n.replace(/[\\/:*?"<>|]+/g,"").trim().replace(/\s+/g,"_").slice(0,80)+".xlsx";
 const dm=v=>{const a=split(v);return a[0]+"° "+a[1]+"′ "+a[2].toFixed(2)+"″"};
 function parse(){rows=$("inp").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>{
- const f=l.split(/\t|\|/).map(s=>s.trim()),name=f[0]||"",c=parseCoord(f[1]||""),ev=(f[2]||"").replace(/[^\d.,-]/g,"").replace(",",".");
- const el=ev===""?NaN:parseFloat(ev);
+ const p=parseLine(l,+$("hl").value,+$("hb").value),name=p.name,c=p.c,el=p.ev===""?NaN:parseFloat(p.ev);
  return{name,c,el,err:!name?"Nama kosong":!c?"Koordinat tidak terbaca":isNaN(el)?"Elevation kosong":""}});
  $("tb").innerHTML="<tr><th>#</th><th>Nama</th><th>Lintang</th><th>Bujur</th><th>Elev.</th><th></th></tr>"+rows.map((r,i)=>"<tr><td>"+(i+1)+"</td><td>"+r.name.replace(/</g,"&lt;")+"</td>"+(r.err?'<td colspan="3" class="bad">'+r.err+"</td><td></td>":"<td>"+dm(r.c.lat)+(r.c.lat<0?" S":" U")+"</td><td>"+dm(r.c.lon)+(r.c.lon<0?" B":" T")+"</td><td>"+r.el+" m</td><td><button class=g data-i="+i+">Unduh</button></td>")+"</tr>").join("");
  $("all").disabled=!rows.length||rows.some(r=>r.err)}
@@ -96,7 +105,7 @@ async function run(list){
   for(const r of list){let n=fn(r.name);if(used[n])n=n.replace(".xlsx","_"+(++used[n])+".xlsx");else used[n]=1;z.file(n,await makeBook(tpl,meta(r)))}
   const b=await z.generateAsync({type:"blob"});await save("Arah_Qiblat_Masjid.zip",b,"Selesai: "+list.length+" file dalam ZIP.")
  }catch(e){$("st").textContent="Gagal membuat file: "+e.message}}
-$("inp").addEventListener("input",parse);
+$("inp").addEventListener("input",parse);["hl","hb"].forEach(i=>$(i).addEventListener("input",parse));
 $("tb").addEventListener("click",e=>{const i=e.target.dataset&&e.target.dataset.i;if(i!==undefined)run([rows[+i]])});
 $("all").onclick=()=>run(rows);
 parse();
