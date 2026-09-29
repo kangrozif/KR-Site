@@ -87,10 +87,12 @@ if(typeof module!=="undefined")module.exports={parseLine,parseCoord,loadTpl,make
 const $=id=>document.getElementById(id);let rows=[],tpl=null;
 const fn=(d,n)=>{const c=x=>(x||"").replace(/[\\/:*?"<>|]+/g,"").trim().replace(/\s+/g,"_");return[c(d),c(n)].filter(Boolean).join("_").slice(0,100)+".xlsx"};
 const dm=v=>{const a=split(v);return a[0]+"° "+a[1]+"′ "+a[2].toFixed(2)+"″"};
+const KA=[21+25/60+18.89/3600,39+49/60+46.27/3600],RD=Math.PI/180,cl1=x=>Math.max(-1,Math.min(1,x));
+function azq(la,lo){const A=(((360-KA[1]+lo)%360)+360)%360,s=Math.sin,c=Math.cos,h=Math.asin(cl1(s(la*RD)*s(KA[0]*RD)+c(la*RD)*c(KA[0]*RD)*c(A*RD))),z=Math.acos(cl1((s(KA[0]*RD)-s(la*RD)*s(h))/c(la*RD)/c(h)))/RD;return A>180?z:360-z}
 function parse(){rows=$("inp").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>{
  const p=parseLine(l,+$("hl").value,+$("hb").value),name=p.name,desa=p.desa,c=p.c,el=p.ev===""?NaN:parseFloat(p.ev);
- return{name,desa,c,el,err:!name?"Nama kosong":!c?"Koordinat tidak terbaca":isNaN(el)?"Elevation kosong":""}});
- $("tb").innerHTML="<tr><th>#</th><th>Desa</th><th>Nama</th><th>Lintang</th><th>Bujur</th><th>Elev.</th><th></th></tr>"+rows.map((r,i)=>"<tr><td>"+(i+1)+"</td><td>"+r.desa.replace(/</g,"&lt;")+"</td><td>"+r.name.replace(/</g,"&lt;")+"</td>"+(r.err?'<td colspan="3" class="bad">'+r.err+"</td><td></td>":"<td>"+dm(r.c.lat)+(r.c.lat<0?" S":" U")+"</td><td>"+dm(r.c.lon)+(r.c.lon<0?" B":" T")+"</td><td>"+r.el+" m</td><td><button class=g data-i="+i+">Unduh</button></td>")+"</tr>").join("");
+ return{name,desa,c,el,az:c?azq(c.lat,c.lon):NaN,err:!name?"Nama kosong":!c?"Koordinat tidak terbaca":isNaN(el)?"Elevation kosong":""}});
+ $("tb").innerHTML="<tr><th>#</th><th>Desa</th><th>Nama</th><th>Lintang</th><th>Bujur</th><th>Elev.</th><th>Azimut Kiblat</th><th></th></tr>"+rows.map((r,i)=>"<tr><td>"+(i+1)+"</td><td>"+r.desa.replace(/</g,"&lt;")+"</td><td>"+r.name.replace(/</g,"&lt;")+"</td>"+(r.err?'<td colspan="4" class="bad">'+r.err+"</td><td></td>":"<td>"+dm(r.c.lat)+(r.c.lat<0?" S":" U")+"</td><td>"+dm(r.c.lon)+(r.c.lon<0?" B":" T")+"</td><td>"+r.el+" m</td><td>"+dm(r.az)+"</td><td><button class=g data-i="+i+">Unduh</button></td>")+"</tr>").join("");
  $("all").disabled=!rows.length||rows.some(r=>r.err)}
 function meta(r){const d=$("dt").value.split("-").map(Number),t=$("tm").value.split(":").map(Number);
  return{name:r.name,lat:r.c.lat,lon:r.c.lon,el:r.el,tz:+$("tz").value,y:d[0],mo:d[1],d:d[2],hh:t[0]||0,mi:t[1]||0,ss:t[2]||0}}
