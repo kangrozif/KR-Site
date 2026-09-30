@@ -37,7 +37,7 @@
     -webkit-font-smoothing: antialiased;
   }
   .mono { font-family: 'JetBrains Mono', monospace; }
-  #root { max-width: 1040px; margin: 0 auto; padding: 24px 16px 60px; }
+  #root { max-width: 1080px; margin: 0 auto; padding: 24px 16px 60px; }
 
   .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
   .header-eyebrow { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
@@ -57,11 +57,19 @@
   .filter-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 10px; }
   @media (max-width: 700px) { .filter-grid { grid-template-columns: 1fr; } }
 
-  .filter-grid-2 { display: grid; grid-template-columns: 1.4fr 1fr 0.7fr 0.7fr; gap: 10px; margin-top: 10px; }
-  @media (max-width: 700px) { .filter-grid-2 { grid-template-columns: 1fr 1fr; } }
+  .filter-grid-2 { display: grid; grid-template-columns: 1fr 1fr 0.9fr 1.1fr auto; gap: 10px; margin-top: 10px; }
+  @media (max-width: 900px) { .filter-grid-2 { grid-template-columns: 1fr 1fr; } }
   .umur-row { display: flex; gap: 6px; align-items: center; }
   .umur-row .input { text-align: center; }
   .umur-row span { color: var(--text-faint); font-size: 12px; white-space: nowrap; }
+
+  .input, .select {
+    background: var(--panel-alt); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; width: 100%; font-family: inherit;
+  }
+  .input:focus, .select:focus { outline: 2px solid var(--gold-dim); outline-offset: 1px; }
+  .input::placeholder { color: var(--text-faint); }
+  .select:disabled, .input:disabled { color: var(--text-faint); cursor: not-allowed; opacity: 0.6; }
 
   .search-btn {
     background: var(--gold); color: #1a1608; border: none; border-radius: 8px;
@@ -76,14 +84,6 @@
     padding: 0 14px; border-radius: 8px; font-size: 12.5px; cursor: pointer; white-space: nowrap;
   }
   .reset-btn:hover { color: var(--text); border-color: var(--text-faint); }
-
-  .input, .select {
-    background: var(--panel-alt); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 12px; border-radius: 8px; font-size: 13px; width: 100%; font-family: inherit;
-  }
-  .input:focus, .select:focus { outline: 2px solid var(--gold-dim); outline-offset: 1px; }
-  .input::placeholder { color: var(--text-faint); }
-  .select:disabled { color: var(--text-faint); cursor: not-allowed; }
 
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -110,10 +110,10 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .login-wrap { min-height: calc(100vh - 48px); display: flex; align-items: center; justify-content: center; }
-  .login-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 32px 28px; width: 100%; max-width: 340px; }
+  .login-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 28px 26px; width: 100%; max-width: 360px; }
   .login-icon { font-size: 26px; margin-bottom: 10px; }
   .login-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
-  .login-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 20px; }
+  .login-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 16px; }
   .login-btn {
     width: 100%; margin-top: 10px; background: var(--gold); color: #1a1608; border: none;
     padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
@@ -121,6 +121,22 @@
   .login-btn:hover { filter: brightness(1.08); }
   .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .login-error { color: var(--danger); font-size: 12px; margin-top: 10px; }
+
+  .login-tabs { display: flex; gap: 6px; margin-bottom: 18px; background: var(--panel-alt); border-radius: 8px; padding: 4px; }
+  .login-tab {
+    flex: 1; text-align: center; padding: 7px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; color: var(--text-muted); background: transparent; border: none;
+  }
+  .login-tab.active { background: var(--gold); color: #1a1608; }
+
+  .code-panel { background: var(--panel-alt); border: 1px dashed var(--gold-dim); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .code-display { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; letter-spacing: 0.15em; color: var(--gold); margin: 8px 0; }
+  .code-gen-btn {
+    background: transparent; border: 1px solid var(--gold-dim); color: var(--gold);
+    padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  }
+  .code-gen-btn:hover { background: rgba(227,179,65,0.08); }
+  .code-gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -132,31 +148,43 @@ const { useState, useEffect, useCallback, useRef, useMemo } = React;
 // Ganti dengan Web App URL hasil deploy Apps Script (admin-appscript/Code.gs)
 const API_URL = 'https://script.google.com/macros/s/AKfycbwasc_tlV4zllzv0cUnhK7HU7Mp6L-c-DAIez5TOG7_zDaVRRvdmnVHw5qqXrBPL0xScg/exec';
 
-const TOKEN_STORAGE_KEY = 'dpt_admin_token';
+const TOKEN_KEY = 'dpt_admin_token';
+const ROLE_KEY = 'dpt_admin_role';
+const EXPIRES_KEY = 'dpt_admin_expires';
 
 function LoginScreen({ onSuccess }) {
-  const [value, setValue] = useState('');
+  const [tab, setTab] = useState('superadmin'); // 'superadmin' | 'admin'
+  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
 
-  const submit = (e) => {
+  const submitSuperadmin = (e) => {
     e.preventDefault();
-    if (!value.trim()) return;
+    if (!password.trim()) return;
     setChecking(true);
     setError('');
-    fetch(API_URL + '?action=meta&token=' + encodeURIComponent(value.trim()))
+    fetch(API_URL + '?action=meta&token=' + encodeURIComponent(password.trim()))
       .then(r => r.json())
       .then(data => {
-        if (data.unauthorized) {
-          setError('Password salah.');
-          return;
-        }
-        if (data.error) {
-          setError(data.error);
-          return;
-        }
-        sessionStorage.setItem(TOKEN_STORAGE_KEY, value.trim());
-        onSuccess(value.trim());
+        if (data.unauthorized) { setError('Password salah.'); return; }
+        if (data.error) { setError(data.error); return; }
+        onSuccess({ token: password.trim(), role: 'superadmin', expiresAt: null });
+      })
+      .catch(() => setError('Gagal menghubungi server. Cek koneksi.'))
+      .finally(() => setChecking(false));
+  };
+
+  const submitAdminCode = (e) => {
+    e.preventDefault();
+    if (!code.trim()) return;
+    setChecking(true);
+    setError('');
+    fetch(API_URL + '?action=logincode&code=' + encodeURIComponent(code.trim()))
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { setError(data.error); return; }
+        onSuccess({ token: data.sessionToken, role: 'admin', expiresAt: data.expiresAt });
       })
       .catch(() => setError('Gagal menghubungi server. Cek koneksi.'))
       .finally(() => setChecking(false));
@@ -164,35 +192,157 @@ function LoginScreen({ onSuccess }) {
 
   return (
     <div className="login-wrap">
-      <form className="login-card" onSubmit={submit}>
+      <div className="login-card">
         <div className="login-icon">🔒</div>
         <div className="login-title">Akses Admin</div>
-        <div className="login-sub">Masukkan password untuk membuka data pemilih.</div>
-        <input
-          className="input"
-          type="password"
-          placeholder="Password"
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          autoFocus
-        />
-        {error && <div className="login-error">⚠️ {error}</div>}
-        <button className="login-btn" type="submit" disabled={checking}>
-          {checking ? 'Memeriksa...' : 'Masuk'}
+        <div className="login-sub">Data Pemilih — kangrozif.my.id</div>
+
+        <div className="login-tabs">
+          <button type="button" className={'login-tab' + (tab === 'superadmin' ? ' active' : '')} onClick={() => { setTab('superadmin'); setError(''); }}>
+            Superadmin
+          </button>
+          <button type="button" className={'login-tab' + (tab === 'admin' ? ' active' : '')} onClick={() => { setTab('admin'); setError(''); }}>
+            Admin (Kode dari Superadmin)
+          </button>
+        </div>
+
+        {tab === 'superadmin' ? (
+          <form onSubmit={submitSuperadmin}>
+            <input
+              className="input"
+              type="password"
+              placeholder="Password Superadmin"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoFocus
+            />
+            {error && <div className="login-error">⚠️ {error}</div>}
+            <button className="login-btn" type="submit" disabled={checking}>
+              {checking ? 'Memeriksa...' : 'Masuk sebagai Superadmin'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={submitAdminCode}>
+            <input
+              className="input mono"
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="Kode 6 digit dari Superadmin"
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/[^0-9]/g, ''))}
+              autoFocus
+            />
+            {error && <div className="login-error">⚠️ {error}</div>}
+            <button className="login-btn" type="submit" disabled={checking}>
+              {checking ? 'Memeriksa...' : 'Masuk sebagai Admin'}
+            </button>
+            <div style={{ fontSize: '11px', color: 'var(--text-faint)', marginTop: '10px' }}>
+              Hubungi Superadmin (WA/telepon) untuk minta kode akses. Ketik kode yang diberikan secepatnya — kode hanya berlaku sekitar 2-3 menit. Sesi login otomatis berakhir 1 jam setelah masuk.
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TotpSetupPanel({ token }) {
+  const [secret, setSecret] = useState('');
+  const [otpauthUri, setOtpauthUri] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [revealed, setRevealed] = useState(false);
+
+  const fetchTotp = (regenerate) => {
+    if (regenerate) {
+      const ok = window.confirm('Reset akan membuat QR/kode lama tidak berlaku lagi — Anda perlu scan ulang QR baru ke Google Authenticator di HP Anda. Lanjutkan?');
+      if (!ok) return;
+    }
+    setLoading(true);
+    setError('');
+    fetch(API_URL + '?action=setuptotp&token=' + encodeURIComponent(token) + (regenerate ? '&regenerate=true' : ''))
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { setError(data.error); return; }
+        setSecret(data.secret);
+        setOtpauthUri(data.otpauthUri);
+        setRevealed(true);
+      })
+      .catch(() => setError('Gagal memuat setup Google Authenticator.'))
+      .finally(() => setLoading(false));
+  };
+
+  const qrUrl = otpauthUri
+    ? 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(otpauthUri)
+    : '';
+
+  return (
+    <div className="panel">
+      <div className="panel-title">🔐 Google Authenticator Superadmin <span className="badge" style={{ color: 'var(--danger)' }}>RAHASIA</span></div>
+      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+        <b style={{ color: 'var(--danger)' }}>QR ini HANYA untuk di-scan ke HP Superadmin sendiri — JANGAN dibagikan ke admin biasa.</b>
+        {' '}Kalau admin biasa punya akses ke QR ini, mereka bisa generate kode sendiri kapan pun, dan tujuan sistem ini (Superadmin harus terlibat di setiap login) jadi hilang.
+        <br/><br/>
+        Cara pakai: saat admin biasa menghubungi Anda minta akses, buka aplikasi Google Authenticator di HP Anda, baca kode 6-digit yang sedang tampil, lalu kirimkan manual (WhatsApp/telepon) ke admin biasa tersebut. Kode berlaku sekitar 2-3 menit sejak Anda membacanya.
+      </div>
+
+      {error && <div className="login-error" style={{ marginBottom: '10px' }}>⚠️ {error}</div>}
+
+      {!revealed ? (
+        <button className="code-gen-btn" onClick={() => fetchTotp(false)} disabled={loading}>
+          {loading ? 'Memuat...' : '👁 Tampilkan QR Setup (untuk HP Anda sendiri)'}
         </button>
-      </form>
+      ) : (
+        <React.Fragment>
+          <div className="code-panel" style={{ textAlign: 'center' }}>
+            {qrUrl && <img src={qrUrl} alt="QR Google Authenticator" style={{ borderRadius: '8px', background: '#fff', padding: '8px' }} />}
+            <div style={{ fontSize: '11px', color: 'var(--text-faint)', marginTop: '10px' }}>
+              Atau masukkan manual (kalau tidak bisa scan) — Kunci Rahasia:
+            </div>
+            <div className="mono" style={{ fontSize: '14px', color: 'var(--gold)', letterSpacing: '0.05em', marginTop: '4px', wordBreak: 'break-all' }}>
+              {secret}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            <button className="code-gen-btn" onClick={() => fetchTotp(false)} disabled={loading}>
+              {loading ? 'Memuat...' : '↻ Muat Ulang'}
+            </button>
+            <button className="code-gen-btn" style={{ borderColor: 'var(--danger-dim)', color: 'var(--danger)' }} onClick={() => fetchTotp(true)} disabled={loading}>
+              {loading ? '...' : '⚠ Reset (cabut semua akses lama)'}
+            </button>
+          </div>
+        </React.Fragment>
+      )}
     </div>
   );
 }
 
 function App() {
-  const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_STORAGE_KEY) || '');
+  const [session, setSession] = useState(() => {
+    const token = sessionStorage.getItem(TOKEN_KEY);
+    const role = sessionStorage.getItem(ROLE_KEY);
+    const expiresAtRaw = sessionStorage.getItem(EXPIRES_KEY);
+    const expiresAt = expiresAtRaw ? parseInt(expiresAtRaw, 10) : null;
+    if (token && role) {
+      if (expiresAt && expiresAt <= Date.now()) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(ROLE_KEY);
+        sessionStorage.removeItem(EXPIRES_KEY);
+        return null;
+      }
+      return { token, role, expiresAt };
+    }
+    return null;
+  });
+
   const [meta, setMeta] = useState({ kecamatan: {}, totalRecords: 0 });
   const [metaLoading, setMetaLoading] = useState(true);
   const [metaError, setMetaError] = useState('');
 
   const [namaQuery, setNamaQuery] = useState('');
   const [nikQuery, setNikQuery] = useState('');
+  const [nkkQuery, setNkkQuery] = useState('');
   const [jkFilter, setJkFilter] = useState('SEMUA');
   const [umurMin, setUmurMin] = useState('');
   const [umurMax, setUmurMax] = useState('');
@@ -207,8 +357,24 @@ function App() {
   const [hasSearched, setHasSearched] = useState(false);
 
   const requestIdRef = useRef(0);
+  const token = session ? session.token : '';
 
-  // Cegah klik kanan & shortcut devtools (hanya penghalang ringan, bukan proteksi sungguhan)
+  const handleLogout = useCallback(() => {
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(ROLE_KEY);
+    sessionStorage.removeItem(EXPIRES_KEY);
+    setSession(null);
+  }, []);
+
+  const handleLoginSuccess = ({ token, role, expiresAt }) => {
+    sessionStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem(ROLE_KEY, role);
+    if (expiresAt) sessionStorage.setItem(EXPIRES_KEY, String(expiresAt));
+    else sessionStorage.removeItem(EXPIRES_KEY);
+    setSession({ token, role, expiresAt: expiresAt || null });
+  };
+
+  // Cegah klik kanan & shortcut devtools (penghalang ringan, bukan proteksi sungguhan)
   useEffect(() => {
     const blockContextMenu = (e) => e.preventDefault();
     const blockKeys = (e) => {
@@ -225,16 +391,13 @@ function App() {
     };
   }, []);
 
-  // Auto-logout setelah 20 menit tidak ada aktivitas
+  // Auto-logout idle 20 menit (semua role)
   useEffect(() => {
     if (!token) return;
     let timer;
     const scheduleLogout = () => {
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
-        setToken('');
-      }, 20 * 60 * 1000);
+      timer = setTimeout(handleLogout, 20 * 60 * 1000);
     };
     const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
     events.forEach(ev => window.addEventListener(ev, scheduleLogout));
@@ -243,18 +406,23 @@ function App() {
       clearTimeout(timer);
       events.forEach(ev => window.removeEventListener(ev, scheduleLogout));
     };
-  }, [token]);
+  }, [token, handleLogout]);
+
+  // Hard session limit 1 jam untuk Admin biasa (bukan idle-based, tidak bisa diperpanjang aktivitas)
+  useEffect(() => {
+    if (!session || !session.expiresAt) return;
+    const msLeft = session.expiresAt - Date.now();
+    if (msLeft <= 0) { handleLogout(); return; }
+    const t = setTimeout(handleLogout, msLeft);
+    return () => clearTimeout(t);
+  }, [session, handleLogout]);
 
   useEffect(() => {
     if (!token) return;
     fetch(API_URL + '?action=meta&token=' + encodeURIComponent(token))
       .then(r => r.json())
       .then(data => {
-        if (data.unauthorized) {
-          sessionStorage.removeItem(TOKEN_STORAGE_KEY);
-          setToken('');
-          return;
-        }
+        if (data.unauthorized) { handleLogout(); return; }
         if (data.error) throw new Error(data.error);
         setMeta(data);
       })
@@ -284,6 +452,7 @@ function App() {
       + '&token=' + encodeURIComponent(token)
       + '&nama=' + encodeURIComponent(namaQuery.trim())
       + '&nik=' + encodeURIComponent(nikQuery.trim())
+      + '&nkk=' + encodeURIComponent(nkkQuery.trim())
       + '&jk=' + encodeURIComponent(jkFilter)
       + '&umurMin=' + encodeURIComponent(umurMin)
       + '&umurMax=' + encodeURIComponent(umurMax)
@@ -294,11 +463,7 @@ function App() {
       .then(r => r.json())
       .then(data => {
         if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
-        if (data.unauthorized) {
-          sessionStorage.removeItem(TOKEN_STORAGE_KEY);
-          setToken('');
-          throw new Error('Sesi berakhir, silakan login ulang.');
-        }
+        if (data.unauthorized) { handleLogout(); return; }
         if (data.error) throw new Error(data.error);
         if (data.needsNarrow) {
           setNeedsNarrow(true);
@@ -310,14 +475,14 @@ function App() {
         }
       })
       .catch(err => {
-        if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
+        if (myRequestId !== requestIdRef.current) return;
         setSearchError(err.message || 'Gagal mengambil hasil pencarian.');
       })
       .finally(() => {
-        if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
+        if (myRequestId !== requestIdRef.current) return;
         setSearching(false);
       });
-  }, [namaQuery, nikQuery, jkFilter, umurMin, umurMax, selKec, selDesa, token]);
+  }, [namaQuery, nikQuery, nkkQuery, jkFilter, umurMin, umurMax, selKec, selDesa, token, handleLogout]);
 
   // Dropdown Kecamatan/Desa/Jenis Kelamin: auto-search (aksi diskrit, aman dari race condition)
   useEffect(() => {
@@ -326,7 +491,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selKec, selDesa, jkFilter, metaLoading]);
 
-  const handleNamaSubmit = (e) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
     runSearch();
   };
@@ -334,6 +499,7 @@ function App() {
   const resetFilters = () => {
     setNamaQuery('');
     setNikQuery('');
+    setNkkQuery('');
     setJkFilter('SEMUA');
     setUmurMin('');
     setUmurMax('');
@@ -346,13 +512,8 @@ function App() {
     setScanned(0);
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem(TOKEN_STORAGE_KEY);
-    setToken('');
-  };
-
-  if (!token) {
-    return <LoginScreen onSuccess={setToken} />;
+  if (!session) {
+    return <LoginScreen onSuccess={handleLoginSuccess} />;
   }
 
   const isEmpty = !metaLoading && kecamatanList.length === 0 && !metaError;
@@ -361,9 +522,11 @@ function App() {
     <React.Fragment>
       <div className="header">
         <div>
-          <div className="header-eyebrow">Admin · Data Pemilih</div>
+          <div className="header-eyebrow">
+            Admin · Data Pemilih {session.role === 'superadmin' ? <span className="badge">SUPERADMIN</span> : <span className="badge">ADMIN</span>}
+          </div>
           <h1 className="header-title">Filter &amp; Pencarian Data</h1>
-          <div className="header-sub">Cari berdasarkan Nama, Kecamatan, dan Desa/Kelurahan</div>
+          <div className="header-sub">Cari berdasarkan Nama, NIK, NKK, Jenis Kelamin, Umur, Kecamatan, dan Desa</div>
         </div>
         <div className="stat-row">
           <div className="stat-pill">👥 <b>{(meta.totalRecords || 0).toLocaleString('id-ID')}</b> data</div>
@@ -374,8 +537,10 @@ function App() {
         </div>
       </div>
 
+      {session.role === 'superadmin' && <TotpSetupPanel token={token} />}
+
       <div className="panel">
-        <form className="filter-grid" onSubmit={handleNamaSubmit}>
+        <form className="filter-grid" onSubmit={handleFormSubmit}>
           <input
             className="input"
             placeholder="Ketik nama untuk mencari..."
@@ -404,53 +569,58 @@ function App() {
           <button type="submit" className="search-btn" disabled={isEmpty || searching} title="Cari">
             🔎
           </button>
-        </form>
 
-        <div className="filter-grid-2">
-          <input
-            className="input"
-            placeholder="Cari NIK..."
-            value={nikQuery}
-            onChange={e => setNikQuery(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } }}
-            disabled={isEmpty}
-            inputMode="numeric"
-          />
-          <select
-            className="select"
-            value={jkFilter}
-            onChange={e => setJkFilter(e.target.value)}
-            disabled={isEmpty}
-          >
-            <option value="SEMUA">Semua JK</option>
-            <option value="L">Laki-laki (L)</option>
-            <option value="P">Perempuan (P)</option>
-          </select>
-          <div className="umur-row">
+          <div className="filter-grid-2" style={{ gridColumn: '1 / -1' }}>
             <input
               className="input"
-              placeholder="Min"
-              value={umurMin}
-              onChange={e => setUmurMin(e.target.value.replace(/[^0-9]/g, ''))}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } }}
+              placeholder="Cari NIK..."
+              value={nikQuery}
+              onChange={e => setNikQuery(e.target.value)}
               disabled={isEmpty}
               inputMode="numeric"
             />
-            <span>—</span>
             <input
               className="input"
-              placeholder="Max"
-              value={umurMax}
-              onChange={e => setUmurMax(e.target.value.replace(/[^0-9]/g, ''))}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } }}
+              placeholder="Cari NKK..."
+              value={nkkQuery}
+              onChange={e => setNkkQuery(e.target.value)}
               disabled={isEmpty}
               inputMode="numeric"
             />
+            <select
+              className="select"
+              value={jkFilter}
+              onChange={e => setJkFilter(e.target.value)}
+              disabled={isEmpty}
+            >
+              <option value="SEMUA">Semua JK</option>
+              <option value="L">Laki-laki (L)</option>
+              <option value="P">Perempuan (P)</option>
+            </select>
+            <div className="umur-row">
+              <input
+                className="input"
+                placeholder="Min"
+                value={umurMin}
+                onChange={e => setUmurMin(e.target.value.replace(/[^0-9]/g, ''))}
+                disabled={isEmpty}
+                inputMode="numeric"
+              />
+              <span>—</span>
+              <input
+                className="input"
+                placeholder="Max"
+                value={umurMax}
+                onChange={e => setUmurMax(e.target.value.replace(/[^0-9]/g, ''))}
+                disabled={isEmpty}
+                inputMode="numeric"
+              />
+            </div>
+            <button type="button" className="reset-btn" onClick={resetFilters} disabled={isEmpty}>
+              ↺ Reset Filter
+            </button>
           </div>
-          <button type="button" className="reset-btn" onClick={resetFilters} disabled={isEmpty}>
-            ↺ Reset Filter
-          </button>
-        </div>
+        </form>
       </div>
 
       <div className="panel" style={{ padding: 0 }}>
@@ -474,7 +644,7 @@ function App() {
               ) : searchError ? (
                 <span style={{ color: 'var(--danger)' }}>⚠️ {searchError}</span>
               ) : needsNarrow ? (
-                <span>Ketik nama/NIK, pilih Kecamatan/Desa, Jenis Kelamin, atau Umur untuk menampilkan data. <span className="badge">mencegah scan berlebihan</span></span>
+                <span>Ketik nama/NIK/NKK, pilih Kecamatan/Desa, Jenis Kelamin, atau Umur untuk menampilkan data. <span className="badge">mencegah scan berlebihan</span></span>
               ) : hasSearched ? (
                 <span>Menampilkan <b className="mono">{results.length}</b> hasil {results.length >= 200 && '(dibatasi 200)'} dari <b className="mono">{scanned.toLocaleString('id-ID')}</b> data dipindai</span>
               ) : 'Menunggu pencarian...'}
