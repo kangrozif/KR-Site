@@ -502,7 +502,7 @@ function App() {
       + '&kec=' + encodeURIComponent(selKec)
       + '&desa=' + encodeURIComponent(selDesa);
 
-    jsonpRequest(url)
+    jsonpRequest(url, 55000)
       .then(data => {
         if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
         if (data.unauthorized) { handleLogout(); return; }
@@ -526,12 +526,8 @@ function App() {
       });
   }, [namaQuery, nikQuery, nkkQuery, jkFilter, umurMin, umurMax, selKec, selDesa, token, handleLogout]);
 
-  // Dropdown Kecamatan/Desa/Jenis Kelamin: auto-search (aksi diskrit, aman dari race condition)
-  useEffect(() => {
-    if (metaLoading || kecamatanList.length === 0) return;
-    runSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selKec, selDesa, jkFilter, metaLoading]);
+  // Semua pencarian (Nama, NIK, NKK, Kecamatan, Desa, Jenis Kelamin, Umur) sekarang murni manual —
+  // hanya jalan saat klik tombol 🔎 atau tekan Enter, tidak ada lagi auto-search saat ganti dropdown.
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -682,7 +678,7 @@ function App() {
           <React.Fragment>
             <div className="status-row" style={{ padding: '12px 16px 0' }}>
               {searching ? (
-                <span><span className="spin">⏳</span> Mencari...</span>
+                <span><span className="spin">⏳</span> Mencari... (bisa sampai ~1 menit kalau cakupannya banyak desa)</span>
               ) : searchError ? (
                 <span style={{ color: 'var(--danger)' }}>⚠️ {searchError}</span>
               ) : needsNarrow ? (
