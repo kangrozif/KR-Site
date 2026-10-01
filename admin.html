@@ -157,8 +157,19 @@ const EXPIRES_KEY = 'dpt_admin_expires';
  * menyajikan response redirect Apps Script yang sudah kedaluwarsa dari cache (penyebab 404).
  */
 function apiFetch(url) {
-  const bust = (url.includes('?') ? '&' : '?') + '_ts=' + Date.now();
-  return fetch(url + bust, { cache: 'no-store' });
+  return fetch(url);
+}
+
+/** Parse response sebagai JSON; kalau gagal, lempar error berisi cuplikan respons asli (untuk debugging tanpa DevTools) */
+function parseJsonResponse(r) {
+  return r.text().then(text => {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      const snippet = text.trim().slice(0, 300);
+      throw new Error('Server tidak mengembalikan JSON (status ' + r.status + '). Cuplikan respons: ' + snippet);
+    }
+  });
 }
 
 function LoginScreen({ onSuccess }) {
@@ -174,7 +185,7 @@ function LoginScreen({ onSuccess }) {
     setChecking(true);
     setError('');
     apiFetch(API_URL + '?action=meta&token=' + encodeURIComponent(password.trim()))
-      .then(r => r.json())
+      .then(parseJsonResponse)
       .then(data => {
         if (data.unauthorized) { setError('Password salah.'); return; }
         if (data.error) { setError(data.error); return; }
@@ -190,7 +201,7 @@ function LoginScreen({ onSuccess }) {
     setChecking(true);
     setError('');
     apiFetch(API_URL + '?action=logincode&code=' + encodeURIComponent(code.trim()))
-      .then(r => r.json())
+      .then(parseJsonResponse)
       .then(data => {
         if (data.error) { setError(data.error); return; }
         onSuccess({ token: data.sessionToken, role: 'admin', expiresAt: data.expiresAt });
@@ -271,7 +282,7 @@ function TotpSetupPanel({ token }) {
     setLoading(true);
     setError('');
     apiFetch(API_URL + '?action=setuptotp&token=' + encodeURIComponent(token) + (regenerate ? '&regenerate=true' : ''))
-      .then(r => r.json())
+      .then(parseJsonResponse)
       .then(data => {
         if (data.error) { setError(data.error); return; }
         setSecret(data.secret);
@@ -430,7 +441,7 @@ function App() {
   useEffect(() => {
     if (!token) return;
     apiFetch(API_URL + '?action=meta&token=' + encodeURIComponent(token))
-      .then(r => r.json())
+      .then(parseJsonResponse)
       .then(data => {
         if (data.unauthorized) { handleLogout(); return; }
         if (data.error) throw new Error(data.error);
@@ -470,7 +481,7 @@ function App() {
       + '&desa=' + encodeURIComponent(selDesa);
 
     apiFetch(url)
-      .then(r => r.json())
+      .then(parseJsonResponse)
       .then(data => {
         if (myRequestId !== requestIdRef.current) return; // respons usang, abaikan
         if (data.unauthorized) { handleLogout(); return; }
