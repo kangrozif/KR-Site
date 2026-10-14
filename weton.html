@@ -153,6 +153,11 @@ button{
 }
 .neptu-row .tot small{font-family:var(--sans);font-weight:500;font-size:.78rem;color:var(--muted);margin-right:6px}
 
+.watak{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.watak h4{font-family:var(--serif);font-size:1rem;color:var(--green);margin-bottom:8px}
+.watak p{font-size:.93rem;color:var(--ink);margin-top:8px}
+.watak strong{color:var(--green)}
+.watak em{display:block;font-style:normal;color:var(--muted);font-size:.88rem;margin-top:2px}
 .verdict{
   margin-top:20px;background:var(--green);color:var(--ivory);
   border-radius:14px;padding:30px 26px;
@@ -233,10 +238,6 @@ footer{
       <div class="person">
         <h2>Calon pria</h2>
         <div class="field">
-          <label for="nama1">Nama (opsional)</label>
-          <input type="text" id="nama1" autocomplete="off" maxlength="40" placeholder="Contoh: Ahmad">
-        </div>
-        <div class="field">
           <label for="tgl1">Tanggal lahir</label>
           <input type="date" id="tgl1" min="1900-01-01">
         </div>
@@ -244,10 +245,6 @@ footer{
       </div>
       <div class="person">
         <h2>Calon wanita</h2>
-        <div class="field">
-          <label for="nama2">Nama (opsional)</label>
-          <input type="text" id="nama2" autocomplete="off" maxlength="40" placeholder="Contoh: Siti">
-        </div>
         <div class="field">
           <label for="tgl2">Tanggal lahir</label>
           <input type="date" id="tgl2" min="1900-01-01">
@@ -265,7 +262,7 @@ footer{
   <section id="results" aria-live="polite">
     <div class="wetons" id="wetons"></div>
     <div id="verdictWrap"></div>
-    <p class="note">Perhitungan ini bagian dari tradisi dan budaya Jawa, bukan syarat sah pernikahan menurut syariat Islam maupun hukum negara. Gunakan sebagai bahan perenungan dan diskusi keluarga, bukan sebagai penentu keputusan.</p>
+    <p class="note">Gambaran watak bersifat umum dan dapat berbeda antar sumber primbon. Perhitungan ini bagian dari tradisi dan budaya Jawa, bukan syarat sah pernikahan menurut syariat Islam maupun hukum negara. Gunakan sebagai bahan perenungan dan diskusi keluarga, bukan sebagai penentu keputusan.</p>
   </section>
 </main>
 
@@ -284,6 +281,23 @@ footer{
   // Jangkar pasaran: 17 Agustus 1945 = Jumat Legi
   var REF = Date.UTC(1945, 7, 17);
   var DAY_MS = 86400000;
+
+  var WATAK_DINA = {
+    Ahad:{k:'Berwibawa, mandiri, dan punya jiwa memimpin.', w:'Cenderung keras kepala dan sulit menerima masukan.'},
+    Senin:{k:'Penyabar, lembut hati, dan peka terhadap perasaan orang lain.', w:'Mudah ragu dan kurang tegas dalam mengambil keputusan.'},
+    Selasa:{k:'Berani, tegas, dan pekerja keras.', w:'Mudah tersulut emosi dan bicaranya bisa terlalu blak-blakan.'},
+    Rabu:{k:'Teliti, tenang, dan pandai berpikir sebelum bertindak.', w:'Cenderung tertutup dan lama dalam membuka diri.'},
+    Kamis:{k:'Bijaksana, jujur, religius, dan disegani.', w:'Cenderung kaku dan memegang prinsip terlalu ketat.'},
+    Jumat:{k:'Ramah, penyayang, romantis, dan mudah disukai orang.', w:'Terlalu perasa dan mudah terbawa suasana.'},
+    Sabtu:{k:'Tekun, ulet, serius, dan teguh pendirian.', w:'Cenderung pendiam dan lambat melupakan kekecewaan.'}
+  };
+  var WATAK_PASARAN = {
+    Legi:{k:'Murah hati, ramah, suka bergaul, dan mudah memaafkan.', w:'Mudah terbujuk dan kurang bisa mengatur pengeluaran.'},
+    Pahing:{k:'Ambisius, mandiri, hemat, dan gigih mengejar tujuan.', w:'Cenderung mementingkan diri sendiri dan keras kepala.'},
+    Pon:{k:'Cerdas, setia, dan pandai menyimpan rahasia.', w:'Cenderung tertutup dan kadang terkesan angkuh.'},
+    Wage:{k:'Tenang, mandiri, teguh, dan tidak banyak menuntut.', w:'Cenderung menyendiri dan sulit mengubah pendirian.'},
+    Kliwon:{k:'Berkharisma, intuitif, dan kuat dalam kehidupan batin.', w:'Sulit ditebak dan mudah tersinggung.'}
+  };
 
   // Hasil perhitungan jumlah neptu dibagi 8 (sisa 0 dihitung 8)
   var HASIL = {
@@ -342,6 +356,11 @@ footer{
       '<div class="neptu-row">' +
         '<span>' + w.dina + ' ' + w.nd + '</span><span>+</span><span>' + w.pasaran + ' ' + w.np + '</span>' +
         '<span class="tot"><small>Neptu</small>' + w.total + '</span>' +
+      '</div>' +
+      '<div class="watak">' +
+        '<h4>Gambaran watak</h4>' +
+        '<p><strong>' + w.dina + '</strong> ' + WATAK_DINA[w.dina].k + ' <em>Perlu dijaga: ' + WATAK_DINA[w.dina].w.charAt(0).toLowerCase() + WATAK_DINA[w.dina].w.slice(1) + '</em></p>' +
+        '<p><strong>' + w.pasaran + '</strong> ' + WATAK_PASARAN[w.pasaran].k + ' <em>Perlu dijaga: ' + WATAK_PASARAN[w.pasaran].w.charAt(0).toLowerCase() + WATAK_PASARAN[w.pasaran].w.slice(1) + '</em></p>' +
       '</div></article>';
   }
 
@@ -357,7 +376,7 @@ footer{
       return;
     }
 
-    var n1 = $('nama1').value.trim(), n2 = $('nama2').value.trim();
+    var n1 = '', n2 = '';
     var w1 = hitungWeton(v1, $('mg1').checked);
     var w2 = hitungWeton(v2, $('mg2').checked);
 
@@ -387,7 +406,7 @@ footer{
   }
 
   function reset(){
-    ['nama1','nama2','tgl1','tgl2'].forEach(function(id){ $(id).value = ''; });
+    ['tgl1','tgl2'].forEach(function(id){ $(id).value = ''; });
     $('mg1').checked = false; $('mg2').checked = false;
     $('err').classList.remove('show');
     $('results').classList.remove('show');
