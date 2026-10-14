@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cek Weton &amp; Neptu Calon Pengantin | KR Trade</title>
+<meta name="theme-color" content="#0F3D2E">
+<meta name="description" content="Cek weton, neptu, dan kecocokan calon pengantin berdasarkan tanggal lahir menurut perhitungan primbon Jawa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#0F3D2E;
+  --green-2:#165240;
+  --gold:#C9A24B;
+  --gold-soft:#E8D9A8;
+  --gold-deep:#A8842F;
+  --ivory:#F7F3E8;
+  --paper:#FFFFFF;
+  --ink:#1A2433;
+  --muted:#5B6577;
+  --line:#DDD5BF;
+  --good:#2F6B4F;
+  --mixed:#8A6A1F;
+  --warn:#9A3B2E;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);
+  background:var(--ivory);
+  color:var(--ink);
+  line-height:1.6;
+  font-size:16px;
+}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* ---------- Header ---------- */
+.top{
+  background:var(--green);
+  color:var(--ivory);
+  padding:14px 20px;
+  border-bottom:2px solid var(--gold);
+}
+.top-inner{
+  max-width:980px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.brand{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+  font-family:var(--serif);font-weight:700;font-size:1.1rem;letter-spacing:.2px;
+}
+.brand svg{width:30px;height:30px;flex:none}
+.back{
+  font-size:.9rem;text-decoration:none;color:var(--gold-soft);
+  border:1px solid rgba(232,217,168,.4);padding:6px 14px;border-radius:999px;
+}
+.back:hover{background:rgba(232,217,168,.12)}
+
+/* ---------- Hero ---------- */
+.hero{
+  background:linear-gradient(180deg,var(--green) 0%,var(--green-2) 100%);
+  color:var(--ivory);
+  padding:44px 20px 84px;
+  border-bottom:6px double var(--gold);
+}
+.hero-inner{max-width:980px;margin:0 auto}
+.hero h1{
+  color:var(--ivory);
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(1.9rem,5.2vw,3.1rem);
+  line-height:1.15;max-width:18ch;
+}
+.hero p{
+  margin-top:14px;max-width:56ch;color:#D3E2D9;font-size:1.02rem;
+}
+
+/* ---------- Form ---------- */
+main{max-width:980px;margin:-52px auto 0;padding:0 20px 60px}
+.form-card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:26px;
+  border-top:4px solid var(--gold);
+  box-shadow:0 18px 40px -24px rgba(15,61,46,.45);
+}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.person{
+  border:1px solid var(--line);border-radius:10px;padding:18px;
+  background:#FCFAF3;
+}
+.person h2{
+  font-family:var(--serif);font-size:1.25rem;font-weight:700;color:var(--green);
+  margin-bottom:14px;padding-bottom:8px;
+  border-bottom:2px solid var(--gold);display:inline-block;
+}
+label{display:block;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:5px}
+input[type="text"],input[type="date"]{
+  width:100%;font:inherit;padding:11px 12px;border:1px solid #BFB79F;border-radius:8px;
+  background:#fff;color:var(--ink);min-height:46px;
+}
+input+label,.field+.field{margin-top:12px}
+.check{
+  display:flex;align-items:flex-start;gap:8px;margin-top:14px;
+  font-size:.86rem;color:var(--muted);font-weight:400;
+}
+.check input{margin-top:4px;accent-color:var(--green);width:16px;height:16px;flex:none}
+.actions{margin-top:22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button{
+  font:inherit;font-weight:600;cursor:pointer;border-radius:999px;
+  padding:13px 28px;min-height:46px;border:1px solid transparent;
+}
+.btn-main{background:var(--green);color:var(--gold-soft)}
+.btn-main:hover{background:var(--green-2)}
+.btn-ghost{background:transparent;color:var(--green);border-color:var(--green)}
+.btn-ghost:hover{background:rgba(15,61,46,.06)}
+.error{
+  margin-top:14px;color:var(--warn);font-size:.92rem;font-weight:500;display:none;
+}
+.error.show{display:block}
+
+/* ---------- Results ---------- */
+#results{margin-top:30px;display:none}
+#results.show{display:block;animation:rise .45s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#results.show{animation:none}}
+
+.wetons{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.weton-card{
+  background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--gold);
+  border-radius:12px;padding:22px;
+}
+.weton-card .who{font-size:.92rem;color:var(--muted)}
+.weton-card .name{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--green)}
+.weton-card .weton{
+  font-family:var(--serif);font-weight:700;font-size:2rem;color:var(--green);
+  margin:8px 0 2px;line-height:1.15;
+}
+.weton-card .date{font-size:.9rem;color:var(--muted)}
+.neptu-row{
+  margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.95rem;
+}
+.neptu-row .tot{
+  margin-left:auto;font-family:var(--serif);font-weight:700;font-size:1.6rem;color:var(--green);
+}
+.neptu-row .tot small{font-family:var(--sans);font-weight:500;font-size:.78rem;color:var(--muted);margin-right:6px}
+
+.verdict{
+  margin-top:20px;background:var(--green);color:var(--ivory);
+  border-radius:14px;padding:30px 26px;
+  border:2px solid var(--gold);
+  box-shadow:inset 0 0 0 5px var(--green),inset 0 0 0 6px rgba(201,162,75,.55);
+}
+.calc{
+  font-family:var(--mono);font-size:.98rem;color:var(--gold-soft);
+  display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;
+}
+.calc b{color:#fff;font-weight:500}
+.verdict h3{
+  font-family:var(--serif);font-weight:700;font-size:clamp(2rem,6vw,3.2rem);
+  line-height:1.1;margin:14px 0 6px;
+}
+.tone{
+  display:inline-block;font-size:.82rem;font-weight:600;padding:3px 12px;border-radius:999px;
+  background:var(--gold-soft);color:var(--green);
+}
+.tone.warn{background:#F0C9C2}
+.verdict p.meaning{margin-top:14px;max-width:62ch;color:#E3EFE8}
+.scale{
+  margin-top:22px;display:grid;grid-template-columns:repeat(8,1fr);gap:6px;
+}
+.scale div{
+  text-align:center;font-size:.78rem;padding:8px 2px;border-radius:8px;
+  border:1px solid rgba(232,217,168,.35);color:#C3D8CB;
+}
+.scale div.on{background:var(--gold);color:var(--green);border-color:var(--gold);font-weight:700}
+
+.note{
+  margin-top:20px;font-size:.88rem;color:var(--muted);
+  border-left:3px solid var(--gold);padding:4px 0 4px 14px;max-width:70ch;
+}
+footer{
+  text-align:center;color:var(--muted);font-size:.85rem;padding:0 20px 40px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:720px){
+  .pair,.wetons{grid-template-columns:1fr}
+  .scale{grid-template-columns:repeat(4,1fr)}
+  .form-card{padding:18px}
+  .weton-card .weton{font-size:1.7rem}
+  .btn-main,.btn-ghost{width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="/" aria-label="KR Trade, beranda">
+      <svg viewBox="0 0 40 40" aria-hidden="true">
+        <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="none" stroke="#C9A24B" stroke-width="2"/>
+        <rect x="11" y="23" width="4" height="7" fill="#C9A24B"/>
+        <rect x="18" y="18" width="4" height="12" fill="#C9A24B"/>
+        <rect x="25" y="13" width="4" height="17" fill="#C9A24B"/>
+        <polyline points="10,20 17,15 22,17 31,9" fill="none" stroke="#F7F3E8" stroke-width="1.6"/>
+      </svg>
+      KR Trade
+    </a>
+    <a class="back" href="/">Beranda</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <h1>Cek Weton dan Neptu Calon Pengantin</h1>
+    <p>Masukkan tanggal lahir calon pria dan calon wanita. Halaman ini menghitung weton, neptu, dan kecocokannya menurut perhitungan primbon Jawa.</p>
+  </div>
+</section>
+
+<main>
+  <section class="form-card" aria-labelledby="form-title">
+    <h2 id="form-title" style="position:absolute;left:-9999px">Formulir tanggal lahir</h2>
+    <div class="pair">
+      <div class="person">
+        <h2>Calon pria</h2>
+        <div class="field">
+          <label for="nama1">Nama (opsional)</label>
+          <input type="text" id="nama1" autocomplete="off" maxlength="40" placeholder="Contoh: Ahmad">
+        </div>
+        <div class="field">
+          <label for="tgl1">Tanggal lahir</label>
+          <input type="date" id="tgl1" min="1900-01-01">
+        </div>
+        <label class="check"><input type="checkbox" id="mg1"> Lahir setelah Maghrib (hari dihitung maju satu hari)</label>
+      </div>
+      <div class="person">
+        <h2>Calon wanita</h2>
+        <div class="field">
+          <label for="nama2">Nama (opsional)</label>
+          <input type="text" id="nama2" autocomplete="off" maxlength="40" placeholder="Contoh: Siti">
+        </div>
+        <div class="field">
+          <label for="tgl2">Tanggal lahir</label>
+          <input type="date" id="tgl2" min="1900-01-01">
+        </div>
+        <label class="check"><input type="checkbox" id="mg2"> Lahir setelah Maghrib (hari dihitung maju satu hari)</label>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-main" id="btnHitung" type="button">Hitung weton dan kecocokan</button>
+      <button class="btn-ghost" id="btnReset" type="button">Kosongkan</button>
+    </div>
+    <p class="error" id="err" role="alert"></p>
+  </section>
+
+  <section id="results" aria-live="polite">
+    <div class="wetons" id="wetons"></div>
+    <div id="verdictWrap"></div>
+    <p class="note">Perhitungan ini bagian dari tradisi dan budaya Jawa, bukan syarat sah pernikahan menurut syariat Islam maupun hukum negara. Gunakan sebagai bahan perenungan dan diskusi keluarga, bukan sebagai penentu keputusan.</p>
+  </section>
+</main>
+
+<footer>&copy; <span id="yr"></span> KR Trade &middot; kangrozif.my.id</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  var DINA = ['Ahad','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  var NEPTU_DINA = {Ahad:5, Senin:4, Selasa:3, Rabu:7, Kamis:8, Jumat:6, Sabtu:9};
+  var PASARAN = ['Legi','Pahing','Pon','Wage','Kliwon'];
+  var NEPTU_PASARAN = {Legi:5, Pahing:9, Pon:7, Wage:4, Kliwon:8};
+  var BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+  // Jangkar pasaran: 17 Agustus 1945 = Jumat Legi
+  var REF = Date.UTC(1945, 7, 17);
+  var DAY_MS = 86400000;
+
+  // Hasil perhitungan jumlah neptu dibagi 8 (sisa 0 dihitung 8)
+  var HASIL = {
+    1:{nama:'Pegat', tone:'warn', ket:'Dalam primbon, Pegat dimaknai sebagai pasangan yang rawan diuji oleh perselisihan dan masalah ekonomi. Tradisi menyarankan lebih banyak keterbukaan, musyawarah, dan kesiapan finansial sebelum menikah.'},
+    2:{nama:'Ratu', tone:'good', ket:'Ratu dimaknai sebagai pasangan yang dihormati dan disegani lingkungannya. Rumah tangga dipercaya memiliki wibawa dan pengaruh yang baik di tengah masyarakat.'},
+    3:{nama:'Jodoh', tone:'good', ket:'Jodoh dimaknai sebagai pasangan yang saling melengkapi dan cocok. Rumah tangga dipercaya berjalan harmonis dan langgeng.'},
+    4:{nama:'Topo', tone:'mixed', ket:'Topo dimaknai sebagai pasangan yang melalui masa prihatin di awal pernikahan, lalu mendapat kebahagiaan dan kemapanan setelah bersabar dan berusaha bersama.'},
+    5:{nama:'Tinari', tone:'good', ket:'Tinari dimaknai sebagai pasangan yang dikaruniai kebahagiaan dan kemudahan rezeki. Rumah tangga dipercaya berjalan lancar dan penuh kecukupan.'},
+    6:{nama:'Padu', tone:'mixed', ket:'Padu dimaknai sebagai pasangan yang cukup sering berselisih paham, tetapi tetap bisa rukun selama saling mengalah dan mau berkomunikasi.'},
+    7:{nama:'Sujanan', tone:'warn', ket:'Sujanan dimaknai sebagai pasangan yang rawan godaan dan prasangka dari pihak luar. Tradisi menyarankan menjaga kepercayaan, kejujuran, dan batasan pergaulan.'},
+    8:{nama:'Pesthi', tone:'good', ket:'Pesthi dimaknai sebagai pasangan yang rukun, damai, dan sejahtera hingga usia tua. Rumah tangga dipercaya tentram dan kokoh.'}
+  };
+  var URUTAN = ['Pegat','Ratu','Jodoh','Topo','Tinari','Padu','Sujanan','Pesthi'];
+  var TONE_LABEL = {good:'Baik', mixed:'Cukup, perlu kesabaran', warn:'Perlu perhatian'};
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function hitungWeton(value, setelahMaghrib){
+    var p = value.split('-');
+    var y = parseInt(p[0],10), m = parseInt(p[1],10), d = parseInt(p[2],10);
+    var utc = Date.UTC(y, m-1, d);
+    if (setelahMaghrib) utc += DAY_MS;
+    var dt = new Date(utc);
+    var dina = DINA[dt.getUTCDay()];
+    var selisih = Math.round((utc - REF) / DAY_MS);
+    var pasaran = PASARAN[((selisih % 5) + 5) % 5];
+    var nd = NEPTU_DINA[dina], np = NEPTU_PASARAN[pasaran];
+    return {
+      dina:dina, pasaran:pasaran, nd:nd, np:np, total:nd+np,
+      tglLahir: d + ' ' + BULAN[m-1] + ' ' + y,
+      maju: !!setelahMaghrib
+    };
+  }
+
+  function validDate(v){
+    if (!v) return false;
+    var p = v.split('-');
+    if (p.length !== 3) return false;
+    var y = +p[0], m = +p[1], d = +p[2];
+    var t = new Date(Date.UTC(y, m-1, d));
+    return t.getUTCFullYear() === y && t.getUTCMonth() === m-1 && t.getUTCDate() === d && y >= 1900;
+  }
+
+  function kartu(label, nama, w){
+    var judul = nama ? esc(nama) : label;
+    var sub = nama ? '<div class="who">' + label + '</div>' : '';
+    return '<article class="weton-card">' +
+      '<div class="name">' + judul + '</div>' + sub +
+      '<div class="weton">' + w.dina + ' ' + w.pasaran + '</div>' +
+      '<div class="date">Lahir ' + w.tglLahir + (w.maju ? ' (setelah Maghrib)' : '') + '</div>' +
+      '<div class="neptu-row">' +
+        '<span>' + w.dina + ' ' + w.nd + '</span><span>+</span><span>' + w.pasaran + ' ' + w.np + '</span>' +
+        '<span class="tot"><small>Neptu</small>' + w.total + '</span>' +
+      '</div></article>';
+  }
+
+  function tampilkan(){
+    var err = $('err');
+    err.classList.remove('show'); err.textContent = '';
+
+    var v1 = $('tgl1').value, v2 = $('tgl2').value;
+    if (!validDate(v1) || !validDate(v2)){
+      err.textContent = 'Isi tanggal lahir calon pria dan calon wanita dengan tanggal yang valid (tahun 1900 ke atas).';
+      err.classList.add('show');
+      $('results').classList.remove('show');
+      return;
+    }
+
+    var n1 = $('nama1').value.trim(), n2 = $('nama2').value.trim();
+    var w1 = hitungWeton(v1, $('mg1').checked);
+    var w2 = hitungWeton(v2, $('mg2').checked);
+
+    $('wetons').innerHTML = kartu('Calon pria', n1, w1) + kartu('Calon wanita', n2, w2);
+
+    var jumlah = w1.total + w2.total;
+    var sisa = jumlah % 8; if (sisa === 0) sisa = 8;
+    var h = HASIL[sisa];
+
+    var scale = URUTAN.map(function(n, i){
+      return '<div' + (i+1 === sisa ? ' class="on"' : '') + '>' + n + '</div>';
+    }).join('');
+
+    $('verdictWrap').innerHTML =
+      '<section class="verdict" aria-label="Hasil kecocokan">' +
+        '<div class="calc"><span><b>' + w1.total + '</b> + <b>' + w2.total + '</b> = <b>' + jumlah + '</b></span>' +
+        '<span>&divide; 8, sisa <b>' + (jumlah % 8) + '</b>' + (jumlah % 8 === 0 ? ' (dihitung 8)' : '') + '</span></div>' +
+        '<h3>' + h.nama + '</h3>' +
+        '<span class="tone ' + (h.tone === 'warn' ? 'warn' : '') + '">' + TONE_LABEL[h.tone] + '</span>' +
+        '<p class="meaning">' + h.ket + '</p>' +
+        '<div class="scale" aria-hidden="true">' + scale + '</div>' +
+      '</section>';
+
+    var res = $('results');
+    res.classList.add('show');
+    res.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
+  }
+
+  function reset(){
+    ['nama1','nama2','tgl1','tgl2'].forEach(function(id){ $(id).value = ''; });
+    $('mg1').checked = false; $('mg2').checked = false;
+    $('err').classList.remove('show');
+    $('results').classList.remove('show');
+    $('tgl1').focus();
+  }
+
+  $('btnHitung').addEventListener('click', tampilkan);
+  $('btnReset').addEventListener('click', reset);
+  $('yr').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
