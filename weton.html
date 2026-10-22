@@ -199,13 +199,17 @@ footer{
 .chip.mixed{background:var(--gold-soft);color:#6B5115}
 .chip.warn{background:#F0D3CD;color:var(--warn)}
 
+.dl{display:flex;justify-content:flex-end;margin-bottom:16px}
+.btn-gold{background:var(--gold);color:var(--green);border-color:var(--gold-deep)}
+.btn-gold:hover{background:var(--gold-soft)}
+
 /* ---------- Responsive ---------- */
 @media (max-width:720px){
   .pair,.wetons,.extra{grid-template-columns:1fr}
   .scale{grid-template-columns:repeat(4,1fr)}
   .form-card{padding:18px}
   .weton-card .weton{font-size:1.7rem}
-  .btn-main,.btn-ghost{width:100%}
+  .btn-main,.btn-ghost,.btn-gold{width:100%}
 }
 </style>
 </head>
@@ -273,6 +277,7 @@ footer{
   </section>
 
   <section id="results" aria-live="polite">
+    <div class="dl"><button type="button" class="btn-gold" id="btnPdf">Unduh hasil (PDF)</button></div>
     <div class="wetons" id="wetons"></div>
     <div id="verdictWrap"></div>
     <div id="extraWrap"></div>
@@ -282,6 +287,7 @@ footer{
 
 <footer>&copy; <span id="yr"></span> KR Trade &middot; kangrozif.my.id</footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script>
 (function(){
   'use strict';
@@ -428,6 +434,7 @@ footer{
   };
 
   /* ================= UTIL ================= */
+  var last = null;
   function $(id){ return document.getElementById(id); }
   function low(t){ return t.charAt(0).toLowerCase() + t.slice(1); }
 
@@ -583,67 +590,85 @@ footer{
       more('Shio dan unsur kelahiran', shioHtml) +
       more('Zodiak dan angka hidup',
         '<p><strong>' + p.zod + '</strong> (unsur ' + z.e + '). ' + z.k + '</p>' +
-        '<p><strong>Angka hidup ' + p.lp + '.</strong> ' + a.k + ' <em>Perlu dijaga: ' + a.w + '</em></p>') +
+        '<p><strong>Angka hidup ' + p.lp + '.</strong> ' + a.k + ' <em>Catatan: ' + a.w + '</em></p>') +
     '</article>';
   }
 
-  function infoCard(judul, hasil, calc, tone, label, detail){
+  function esc(t){
+    return String(t).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function infoCard(o){
     return '<article class="info-card">' +
-      '<h4>' + judul + '</h4>' +
-      '<div class="res">' + hasil + '</div>' +
-      (calc ? '<div class="calc2">' + calc + '</div>' : '') +
-      (label ? '<span class="chip ' + tone + '">' + label + '</span>' : '') +
-      '<p>' + detail + '</p>' +
+      '<h4>' + esc(o.judul) + '</h4>' +
+      '<div class="res">' + esc(o.hasil) + '</div>' +
+      (o.calc ? '<div class="calc2">' + esc(o.calc) + '</div>' : '') +
+      (o.label ? '<span class="chip ' + o.tone + '">' + esc(o.label) + '</span>' : '') +
+      '<p>' + esc(o.detail) + '</p>' +
     '</article>';
   }
 
   function fmtUsia(u){ return u.y + ' th ' + u.m + ' bln'; }
 
-  function kartuUsia(p1, p2){
-    var tua = p1, muda = p2, tuaLabel = 'calon pria';
+  function cardUsia(p1, p2){
+    var tua = p1, tuaLabel = 'calon pria';
     var t1 = Date.UTC(p1.y, p1.m-1, p1.d), t2 = Date.UTC(p2.y, p2.m-1, p2.d);
+    var muda = p2;
     if (t1 > t2){ tua = p2; muda = p1; tuaLabel = 'calon wanita'; }
-    var sel = (t1 === t2) ? {y:0, m:0, d:0} : hitungUsia(tua.y, tua.m, tua.d, new Date(muda.y, muda.m-1, muda.d));
-    var selisihTxt = (t1 === t2) ? 'Seusia (lahir pada tanggal yang sama)' :
-      'Selisih ' + sel.y + ' th ' + sel.m + ' bln (' + tuaLabel + ' lebih tua)';
-
+    var selisihTxt;
+    if (t1 === t2){
+      selisihTxt = 'Seusia (lahir pada tanggal yang sama)';
+    } else {
+      var sel = hitungUsia(tua.y, tua.m, tua.d, new Date(muda.y, muda.m-1, muda.d));
+      selisihTxt = 'Selisih ' + sel.y + ' th ' + sel.m + ' bln (' + tuaLabel + ' lebih tua)';
+    }
     var kurang = [];
     if (p1.usia.y < 19) kurang.push('calon pria');
     if (p2.usia.y < 19) kurang.push('calon wanita');
     var ok = kurang.length === 0;
-    var detail = ok ?
-      'Keduanya telah mencapai batas usia minimal perkawinan, yaitu 19 tahun, sesuai UU No. 16 Tahun 2019.' :
-      'Usia ' + kurang.join(' dan ') + ' belum mencapai 19 tahun. Menurut UU No. 16 Tahun 2019, perkawinan pada usia di bawah itu hanya dapat dilakukan dengan dispensasi dari pengadilan.';
-    return infoCard('Usia dan kesiapan menikah', selisihTxt,
-      'Pria ' + fmtUsia(p1.usia) + ' &middot; Wanita ' + fmtUsia(p2.usia),
-      ok ? 'good' : 'warn', ok ? 'Memenuhi batas usia' : 'Perlu perhatian', detail);
+    return {
+      judul:'Usia dan kesiapan menikah', hasil:selisihTxt,
+      calc:'Pria ' + fmtUsia(p1.usia) + ' \u00B7 Wanita ' + fmtUsia(p2.usia),
+      tone: ok ? 'good' : 'warn', label: ok ? 'Memenuhi batas usia' : 'Perlu perhatian',
+      detail: ok ?
+        'Keduanya telah mencapai batas usia minimal perkawinan, yaitu 19 tahun, sesuai UU No. 16 Tahun 2019.' :
+        'Usia ' + kurang.join(' dan ') + ' belum mencapai 19 tahun. Menurut UU No. 16 Tahun 2019, perkawinan pada usia di bawah itu hanya dapat dilakukan dengan dispensasi dari pengadilan.'
+    };
   }
 
-  function kartuPancasuda(jumlah){
+  function cardPancasuda(jumlah){
     var sisa = jumlah % 5; if (sisa === 0) sisa = 5;
     var h = PANCASUDA[sisa];
-    return infoCard('Kecocokan Pancasuda', h.nama,
-      jumlah + ' &divide; 5, sisa ' + (jumlah % 5) + (jumlah % 5 === 0 ? ' (dihitung 5)' : ''),
-      h.tone, TONE_LABEL[h.tone], h.ket + ' Pancasuda memiliki beberapa versi perhitungan, sehingga hasilnya bisa berbeda dari rujukan lain.');
+    return {
+      judul:'Kecocokan Pancasuda', hasil:h.nama,
+      calc:jumlah + ' \u00F7 5, sisa ' + (jumlah % 5) + (jumlah % 5 === 0 ? ' (dihitung 5)' : ''),
+      tone:h.tone, label:TONE_LABEL[h.tone],
+      detail:h.ket + ' Pancasuda memiliki beberapa versi perhitungan, sehingga hasilnya bisa berbeda dari rujukan lain.'
+    };
   }
 
-  function kartuShio(p1, p2){
+  function cardShio(p1, p2){
     if (p1.shio.ambigu || p2.shio.ambigu){
-      return infoCard('Kecocokan shio dan unsur', 'Menunggu pilihan Imlek', '', '', '',
-        'Salah satu calon lahir antara 21 Januari dan 20 Februari. Pilih apakah kelahirannya sebelum atau sesudah Imlek tahun itu, lalu hitung ulang.');
+      return {judul:'Kecocokan shio dan unsur', hasil:'Menunggu pilihan Imlek', calc:'', tone:'', label:'',
+        detail:'Salah satu calon lahir antara 21 Januari dan 20 Februari. Pilih apakah kelahirannya sebelum atau sesudah Imlek tahun itu, lalu hitung ulang.'};
     }
-    var a = p1.shio, b = p2.shio;
-    var c = cocokShio(a.i, b.i);
-    return infoCard('Kecocokan shio dan unsur', SHIO[a.i].n + ' &amp; ' + SHIO[b.i].n,
-      'Pria: ' + SHIO[a.i].n + ' ' + a.elemen + ' &middot; Wanita: ' + SHIO[b.i].n + ' ' + b.elemen,
-      c.tone, c.t, c.ket + ' ' + relElemen(a.elemen, b.elemen));
+    var a = p1.shio, b = p2.shio, c = cocokShio(a.i, b.i);
+    return {
+      judul:'Kecocokan shio dan unsur', hasil:SHIO[a.i].n + ' & ' + SHIO[b.i].n,
+      calc:'Pria: ' + SHIO[a.i].n + ' ' + a.elemen + ' \u00B7 Wanita: ' + SHIO[b.i].n + ' ' + b.elemen,
+      tone:c.tone, label:c.t, detail:c.ket + ' ' + relElemen(a.elemen, b.elemen)
+    };
   }
 
-  function kartuZodiak(p1, p2){
+  function cardZodiak(p1, p2){
     var c = cocokZodiak(ZODIAK[p1.zod].e, ZODIAK[p2.zod].e);
-    return infoCard('Kecocokan zodiak', p1.zod + ' &amp; ' + p2.zod,
-      'Unsur ' + ZODIAK[p1.zod].e + ' dan ' + ZODIAK[p2.zod].e,
-      c.tone, c.t, c.ket + ' Angka hidup: pria ' + p1.lp + ', wanita ' + p2.lp + '.');
+    return {
+      judul:'Kecocokan zodiak', hasil:p1.zod + ' & ' + p2.zod,
+      calc:'Unsur ' + ZODIAK[p1.zod].e + ' dan ' + ZODIAK[p2.zod].e,
+      tone:c.tone, label:c.t, detail:c.ket + ' Angka hidup: pria ' + p1.lp + ', wanita ' + p2.lp + '.'
+    };
   }
 
   function dataOrang(n){
@@ -700,13 +725,9 @@ footer{
         '<div class="scale" aria-hidden="true">' + scale + '</div>' +
       '</section>';
 
-    $('extraWrap').innerHTML =
-      '<div class="extra">' +
-        kartuPancasuda(jumlah) +
-        kartuShio(p1, p2) +
-        kartuZodiak(p1, p2) +
-        kartuUsia(p1, p2) +
-      '</div>';
+    var cards = [cardPancasuda(jumlah), cardShio(p1, p2), cardZodiak(p1, p2), cardUsia(p1, p2)];
+    $('extraWrap').innerHTML = '<div class="extra">' + cards.map(infoCard).join('') + '</div>';
+    last = {p1:p1, p2:p2, jumlah:jumlah, h:h, cards:cards};
 
     var res = $('results');
     res.classList.add('show');
@@ -732,7 +753,160 @@ footer{
     $('tgl1').focus();
   }
 
+  /* ================= UNDUH PDF ================= */
+  var CATATAN = 'Gambaran watak, rezeki, shio, zodiak, dan angka hidup bersifat umum dan dapat berbeda antar sumber. Perhitungan ini bagian dari tradisi dan budaya Jawa, bukan syarat sah pernikahan menurut syariat Islam maupun hukum negara. Gunakan sebagai bahan perenungan dan diskusi keluarga, bukan sebagai penentu keputusan.';
+
+  function plainOrang(label, p){
+    var w = p.w, u = p.usia, z = ZODIAK[p.zod], a = ANGKA_HIDUP[p.lp], shioTxt;
+    if (p.shio.ambigu){
+      shioTxt = 'Lahir antara 21 Januari dan 20 Februari; status Imlek belum dipilih sehingga shio belum dihitung.';
+    } else {
+      var s = SHIO[p.shio.i];
+      shioTxt = s.n + ' ' + p.shio.elemen + ' (' + (p.shio.yang ? 'Yang' : 'Yin') + '). ' + s.k +
+        ' Perlu dijaga: ' + low(s.w) + ' Unsur ' + p.shio.elemen + ': ' + WATAK_ELEMEN[p.shio.elemen] + '.';
+    }
+    function wk(o, pre, key){ return o.k + ' ' + pre + ' ' + low(o[key]); }
+    return {
+      judul: label,
+      weton: w.dina + ' ' + w.pasaran,
+      info: 'Lahir ' + w.tglLahir + (w.maju ? ' (setelah Maghrib)' : '') + ' | usia ' + u.y + ' th ' + u.m + ' bln ' + u.d + ' hr',
+      neptu: 'Neptu: ' + w.dina + ' ' + w.nd + ' + ' + w.pasaran + ' ' + w.np + ' = ' + w.total,
+      rows: [
+        ['Watak hari (' + w.dina + ')', wk(WATAK_DINA[w.dina], 'Perlu dijaga:', 'w')],
+        ['Watak pasaran (' + w.pasaran + ')', wk(WATAK_PASARAN[w.pasaran], 'Perlu dijaga:', 'w')],
+        ['Watak berdasarkan jumlah neptu (' + w.total + ')', wk(WATAK_NEPTU[w.total], 'Perlu dijaga:', 'w')],
+        ['Rezeki dan peruntungan (hari)', wk(REZEKI_DINA[w.dina], 'Saran:', 's')],
+        ['Rezeki dan peruntungan (pasaran)', wk(REZEKI_PASARAN[w.pasaran], 'Saran:', 's')],
+        ['Shio dan unsur kelahiran', shioTxt],
+        ['Zodiak ' + p.zod + ' (unsur ' + z.e + ')', z.k],
+        ['Angka hidup ' + p.lp, a.k + ' Catatan: ' + a.w]
+      ]
+    };
+  }
+
+  function unduhPdf(){
+    var err = $('err');
+    if (!last) return;
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if (!J){
+      err.textContent = 'Pustaka PDF belum termuat. Periksa koneksi internet lalu coba lagi.';
+      err.classList.add('show');
+      return;
+    }
+    var doc = new J({unit:'mm', format:'a4'});
+    var W = 210, H = 297, M = 16, CW = W - 2*M, y = 0, i;
+    var GREEN = [15,61,46], GOLD = [201,162,75], INK = [26,36,51], MUTED = [91,101,119], IVORY = [247,243,232], SOFT = [232,217,168];
+    var TONE = {good:[47,107,79], mixed:[138,106,31], warn:[154,59,46]};
+
+    function lh(size){ return size * 0.3528 * 1.42; }
+    function ensure(h){ if (y + h > H - 20){ doc.addPage(); y = M; } }
+    function write(t, size, style, color, indent, gap, fam){
+      doc.setFont(fam || 'helvetica', style);
+      doc.setFontSize(size);
+      doc.setTextColor(color[0], color[1], color[2]);
+      var lines = doc.splitTextToSize(t, CW - indent - 2), step = lh(size), k;
+      for (k = 0; k < lines.length; k++){
+        ensure(step);
+        doc.text(lines[k], M + indent, y + size * 0.3528);
+        y += step;
+      }
+      y += gap || 0;
+    }
+    function bar(top, page0){
+      if (doc.getNumberOfPages() === page0 && y > top){
+        doc.setFillColor(GOLD[0], GOLD[1], GOLD[2]);
+        doc.rect(M, top, 1.2, y - top - 1, 'F');
+      }
+    }
+
+    // Kepala
+    var now = new Date();
+    doc.setFillColor(GREEN[0], GREEN[1], GREEN[2]);
+    doc.rect(0, 0, W, 32, 'F');
+    doc.setFillColor(GOLD[0], GOLD[1], GOLD[2]);
+    doc.rect(0, 32, W, 1.4, 'F');
+    doc.setTextColor(IVORY[0], IVORY[1], IVORY[2]);
+    doc.setFont('times', 'bold'); doc.setFontSize(20);
+    doc.text('Hasil Cek Weton dan Neptu', M, 15);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.setTextColor(SOFT[0], SOFT[1], SOFT[2]);
+    doc.text('Calon pengantin  |  kangrozif.my.id', M, 23);
+    doc.text('Dibuat ' + now.getDate() + ' ' + BULAN[now.getMonth()] + ' ' + now.getFullYear(), W - M, 23, {align:'right'});
+    y = 42;
+
+    // Dua calon
+    [plainOrang('Calon pria', last.p1), plainOrang('Calon wanita', last.p2)].forEach(function(o){
+      ensure(46);
+      var top = y, page0 = doc.getNumberOfPages();
+      write(o.judul.toUpperCase(), 8.5, 'bold', MUTED, 4, 0.5);
+      write(o.weton, 21, 'bold', GREEN, 4, 0.5, 'times');
+      write(o.info, 9, 'normal', MUTED, 4, 1);
+      write(o.neptu, 10, 'bold', INK, 4, 2.5, 'courier');
+      o.rows.forEach(function(r){
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
+        ensure(lh(9.5) * (1 + doc.splitTextToSize(r[1], CW - 6).length) + 2.6);
+        write(r[0], 9.5, 'bold', GREEN, 4, 0.2);
+        write(r[1], 9.5, 'normal', INK, 4, 2.4);
+      });
+      bar(top, page0);
+      y += 5;
+    });
+
+    // Hasil Pegat - Ratu - Jodoh
+    var h = last.h, jumlah = last.jumlah;
+    var body = doc.splitTextToSize(h.ket, CW - 14);
+    doc.setFontSize(10);
+    var boxH = 36 + body.length * lh(10) + 4;
+    ensure(boxH + 4);
+    doc.setFillColor(GREEN[0], GREEN[1], GREEN[2]);
+    doc.roundedRect(M, y, CW, boxH, 2, 2, 'F');
+    doc.setDrawColor(GOLD[0], GOLD[1], GOLD[2]); doc.setLineWidth(0.6);
+    doc.roundedRect(M, y, CW, boxH, 2, 2, 'S');
+    doc.setFont('courier', 'normal'); doc.setFontSize(10);
+    doc.setTextColor(SOFT[0], SOFT[1], SOFT[2]);
+    doc.text(last.p1.w.total + ' + ' + last.p2.w.total + ' = ' + jumlah + '   |   dibagi 8, sisa ' + (jumlah % 8) + (jumlah % 8 === 0 ? ' (dihitung 8)' : ''), M + 7, y + 9);
+    doc.setFont('times', 'bold'); doc.setFontSize(24);
+    doc.setTextColor(IVORY[0], IVORY[1], IVORY[2]);
+    doc.text(h.nama, M + 7, y + 20);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5);
+    doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+    doc.text(TONE_LABEL[h.tone], M + 7, y + 27);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.setTextColor(IVORY[0], IVORY[1], IVORY[2]);
+    for (i = 0; i < body.length; i++) doc.text(body[i], M + 7, y + 34 + i * lh(10));
+    y += boxH + 8;
+
+    // Kecocokan lain
+    last.cards.forEach(function(c){
+      ensure(40);
+      var top = y, page0 = doc.getNumberOfPages();
+      write(c.judul, 12, 'bold', GREEN, 4, 0.5, 'times');
+      write(c.hasil, 12, 'bold', INK, 4, 0.3);
+      if (c.calc) write(c.calc, 8.5, 'normal', MUTED, 4, 0.8, 'courier');
+      if (c.label) write(c.label, 9, 'bold', TONE[c.tone] || MUTED, 4, 0.5);
+      write(c.detail, 9.5, 'normal', INK, 4, 2);
+      bar(top, page0);
+      y += 5;
+    });
+
+    write(CATATAN, 8.5, 'italic', MUTED, 0, 0);
+
+    // Kaki halaman
+    var n = doc.getNumberOfPages();
+    for (i = 1; i <= n; i++){
+      doc.setPage(i);
+      doc.setDrawColor(GOLD[0], GOLD[1], GOLD[2]); doc.setLineWidth(0.3);
+      doc.line(M, H - 14, W - M, H - 14);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      doc.text('kangrozif.my.id/weton.html', M, H - 9);
+      doc.text('Halaman ' + i + ' dari ' + n, W - M, H - 9, {align:'right'});
+    }
+    doc.save('hasil-weton-calon-pengantin.pdf');
+  }
+
   $('btnHitung').addEventListener('click', tampilkan);
+  $('btnPdf').addEventListener('click', unduhPdf);
   $('btnReset').addEventListener('click', reset);
   $('tgl1').addEventListener('change', function(){ toggleImlek(1); });
   $('tgl2').addEventListener('change', function(){ toggleImlek(2); });
