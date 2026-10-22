@@ -62,26 +62,8 @@ a{color:inherit}
 }
 .back:hover{background:rgba(232,217,168,.12)}
 
-/* ---------- Hero ---------- */
-.hero{
-  background:linear-gradient(180deg,var(--green) 0%,var(--green-2) 100%);
-  color:var(--ivory);
-  padding:44px 20px 84px;
-  border-bottom:6px double var(--gold);
-}
-.hero-inner{max-width:980px;margin:0 auto}
-.hero h1{
-  color:var(--ivory);
-  font-family:var(--serif);font-weight:700;
-  font-size:clamp(1.9rem,5.2vw,3.1rem);
-  line-height:1.15;max-width:18ch;
-}
-.hero p{
-  margin-top:14px;max-width:56ch;color:#D3E2D9;font-size:1.02rem;
-}
-
 /* ---------- Form ---------- */
-main{max-width:980px;margin:-52px auto 0;padding:0 20px 60px}
+main{max-width:980px;margin:28px auto 0;padding:0 20px 60px}
 .form-card{
   background:var(--paper);
   border:1px solid var(--line);
@@ -101,7 +83,7 @@ main{max-width:980px;margin:-52px auto 0;padding:0 20px 60px}
   border-bottom:2px solid var(--gold);display:inline-block;
 }
 label{display:block;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:5px}
-input[type="text"],input[type="date"]{
+input[type="text"],input[type="date"],select{
   width:100%;font:inherit;padding:11px 12px;border:1px solid #BFB79F;border-radius:8px;
   background:#fff;color:var(--ink);min-height:46px;
 }
@@ -196,9 +178,30 @@ footer{
   text-align:center;color:var(--muted);font-size:.85rem;padding:0 20px 40px;
 }
 
+[hidden]{display:none!important}
+.more{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.more summary{cursor:pointer;font-weight:600;color:var(--green);font-size:.95rem;list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:'+';display:inline-block;width:1.2em;color:var(--gold-deep);font-weight:700}
+.more[open] summary::before{content:'\2212'}
+.more>div{font-size:.92rem;margin-top:8px}
+.more p{margin-top:8px}
+.more strong{color:var(--green)}
+.more em{display:block;font-style:normal;color:var(--muted);font-size:.88rem;margin-top:2px}
+.extra{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+.info-card{background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;padding:20px}
+.info-card h4{font-family:var(--serif);color:var(--green);font-size:1.05rem;margin-bottom:6px}
+.info-card .res{font-family:var(--serif);font-weight:700;font-size:1.5rem;color:var(--green);line-height:1.2}
+.info-card .calc2{font-family:var(--mono);font-size:.82rem;color:var(--muted);margin-top:4px}
+.info-card p{font-size:.92rem;margin-top:10px}
+.chip{display:inline-block;margin-top:10px;font-size:.8rem;font-weight:600;padding:3px 12px;border-radius:999px}
+.chip.good{background:#DCEBE2;color:var(--good)}
+.chip.mixed{background:var(--gold-soft);color:#6B5115}
+.chip.warn{background:#F0D3CD;color:var(--warn)}
+
 /* ---------- Responsive ---------- */
 @media (max-width:720px){
-  .pair,.wetons{grid-template-columns:1fr}
+  .pair,.wetons,.extra{grid-template-columns:1fr}
   .scale{grid-template-columns:repeat(4,1fr)}
   .form-card{padding:18px}
   .weton-card .weton{font-size:1.7rem}
@@ -224,14 +227,8 @@ footer{
   </div>
 </header>
 
-<section class="hero">
-  <div class="hero-inner">
-    <h1>Cek Weton dan Neptu Calon Pengantin</h1>
-    <p>Masukkan tanggal lahir calon pria dan calon wanita. Halaman ini menghitung weton, neptu, dan kecocokannya menurut perhitungan primbon Jawa.</p>
-  </div>
-</section>
-
 <main>
+  <h1 style="position:absolute;left:-9999px">Cek Weton dan Neptu Calon Pengantin</h1>
   <section class="form-card" aria-labelledby="form-title">
     <h2 id="form-title" style="position:absolute;left:-9999px">Formulir tanggal lahir</h2>
     <div class="pair">
@@ -241,6 +238,14 @@ footer{
           <label for="tgl1">Tanggal lahir</label>
           <input type="date" id="tgl1" min="1900-01-01">
         </div>
+        <div class="field" id="imlek1" hidden>
+          <label for="im1">Lahir 21 Jan–20 Feb: sudah melewati Imlek?</label>
+          <select id="im1">
+            <option value="">Pilih</option>
+            <option value="sebelum">Belum (sebelum Imlek)</option>
+            <option value="sesudah">Sudah (sesudah Imlek)</option>
+          </select>
+        </div>
         <label class="check"><input type="checkbox" id="mg1"> Lahir setelah Maghrib (hari dihitung maju satu hari)</label>
       </div>
       <div class="person">
@@ -248,6 +253,14 @@ footer{
         <div class="field">
           <label for="tgl2">Tanggal lahir</label>
           <input type="date" id="tgl2" min="1900-01-01">
+        </div>
+        <div class="field" id="imlek2" hidden>
+          <label for="im2">Lahir 21 Jan–20 Feb: sudah melewati Imlek?</label>
+          <select id="im2">
+            <option value="">Pilih</option>
+            <option value="sebelum">Belum (sebelum Imlek)</option>
+            <option value="sesudah">Sudah (sesudah Imlek)</option>
+          </select>
         </div>
         <label class="check"><input type="checkbox" id="mg2"> Lahir setelah Maghrib (hari dihitung maju satu hari)</label>
       </div>
@@ -262,7 +275,8 @@ footer{
   <section id="results" aria-live="polite">
     <div class="wetons" id="wetons"></div>
     <div id="verdictWrap"></div>
-    <p class="note">Gambaran watak bersifat umum dan dapat berbeda antar sumber primbon. Perhitungan ini bagian dari tradisi dan budaya Jawa, bukan syarat sah pernikahan menurut syariat Islam maupun hukum negara. Gunakan sebagai bahan perenungan dan diskusi keluarga, bukan sebagai penentu keputusan.</p>
+    <div id="extraWrap"></div>
+    <p class="note">Gambaran watak, rezeki, shio, zodiak, dan angka hidup bersifat umum dan dapat berbeda antar sumber. Perhitungan ini bagian dari tradisi dan budaya Jawa, bukan syarat sah pernikahan menurut syariat Islam maupun hukum negara. Gunakan sebagai bahan perenungan dan diskusi keluarga, bukan sebagai penentu keputusan.</p>
   </section>
 </main>
 
@@ -272,6 +286,7 @@ footer{
 (function(){
   'use strict';
 
+  /* ================= DATA WETON ================= */
   var DINA = ['Ahad','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
   var NEPTU_DINA = {Ahad:5, Senin:4, Selasa:3, Rabu:7, Kamis:8, Jumat:6, Sabtu:9};
   var PASARAN = ['Legi','Pahing','Pon','Wage','Kliwon'];
@@ -299,7 +314,41 @@ footer{
     Kliwon:{k:'Berkharisma, intuitif, dan kuat dalam kehidupan batin.', w:'Sulit ditebak dan mudah tersinggung.'}
   };
 
-  // Hasil perhitungan jumlah neptu dibagi 8 (sisa 0 dihitung 8)
+  // Watak berdasarkan jumlah neptu (7-18)
+  var WATAK_NEPTU = {
+    7:{k:'Sederhana, tidak banyak menuntut, dan berhati-hati dalam melangkah.', w:'Terlalu berhati-hati sehingga lambat mengambil peluang.'},
+    8:{k:'Setia pada janji dan tekun menjalani tugas.', w:'Mudah merasa kurang percaya diri.'},
+    9:{k:'Tenang, rendah hati, dan pandai menahan diri.', w:'Cenderung memendam perasaan.'},
+    10:{k:'Ramah, luwes bergaul, dan mudah menyesuaikan diri.', w:'Kurang tegas ketika menghadapi banyak pendapat.'},
+    11:{k:'Pekerja keras dan bertanggung jawab.', w:'Terlalu banyak menanggung beban sendiri.'},
+    12:{k:'Cerdas dan banyak akal.', w:'Mudah gelisah dan banyak pikiran.'},
+    13:{k:'Seimbang, bijak menimbang, dan dipercaya orang.', w:'Lambat dalam memutuskan.'},
+    14:{k:'Berpendirian kuat dan berani memimpin.', w:'Keras hati dan sulit mengalah.'},
+    15:{k:'Penuh semangat, ambisius, dan tekun mengejar cita-cita.', w:'Lupa beristirahat dan mudah tegang.'},
+    16:{k:'Berwibawa, berpengaruh, dan disegani.', w:'Mudah merasa paling benar.'},
+    17:{k:'Murah hati, peduli sesama, dan suka menolong.', w:'Sulit menolak sehingga mudah dimanfaatkan.'},
+    18:{k:'Berjiwa besar, teguh, dan kuat menghadapi ujian hidup.', w:'Terlalu menuntut diri sendiri.'}
+  };
+
+  // Rezeki dan peruntungan
+  var REZEKI_DINA = {
+    Ahad:{k:'Rezeki cenderung datang lewat kepercayaan orang dan peran memimpin.', s:'Jangan hanya mengandalkan nama atau kedudukan, tetap rajin berusaha.'},
+    Senin:{k:'Rezeki mengalir stabil dari ketelatenan dan kehati-hatian.', s:'Berani mengambil peluang yang sudah diperhitungkan.'},
+    Selasa:{k:'Rezeki datang dari kerja keras dan keberanian mengambil langkah.', s:'Kendalikan pengeluaran saat penghasilan sedang naik.'},
+    Rabu:{k:'Rezeki datang lewat kecerdasan, keahlian, dan kemampuan berkomunikasi.', s:'Jangan terlalu lama menimbang hingga peluang lewat.'},
+    Kamis:{k:'Rezeki cenderung berkah dan datang dari kejujuran serta nama baik.', s:'Terbuka pada cara kerja dan peluang baru.'},
+    Jumat:{k:'Rezeki mengalir lewat pergaulan dan hubungan baik dengan banyak orang.', s:'Waspadai pengeluaran untuk gaya hidup dan pergaulan.'},
+    Sabtu:{k:'Rezeki tumbuh pelan namun kokoh lewat ketekunan jangka panjang.', s:'Beri ruang untuk beristirahat dan jangan terlalu keras pada diri sendiri.'}
+  };
+  var REZEKI_PASARAN = {
+    Legi:{k:'Rezeki mudah datang dari pergaulan dan sikap murah hati.', s:'Biasakan menabung agar tidak cepat habis.'},
+    Pahing:{k:'Rezeki datang dari usaha mandiri dan kegigihan.', s:'Jangan terlalu perhitungan hingga melewatkan kerja sama.'},
+    Pon:{k:'Rezeki datang dari ketelitian, strategi, dan perencanaan.', s:'Terbuka terhadap bantuan dan masukan orang lain.'},
+    Wage:{k:'Rezeki cenderung stabil dan menetap, meski datangnya tidak cepat.', s:'Jangan menunda memulai karena menunggu keadaan sempurna.'},
+    Kliwon:{k:'Rezeki sering datang dari jalur tak terduga dan hubungan baik.', s:'Tetap catat dan rencanakan keuangan agar tidak bergantung pada keberuntungan.'}
+  };
+
+  /* ===== Kecocokan 1: jumlah neptu dibagi 8 ===== */
   var HASIL = {
     1:{nama:'Pegat', tone:'warn', ket:'Dalam primbon, Pegat dimaknai sebagai pasangan yang rawan diuji oleh perselisihan dan masalah ekonomi. Tradisi menyarankan lebih banyak keterbukaan, musyawarah, dan kesiapan finansial sebelum menikah.'},
     2:{nama:'Ratu', tone:'good', ket:'Ratu dimaknai sebagai pasangan yang dihormati dan disegani lingkungannya. Rumah tangga dipercaya memiliki wibawa dan pengaruh yang baik di tengah masyarakat.'},
@@ -313,13 +362,85 @@ footer{
   var URUTAN = ['Pegat','Ratu','Jodoh','Topo','Tinari','Padu','Sujanan','Pesthi'];
   var TONE_LABEL = {good:'Baik', mixed:'Cukup, perlu kesabaran', warn:'Perlu perhatian'};
 
+  /* ===== Kecocokan 2: Pancasuda (jumlah neptu dibagi 5) ===== */
+  var PANCASUDA = {
+    1:{nama:'Sri', tone:'good', ket:'Sri dimaknai sebagai pasangan yang dekat dengan kelancaran rezeki, ketenteraman, dan kebaikan dalam rumah tangga.'},
+    2:{nama:'Lungguh', tone:'good', ket:'Lungguh dimaknai sebagai pasangan yang berpeluang mendapat kedudukan, kehormatan, dan kepercayaan dari lingkungannya.'},
+    3:{nama:'Gedhong', tone:'good', ket:'Gedhong dimaknai sebagai pasangan yang berpeluang hidup berkecukupan dan memiliki harta yang terjaga.'},
+    4:{nama:'Lara', tone:'warn', ket:'Lara dimaknai sebagai pasangan yang rawan menghadapi ujian kesehatan atau kesulitan hidup. Tradisi menyarankan menjaga kesehatan, saling menguatkan, dan menyiapkan keuangan sejak awal.'},
+    5:{nama:'Pati', tone:'warn', ket:'Pati dimaknai sebagai pasangan yang berpeluang menghadapi ujian berat. Tradisi menyarankan memperbanyak doa, bermusyawarah, dan menyiapkan diri lahir dan batin.'}
+  };
+
+  /* ================= DATA SHIO & UNSUR ================= */
+  var SHIO = [
+    {n:'Tikus', k:'Cerdas, luwes, dan jeli melihat peluang.', w:'Mudah gelisah dan cenderung terlalu banyak perhitungan.'},
+    {n:'Kerbau', k:'Pekerja keras, sabar, dan setia.', w:'Keras kepala dan kaku terhadap perubahan.'},
+    {n:'Macan', k:'Berani, percaya diri, dan berjiwa pemimpin.', w:'Impulsif dan mudah panas.'},
+    {n:'Kelinci', k:'Lembut, halus budi, dan pandai menjaga suasana.', w:'Terlalu menghindari konflik dan mudah cemas.'},
+    {n:'Naga', k:'Bersemangat, berkharisma, dan ambisius.', w:'Tinggi hati dan kurang sabar.'},
+    {n:'Ular', k:'Bijak, intuitif, dan tenang.', w:'Cenderung tertutup dan mudah cemburu.'},
+    {n:'Kuda', k:'Energik, mandiri, dan ramah.', w:'Kurang sabar dan sulit betah di satu tempat.'},
+    {n:'Kambing', k:'Lembut, kreatif, dan penyayang.', w:'Ragu-ragu dan mudah bergantung pada orang lain.'},
+    {n:'Monyet', k:'Cerdik, lincah, dan humoris.', w:'Kurang konsisten dan mudah bosan.'},
+    {n:'Ayam', k:'Teliti, disiplin, dan jujur.', w:'Terlalu perfeksionis dan suka mengkritik.'},
+    {n:'Anjing', k:'Setia, jujur, dan menjunjung keadilan.', w:'Mudah cemas dan cenderung pesimis.'},
+    {n:'Babi', k:'Murah hati, tulus, dan santai.', w:'Terlalu mudah percaya sehingga rawan dimanfaatkan.'}
+  ];
+  // Unsur menurut digit terakhir tahun: 0,1 Logam; 2,3 Air; 4,5 Kayu; 6,7 Api; 8,9 Tanah
+  var ELEMEN_SHIO = ['Logam','Logam','Air','Air','Kayu','Kayu','Api','Api','Tanah','Tanah'];
+  var WATAK_ELEMEN = {
+    Logam:'tegas, disiplin, dan kuat pendirian',
+    Air:'luwes, intuitif, dan pandai berkomunikasi',
+    Kayu:'suka bertumbuh, murah hati, dan kreatif',
+    Api:'bersemangat, hangat, dan ekspresif',
+    Tanah:'stabil, praktis, dan dapat diandalkan'
+  };
+  var SIKLUS = ['Kayu','Api','Tanah','Logam','Air']; // urutan saling menghidupi
+
+  /* ================= DATA ZODIAK & ANGKA HIDUP ================= */
+  var ZODIAK = {
+    Aries:{e:'Api', k:'Berani, bersemangat, dan suka memulai hal baru.'},
+    Taurus:{e:'Tanah', k:'Sabar, setia, dan menyukai kenyamanan serta kestabilan.'},
+    Gemini:{e:'Udara', k:'Mudah bergaul, cerdas, dan serba ingin tahu.'},
+    Cancer:{e:'Air', k:'Penyayang, peka, dan sangat mementingkan keluarga.'},
+    Leo:{e:'Api', k:'Percaya diri, hangat, dan murah hati.'},
+    Virgo:{e:'Tanah', k:'Teliti, rapi, dan senang melayani.'},
+    Libra:{e:'Udara', k:'Adil, diplomatis, dan mencintai keharmonisan.'},
+    Scorpio:{e:'Air', k:'Gigih, mendalam, dan loyal.'},
+    Sagitarius:{e:'Api', k:'Optimis, bebas, dan jujur apa adanya.'},
+    Capricorn:{e:'Tanah', k:'Disiplin, bertanggung jawab, dan berorientasi target.'},
+    Aquarius:{e:'Udara', k:'Mandiri, kreatif, dan berpikiran terbuka.'},
+    Pisces:{e:'Air', k:'Lembut, imajinatif, dan penuh empati.'}
+  };
+  var ANGKA_HIDUP = {
+    1:{k:'Mandiri, berani memulai, dan berjiwa pemimpin.', w:'perlu belajar mendengar.'},
+    2:{k:'Penengah yang peka, suka bekerja sama, dan menjaga kedamaian.', w:'perlu lebih tegas.'},
+    3:{k:'Ekspresif, ceria, dan kreatif.', w:'perlu menjaga fokus.'},
+    4:{k:'Tertib, tekun, dan dapat diandalkan.', w:'perlu lebih luwes terhadap perubahan.'},
+    5:{k:'Dinamis, suka kebebasan, dan mudah beradaptasi.', w:'perlu menjaga konsistensi.'},
+    6:{k:'Penyayang, bertanggung jawab, dan mengutamakan keluarga.', w:'perlu menjaga agar tidak menanggung semuanya sendiri.'},
+    7:{k:'Pemikir, reflektif, dan haus ilmu.', w:'perlu lebih terbuka kepada orang lain.'},
+    8:{k:'Ambisius, kuat dalam mengelola, dan berorientasi hasil.', w:'perlu menjaga keseimbangan antara materi dan keluarga.'},
+    9:{k:'Dermawan, welas asih, dan berjiwa besar.', w:'perlu belajar melepaskan.'},
+    11:{k:'Peka, inspiratif, dan kuat secara batin.', w:'perlu mengelola kepekaan agar tidak mudah lelah.'},
+    22:{k:'Pembangun yang berwawasan luas dan mampu mewujudkan rencana besar.', w:'perlu menjaga agar tidak terbebani target.'},
+    33:{k:'Pengayom yang penuh kasih dan senang melayani.', w:'perlu menjaga batas diri.'}
+  };
+
+  /* ================= UTIL ================= */
   function $(id){ return document.getElementById(id); }
-  function esc(s){
-    return String(s).replace(/[&<>"']/g, function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-    });
+  function low(t){ return t.charAt(0).toLowerCase() + t.slice(1); }
+
+  function validDate(v){
+    if (!v) return false;
+    var p = v.split('-');
+    if (p.length !== 3) return false;
+    var y = +p[0], m = +p[1], d = +p[2];
+    var t = new Date(Date.UTC(y, m-1, d));
+    return t.getUTCFullYear() === y && t.getUTCMonth() === m-1 && t.getUTCDate() === d && y >= 1900;
   }
 
+  /* ================= PERHITUNGAN ================= */
   function hitungWeton(value, setelahMaghrib){
     var p = value.split('-');
     var y = parseInt(p[0],10), m = parseInt(p[1],10), d = parseInt(p[2],10);
@@ -337,31 +458,205 @@ footer{
     };
   }
 
-  function validDate(v){
-    if (!v) return false;
-    var p = v.split('-');
-    if (p.length !== 3) return false;
-    var y = +p[0], m = +p[1], d = +p[2];
-    var t = new Date(Date.UTC(y, m-1, d));
-    return t.getUTCFullYear() === y && t.getUTCMonth() === m-1 && t.getUTCDate() === d && y >= 1900;
+  function hitungUsia(y, m, d, now){
+    var yy = now.getFullYear() - y;
+    var mm = now.getMonth() + 1 - m;
+    var dd = now.getDate() - d;
+    if (dd < 0){
+      mm--;
+      dd += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+    }
+    if (mm < 0){ yy--; mm += 12; }
+    return {y:yy, m:mm, d:dd};
   }
 
-  function kartu(label, nama, w){
-    var judul = nama ? esc(nama) : label;
-    var sub = nama ? '<div class="who">' + label + '</div>' : '';
+  // Imlek selalu jatuh antara 21 Januari dan 20 Februari
+  function hitungShio(y, m, d, pilihan){
+    var md = m*100 + d, status;
+    if (md < 121) status = 'sebelum';
+    else if (md > 220) status = 'sesudah';
+    else status = pilihan || '';
+    if (!status) return {ambigu:true};
+    var ty = (status === 'sebelum') ? y - 1 : y;
+    return {
+      ambigu:false,
+      i:(((ty - 4) % 12) + 12) % 12,
+      elemen:ELEMEN_SHIO[ty % 10],
+      yang:(ty % 2 === 0)
+    };
+  }
+
+  function hitungZodiak(m, d){
+    var md = m*100 + d;
+    if (md >= 321 && md <= 419) return 'Aries';
+    if (md >= 420 && md <= 520) return 'Taurus';
+    if (md >= 521 && md <= 620) return 'Gemini';
+    if (md >= 621 && md <= 722) return 'Cancer';
+    if (md >= 723 && md <= 822) return 'Leo';
+    if (md >= 823 && md <= 922) return 'Virgo';
+    if (md >= 923 && md <= 1022) return 'Libra';
+    if (md >= 1023 && md <= 1121) return 'Scorpio';
+    if (md >= 1122 && md <= 1221) return 'Sagitarius';
+    if (md >= 1222 || md <= 119) return 'Capricorn';
+    if (md >= 120 && md <= 218) return 'Aquarius';
+    return 'Pisces';
+  }
+
+  function hitungAngkaHidup(y, m, d){
+    var s = String(y) + (m < 10 ? '0' : '') + m + (d < 10 ? '0' : '') + d;
+    var n = 0, i;
+    for (i = 0; i < s.length; i++) n += +s.charAt(i);
+    while (n > 9 && n !== 11 && n !== 22 && n !== 33){
+      var t = 0, str = String(n);
+      for (i = 0; i < str.length; i++) t += +str.charAt(i);
+      n = t;
+    }
+    return n;
+  }
+
+  function cocokShio(a, b){
+    if (a === b) return {t:'Sama shio', tone:'mixed', ket:'Karakter keduanya mirip sehingga mudah saling memahami, tetapi kelemahan yang sama juga bisa saling menguat. Perlu saling mengingatkan.'};
+    if ((a + b) % 12 === 1) return {t:'Enam Harmoni (Liu He)', tone:'good', ket:'Pasangan shio yang dipandang saling melengkapi dan mudah serasi.'};
+    var d = ((a - b) % 12 + 12) % 12;
+    if (d === 6) return {t:'Berlawanan (Liu Chong)', tone:'warn', ket:'Pasangan shio yang dipandang berlawanan watak. Perlu banyak komunikasi, kesabaran, dan saling menghargai perbedaan.'};
+    if (d === 4 || d === 8) return {t:'Segitiga Harmoni (San He)', tone:'good', ket:'Keduanya berada dalam satu kelompok shio yang dipandang sejalan dalam tujuan dan cara pandang.'};
+    return {t:'Netral', tone:'mixed', ket:'Tidak termasuk pasangan yang sangat serasi maupun berlawanan. Keserasian lebih ditentukan oleh sikap keduanya.'};
+  }
+
+  function relElemen(a, b){
+    if (a === b) return 'Unsur sama (' + a + '): selaras dan mudah saling memahami.';
+    var d = (SIKLUS.indexOf(b) - SIKLUS.indexOf(a) + 5) % 5;
+    if (d === 1) return 'Unsur ' + a + ' menghidupi ' + b + ': saling mendukung.';
+    if (d === 4) return 'Unsur ' + b + ' menghidupi ' + a + ': saling mendukung.';
+    if (d === 2) return 'Unsur ' + a + ' menekan ' + b + ': perlu saling menyesuaikan.';
+    return 'Unsur ' + b + ' menekan ' + a + ': perlu saling menyesuaikan.';
+  }
+
+  function cocokZodiak(a, b){
+    if (a === b) return {t:'Unsur sama', tone:'good', ket:'Unsur zodiak sama sehingga cara bersemangat, merasa, dan berpikirnya cenderung sejalan.'};
+    var s = [a, b].sort().join('+');
+    if (s === 'Api+Udara' || s === 'Air+Tanah') return {t:'Unsur saling mendukung', tone:'good', ket:'Dua unsur ini dipandang saling menguatkan dan melengkapi.'};
+    if (s === 'Air+Api' || s === 'Tanah+Udara') return {t:'Perlu penyesuaian', tone:'mixed', ket:'Dua unsur ini berbeda cara menanggapi hidup, sehingga perlu lebih banyak komunikasi dan pengertian.'};
+    return {t:'Netral', tone:'mixed', ket:'Dua unsur ini tidak saling bertentangan maupun terlalu menguatkan.'};
+  }
+
+  /* ================= TAMPILAN ================= */
+  function bagian(label, o, prefix, kunci){
+    return '<p><strong>' + label + '</strong> ' + o.k + ' <em>' + prefix + ' ' + low(o[kunci]) + '</em></p>';
+  }
+  function more(judul, isi){
+    return '<details class="more"><summary>' + judul + '</summary><div>' + isi + '</div></details>';
+  }
+
+  function kartu(label, p){
+    var w = p.w, u = p.usia;
+    var shioHtml;
+    if (p.shio.ambigu){
+      shioHtml = '<p>Lahir antara 21 Januari dan 20 Februari. Pilih status Imlek pada form agar shio dapat dihitung.</p>';
+    } else {
+      var s = SHIO[p.shio.i];
+      shioHtml = '<p><strong>' + s.n + ' ' + p.shio.elemen + '</strong> (' + (p.shio.yang ? 'Yang' : 'Yin') + ')</p>' +
+        bagian('Shio ' + s.n + '.', s, 'Perlu dijaga:', 'w') +
+        '<p><strong>Unsur ' + p.shio.elemen + '.</strong> ' + WATAK_ELEMEN[p.shio.elemen].charAt(0).toUpperCase() + WATAK_ELEMEN[p.shio.elemen].slice(1) + '.</p>';
+    }
+    var z = ZODIAK[p.zod];
+    var a = ANGKA_HIDUP[p.lp];
+
     return '<article class="weton-card">' +
-      '<div class="name">' + judul + '</div>' + sub +
+      '<div class="name">' + label + '</div>' +
       '<div class="weton">' + w.dina + ' ' + w.pasaran + '</div>' +
-      '<div class="date">Lahir ' + w.tglLahir + (w.maju ? ' (setelah Maghrib)' : '') + '</div>' +
+      '<div class="date">Lahir ' + w.tglLahir + (w.maju ? ' (setelah Maghrib)' : '') +
+        ' &middot; usia ' + u.y + ' th ' + u.m + ' bln ' + u.d + ' hr</div>' +
       '<div class="neptu-row">' +
         '<span>' + w.dina + ' ' + w.nd + '</span><span>+</span><span>' + w.pasaran + ' ' + w.np + '</span>' +
         '<span class="tot"><small>Neptu</small>' + w.total + '</span>' +
       '</div>' +
       '<div class="watak">' +
         '<h4>Gambaran watak</h4>' +
-        '<p><strong>' + w.dina + '</strong> ' + WATAK_DINA[w.dina].k + ' <em>Perlu dijaga: ' + WATAK_DINA[w.dina].w.charAt(0).toLowerCase() + WATAK_DINA[w.dina].w.slice(1) + '</em></p>' +
-        '<p><strong>' + w.pasaran + '</strong> ' + WATAK_PASARAN[w.pasaran].k + ' <em>Perlu dijaga: ' + WATAK_PASARAN[w.pasaran].w.charAt(0).toLowerCase() + WATAK_PASARAN[w.pasaran].w.slice(1) + '</em></p>' +
-      '</div></article>';
+        bagian(w.dina, WATAK_DINA[w.dina], 'Perlu dijaga:', 'w') +
+        bagian(w.pasaran, WATAK_PASARAN[w.pasaran], 'Perlu dijaga:', 'w') +
+      '</div>' +
+      more('Watak berdasarkan jumlah neptu (' + w.total + ')', bagian('Neptu ' + w.total + '.', WATAK_NEPTU[w.total], 'Perlu dijaga:', 'w')) +
+      more('Rezeki dan peruntungan',
+        bagian(w.dina + '.', REZEKI_DINA[w.dina], 'Saran:', 's') +
+        bagian(w.pasaran + '.', REZEKI_PASARAN[w.pasaran], 'Saran:', 's')) +
+      more('Shio dan unsur kelahiran', shioHtml) +
+      more('Zodiak dan angka hidup',
+        '<p><strong>' + p.zod + '</strong> (unsur ' + z.e + '). ' + z.k + '</p>' +
+        '<p><strong>Angka hidup ' + p.lp + '.</strong> ' + a.k + ' <em>Perlu dijaga: ' + a.w + '</em></p>') +
+    '</article>';
+  }
+
+  function infoCard(judul, hasil, calc, tone, label, detail){
+    return '<article class="info-card">' +
+      '<h4>' + judul + '</h4>' +
+      '<div class="res">' + hasil + '</div>' +
+      (calc ? '<div class="calc2">' + calc + '</div>' : '') +
+      (label ? '<span class="chip ' + tone + '">' + label + '</span>' : '') +
+      '<p>' + detail + '</p>' +
+    '</article>';
+  }
+
+  function fmtUsia(u){ return u.y + ' th ' + u.m + ' bln'; }
+
+  function kartuUsia(p1, p2){
+    var tua = p1, muda = p2, tuaLabel = 'calon pria';
+    var t1 = Date.UTC(p1.y, p1.m-1, p1.d), t2 = Date.UTC(p2.y, p2.m-1, p2.d);
+    if (t1 > t2){ tua = p2; muda = p1; tuaLabel = 'calon wanita'; }
+    var sel = (t1 === t2) ? {y:0, m:0, d:0} : hitungUsia(tua.y, tua.m, tua.d, new Date(muda.y, muda.m-1, muda.d));
+    var selisihTxt = (t1 === t2) ? 'Seusia (lahir pada tanggal yang sama)' :
+      'Selisih ' + sel.y + ' th ' + sel.m + ' bln (' + tuaLabel + ' lebih tua)';
+
+    var kurang = [];
+    if (p1.usia.y < 19) kurang.push('calon pria');
+    if (p2.usia.y < 19) kurang.push('calon wanita');
+    var ok = kurang.length === 0;
+    var detail = ok ?
+      'Keduanya telah mencapai batas usia minimal perkawinan, yaitu 19 tahun, sesuai UU No. 16 Tahun 2019.' :
+      'Usia ' + kurang.join(' dan ') + ' belum mencapai 19 tahun. Menurut UU No. 16 Tahun 2019, perkawinan pada usia di bawah itu hanya dapat dilakukan dengan dispensasi dari pengadilan.';
+    return infoCard('Usia dan kesiapan menikah', selisihTxt,
+      'Pria ' + fmtUsia(p1.usia) + ' &middot; Wanita ' + fmtUsia(p2.usia),
+      ok ? 'good' : 'warn', ok ? 'Memenuhi batas usia' : 'Perlu perhatian', detail);
+  }
+
+  function kartuPancasuda(jumlah){
+    var sisa = jumlah % 5; if (sisa === 0) sisa = 5;
+    var h = PANCASUDA[sisa];
+    return infoCard('Kecocokan Pancasuda', h.nama,
+      jumlah + ' &divide; 5, sisa ' + (jumlah % 5) + (jumlah % 5 === 0 ? ' (dihitung 5)' : ''),
+      h.tone, TONE_LABEL[h.tone], h.ket + ' Pancasuda memiliki beberapa versi perhitungan, sehingga hasilnya bisa berbeda dari rujukan lain.');
+  }
+
+  function kartuShio(p1, p2){
+    if (p1.shio.ambigu || p2.shio.ambigu){
+      return infoCard('Kecocokan shio dan unsur', 'Menunggu pilihan Imlek', '', '', '',
+        'Salah satu calon lahir antara 21 Januari dan 20 Februari. Pilih apakah kelahirannya sebelum atau sesudah Imlek tahun itu, lalu hitung ulang.');
+    }
+    var a = p1.shio, b = p2.shio;
+    var c = cocokShio(a.i, b.i);
+    return infoCard('Kecocokan shio dan unsur', SHIO[a.i].n + ' &amp; ' + SHIO[b.i].n,
+      'Pria: ' + SHIO[a.i].n + ' ' + a.elemen + ' &middot; Wanita: ' + SHIO[b.i].n + ' ' + b.elemen,
+      c.tone, c.t, c.ket + ' ' + relElemen(a.elemen, b.elemen));
+  }
+
+  function kartuZodiak(p1, p2){
+    var c = cocokZodiak(ZODIAK[p1.zod].e, ZODIAK[p2.zod].e);
+    return infoCard('Kecocokan zodiak', p1.zod + ' &amp; ' + p2.zod,
+      'Unsur ' + ZODIAK[p1.zod].e + ' dan ' + ZODIAK[p2.zod].e,
+      c.tone, c.t, c.ket + ' Angka hidup: pria ' + p1.lp + ', wanita ' + p2.lp + '.');
+  }
+
+  function dataOrang(n){
+    var v = $('tgl' + n).value, pr = v.split('-');
+    var y = +pr[0], m = +pr[1], d = +pr[2];
+    return {
+      y:y, m:m, d:d,
+      w:hitungWeton(v, $('mg' + n).checked),
+      usia:hitungUsia(y, m, d, new Date()),
+      shio:hitungShio(y, m, d, $('im' + n).value),
+      zod:hitungZodiak(m, d),
+      lp:hitungAngkaHidup(y, m, d)
+    };
   }
 
   function tampilkan(){
@@ -375,14 +670,19 @@ footer{
       $('results').classList.remove('show');
       return;
     }
+    var now = new Date(), hariIni = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    function lahir(v){ var p = v.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+    if (lahir(v1) > hariIni || lahir(v2) > hariIni){
+      err.textContent = 'Tanggal lahir tidak boleh melewati hari ini.';
+      err.classList.add('show');
+      $('results').classList.remove('show');
+      return;
+    }
 
-    var n1 = '', n2 = '';
-    var w1 = hitungWeton(v1, $('mg1').checked);
-    var w2 = hitungWeton(v2, $('mg2').checked);
+    var p1 = dataOrang(1), p2 = dataOrang(2);
+    $('wetons').innerHTML = kartu('Calon pria', p1) + kartu('Calon wanita', p2);
 
-    $('wetons').innerHTML = kartu('Calon pria', n1, w1) + kartu('Calon wanita', n2, w2);
-
-    var jumlah = w1.total + w2.total;
+    var jumlah = p1.w.total + p2.w.total;
     var sisa = jumlah % 8; if (sisa === 0) sisa = 8;
     var h = HASIL[sisa];
 
@@ -392,7 +692,7 @@ footer{
 
     $('verdictWrap').innerHTML =
       '<section class="verdict" aria-label="Hasil kecocokan">' +
-        '<div class="calc"><span><b>' + w1.total + '</b> + <b>' + w2.total + '</b> = <b>' + jumlah + '</b></span>' +
+        '<div class="calc"><span><b>' + p1.w.total + '</b> + <b>' + p2.w.total + '</b> = <b>' + jumlah + '</b></span>' +
         '<span>&divide; 8, sisa <b>' + (jumlah % 8) + '</b>' + (jumlah % 8 === 0 ? ' (dihitung 8)' : '') + '</span></div>' +
         '<h3>' + h.nama + '</h3>' +
         '<span class="tone ' + (h.tone === 'warn' ? 'warn' : '') + '">' + TONE_LABEL[h.tone] + '</span>' +
@@ -400,14 +700,33 @@ footer{
         '<div class="scale" aria-hidden="true">' + scale + '</div>' +
       '</section>';
 
+    $('extraWrap').innerHTML =
+      '<div class="extra">' +
+        kartuPancasuda(jumlah) +
+        kartuShio(p1, p2) +
+        kartuZodiak(p1, p2) +
+        kartuUsia(p1, p2) +
+      '</div>';
+
     var res = $('results');
     res.classList.add('show');
     res.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
   }
 
+  function toggleImlek(n){
+    var v = $('tgl' + n).value, box = $('imlek' + n), tampil = false;
+    if (validDate(v)){
+      var p = v.split('-'), md = (+p[1]) * 100 + (+p[2]);
+      tampil = md >= 121 && md <= 220;
+    }
+    box.hidden = !tampil;
+    if (!tampil) $('im' + n).value = '';
+  }
+
   function reset(){
-    ['tgl1','tgl2'].forEach(function(id){ $(id).value = ''; });
+    ['tgl1','tgl2','im1','im2'].forEach(function(id){ $(id).value = ''; });
     $('mg1').checked = false; $('mg2').checked = false;
+    toggleImlek(1); toggleImlek(2);
     $('err').classList.remove('show');
     $('results').classList.remove('show');
     $('tgl1').focus();
@@ -415,6 +734,8 @@ footer{
 
   $('btnHitung').addEventListener('click', tampilkan);
   $('btnReset').addEventListener('click', reset);
+  $('tgl1').addEventListener('change', function(){ toggleImlek(1); });
+  $('tgl2').addEventListener('change', function(){ toggleImlek(2); });
   $('yr').textContent = new Date().getFullYear();
 })();
 </script>
