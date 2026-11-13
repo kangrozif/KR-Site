@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Psikotes Anak TK - Masuk SD/MI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EAF4FB; --ink:#2B2540; --card:#FFFFFF; --sky:#3FA7E0; --sun:#FFC83D;
+  --leaf:#3DBE7A; --berry:#E0507A; --line:#C9DDEB;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Nunito','Trebuchet MS',system-ui,sans-serif; font-weight:600;
+  min-height:100vh; display:flex; justify-content:center; padding:16px;
+}
+h1,h2{font-family:'Baloo 2','Trebuchet MS',system-ui,sans-serif; margin:0; line-height:1.15}
+.app{width:100%; max-width:640px}
+.card{background:var(--card); border-radius:28px; padding:24px; border:3px solid var(--line)}
+.hidden{display:none !important}
+
+.hero{text-align:center}
+.hero .big{font-size:72px; line-height:1}
+.hero h1{font-size:34px; margin:10px 0 6px}
+.hero p{margin:0 0 18px; font-size:18px}
+label{display:block; text-align:left; font-weight:800; margin-bottom:6px}
+input[type=text]{
+  width:100%; font:inherit; font-size:20px; padding:14px 16px; border-radius:16px;
+  border:3px solid var(--line); color:var(--ink); background:#fff;
+}
+input[type=text]:focus{outline:4px solid var(--sun); border-color:var(--sun)}
+.btn{
+  font-family:'Baloo 2',system-ui,sans-serif; font-size:22px; font-weight:700;
+  background:var(--sky); color:#fff; border:0; border-radius:18px; padding:14px 28px;
+  cursor:pointer; margin-top:16px; min-height:56px; box-shadow:0 5px 0 #2582B8;
+}
+.btn:active{transform:translateY(4px); box-shadow:0 1px 0 #2582B8}
+.btn:focus-visible,.opt:focus-visible{outline:4px solid var(--sun); outline-offset:3px}
+.btn.alt{background:var(--leaf); box-shadow:0 5px 0 #28965C}
+
+.top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px}
+.dots{display:flex; gap:6px; flex-wrap:wrap}
+.dot{width:14px; height:14px; border-radius:50%; background:var(--line)}
+.dot.done{background:var(--leaf)}
+.dot.now{background:var(--sun); outline:3px solid var(--ink)}
+.count{font-weight:800; white-space:nowrap}
+.q{font-size:28px; text-align:center; margin:10px 0 6px}
+.stage{
+  min-height:110px; display:flex; align-items:center; justify-content:center;
+  font-size:56px; letter-spacing:6px; margin:6px 0 14px; text-align:center; flex-wrap:wrap;
+}
+.opts{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+.opt{
+  background:#fff; border:4px solid var(--line); border-radius:22px; cursor:pointer;
+  min-height:130px; padding:10px; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:6px; font:inherit; color:var(--ink);
+}
+.opt .v{font-size:52px; line-height:1}
+.opt .t{font-size:20px; font-weight:800; line-height:1.2}
+.opt:hover{border-color:var(--sky)}
+.opt.picked{border-color:var(--berry); background:#FFF0F4}
+.bar{height:14px; border-radius:8px; background:var(--berry)}
+.bars{width:100%}
+.hint{text-align:center; font-size:15px; margin-top:12px; opacity:.75}
+
+.score{text-align:center}
+.score .big{font-size:64px}
+.score h2{font-size:30px}
+.num{font-family:'Baloo 2',sans-serif; font-size:56px; font-weight:700; color:var(--sky)}
+.badge{display:inline-block; padding:8px 20px; border-radius:99px; font-weight:800; font-size:20px; color:#fff; margin:6px 0 10px}
+.b-siap{background:var(--leaf)} .b-cukup{background:#E5A100} .b-damping{background:var(--berry)}
+.tw{overflow-x:auto}
+table{width:100%; border-collapse:collapse; margin-top:14px; font-size:15px}
+th,td{padding:8px 6px; border-bottom:2px solid var(--line); text-align:left; vertical-align:top}
+th{font-family:'Baloo 2',sans-serif}
+.ok{color:#1E8C55; font-weight:800} .no{color:var(--berry); font-weight:800}
+.key{font-size:22px}
+.note{font-size:14px; opacity:.8; margin-top:10px}
+.actions{display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
+
+@media (max-width:420px){
+  .q{font-size:23px} .stage{font-size:44px} .opt .v{font-size:42px} .opt{min-height:110px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .opt{transition:border-color .15s, background .15s}
+}
+@media print{
+  body{background:#fff; padding:0}
+  .card{border:0} .actions{display:none}
+}
+</style>
+</head>
+<body>
+<main class="app">
+
+  <section id="start" class="card hero">
+    <div class="big" aria-hidden="true">🎒</div>
+    <h1>Ayo Main Tebak-Tebakan!</h1>
+    <p>Ada 10 pertanyaan. Pilih gambar atau jawaban yang menurutmu benar.</p>
+    <label for="nama">Nama anak</label>
+    <input id="nama" type="text" maxlength="40" placeholder="Ketik nama di sini" autocomplete="off">
+    <button class="btn" id="btnMulai" type="button">Mulai</button>
+    <p class="hint">Bank soal 100 butir. Setiap tes menampilkan 10 soal acak, satu dari tiap aspek.</p>
+  </section>
+
+  <section id="quiz" class="card hidden" aria-live="polite">
+    <div class="top">
+      <div class="dots" id="dots" aria-hidden="true"></div>
+      <div class="count" id="count"></div>
+    </div>
+    <h2 class="q" id="qText"></h2>
+    <div class="stage" id="stage"></div>
+    <div class="opts" id="opts"></div>
+    <p class="hint">Sentuh jawabanmu, lalu lanjut otomatis.</p>
+  </section>
+
+  <section id="result" class="card hidden">
+    <div class="score">
+      <div class="big" aria-hidden="true">⭐</div>
+      <h2 id="rName"></h2>
+      <div class="num" id="rScore"></div>
+      <div class="badge" id="rBadge"></div>
+      <p id="rDesc" style="margin:0"></p>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>No</th><th>Aspek</th><th>Soal</th><th>Hasil</th><th>Kunci</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="note">Skor: benar = 1, salah = 0 (maksimal 10). 8-10 siap, 5-7 cukup siap, 4 atau kurang perlu pendampingan. Hasil ini gambaran awal kesiapan, bukan diagnosis.</p>
+    <div class="actions">
+      <button class="btn alt" id="btnUlang" type="button">Tes baru</button>
+      <button class="btn" id="btnCetak" type="button">Cetak hasil</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  /* ===== BANK SOAL: 10 aspek x 10 soal = 100 ===== */
+  // Format: [teks soal, tampilan di atas, jawaban benar, salah 1, salah 2]
+  var BANK = {};
+
+  BANK["Mengenal warna"] = [
+    ["Mana yang warna merah?","","🟥","🟦","🟩"],
+    ["Mana yang warna kuning?","","🟨","🟥","🟦"],
+    ["Mana yang warna biru?","","🟦","🟨","🟩"],
+    ["Mana yang warna hijau?","","🟩","🟥","🟧"],
+    ["Mana yang warna oranye?","","🟧","🟦","🟩"],
+    ["Mana yang warna ungu?","","🟪","🟨","🟥"],
+    ["Mana yang warna hitam?","","⬛","⬜","🟨"],
+    ["Apel biasanya berwarna apa?","🍎","Merah","Biru","Ungu"],
+    ["Daun biasanya berwarna apa?","🍃","Hijau","Merah","Hitam"],
+    ["Langit saat cerah berwarna apa?","☀️","Biru","Hijau","Merah"]
+  ];
+
+  BANK["Mengenal bentuk"] = [
+    ["Mana yang bentuk lingkaran?","","⚪","⬜","🔺"],
+    ["Mana yang bentuk segitiga?","","🔺","⚪","⬜"],
+    ["Mana yang bentuk kotak?","","⬜","🔺","⚪"],
+    ["Mana yang bulat seperti bola?","⚽","⚪","⬜","🔺"],
+    ["Mana yang seperti atap rumah?","🏠","🔺","⚪","⬜"],
+    ["Mana yang bentuk bintang?","","⭐","❤️","🌙"],
+    ["Mana yang bentuk hati?","","❤️","⭐","🌙"],
+    ["Mana yang bentuk bulan sabit?","","🌙","⭐","❤️"],
+    ["Roda sepeda bentuknya apa?","🚲","Bulat","Kotak","Segitiga"],
+    ["Jendela rumah biasanya bentuk apa?","🪟","Kotak","Bulat","Segitiga"]
+  ];
+
+  var CNT = [["🍎",2],["⭐",3],["⚽",4],["🐟",5],["🌸",6],["🍪",7],["🎈",8]];
+  BANK["Berhitung"] = CNT.map(function(c){
+    var s = ""; for(var i=0;i<c[1];i++) s += c[0];
+    return ["Ada berapa jumlahnya?", s, String(c[1]), String(c[1]-1), String(c[1]+1)];
+  }).concat([
+    ["Mana angka yang paling besar?","","9","2","5"],
+    ["Satu ditambah satu sama dengan berapa?","🍎 + 🍎","2","3","1"],
+    ["Dua ditambah satu sama dengan berapa?","🍎🍎 + 🍎","3","2","4"]
+  ]);
+
+  BANK["Perbandingan ukuran"] = [
+    ["Mana yang paling besar?","","🐘","🐜","🐭"],
+    ["Mana yang paling kecil?","","🐜","🐘","🐄"],
+    {t:"Mana yang lebih panjang?", s:"", o:[{b:35,l:"Pendek"},{b:100,l:"Panjang",c:1},{b:68,l:"Sama saja"}]},
+    {t:"Mana yang lebih pendek?", s:"", o:[{b:100,l:"Panjang"},{b:30,l:"Pendek",c:1},{b:70,l:"Sedang"}]},
+    ["Mana yang paling tinggi?","","🦒","🐇","🐈"],
+    ["Mana yang paling berat?","","🪨","🪶","🍃"],
+    ["Mana yang paling cepat?","","✈️","🐢","🐌"],
+    ["Mana yang paling lambat?","","🐌","🚗","🐇"],
+    ["Mana yang paling besar?","","🚌","🚲","🛴"],
+    ["Mana yang paling kecil?","","🐭","🐄","🐻"]
+  ];
+
+  BANK["Klasifikasi"] = [
+    ["Mana yang bukan buah?","","🐱","🍎","🍌"],
+    ["Mana yang bukan hewan?","","🍎","🐱","🐶"],
+    ["Mana yang bukan kendaraan?","","🌳","🚗","🚌"],
+    ["Mana yang bukan sayuran?","","🐟","🥕","🥦"],
+    ["Mana yang bukan pakaian?","","🥄","👕","👖"],
+    ["Mana yang bukan alat tulis?","","🍎","✏️","🖍️"],
+    ["Mana yang bukan alat makan?","","⚽","🥄","🍴"],
+    ["Mana yang bukan bunga?","","🚗","🌹","🌻"],
+    ["Mana yang bukan hewan bersayap?","","🐘","🐦","🦋"],
+    ["Mana yang bukan minuman?","","🍞","🥛","🧃"]
+  ];
+
+  BANK["Pola"] = [
+    ["Lanjutkan pola ini. Apa berikutnya?","🔺⚪🔺⚪🔺❓","⚪","🔺","⬜"],
+    ["Lanjutkan pola ini. Apa berikutnya?","🔴🔵🔴🔵🔴❓","🔵","🔴","🟢"],
+    ["Lanjutkan pola ini. Apa berikutnya?","⭐🌙⭐🌙⭐❓","🌙","⭐","❤️"],
+    ["Lanjutkan pola ini. Apa berikutnya?","🍎🍎🍌🍎🍎❓","🍌","🍎","🍇"],
+    ["Lanjutkan pola ini. Apa berikutnya?","🐱🐶🐱🐶🐱❓","🐶","🐱","🐭"],
+    ["Lanjutkan pola ini. Apa berikutnya?","🟥🟦🟩🟥🟦❓","🟩","🟥","🟦"],
+    ["Lanjutkan pola ini. Apa berikutnya?","⚽⚽🏀⚽⚽❓","🏀","⚽","🎾"],
+    ["Lanjutkan pola ini. Apa berikutnya?","1 2 1 2 1 ❓","2","1","3"],
+    ["Lanjutkan pola ini. Apa berikutnya?","🔺🔺⚪🔺🔺❓","⚪","🔺","⬜"],
+    ["Lanjutkan pola ini. Apa berikutnya?","🌞🌧️🌞🌧️🌞❓","🌧️","🌞","⭐"]
+  ];
+
+  BANK["Fungsi benda"] = [
+    ["Mana yang dipakai untuk menulis?","","✏️","🥄","🪥"],
+    ["Mana yang dipakai untuk makan nasi?","","🥄","✏️","👟"],
+    ["Mana yang dipakai untuk menggunting kertas?","","✂️","🥄","🧦"],
+    ["Mana yang dipakai untuk menggosok gigi?","","🪥","🥄","📚"],
+    ["Mana yang dipakai di kaki?","","👟","🧢","🧤"],
+    ["Mana yang dipakai di kepala?","","🧢","👟","🧦"],
+    ["Mana yang dipakai untuk membaca?","","📖","🥄","⚽"],
+    ["Mana yang dipakai untuk menelepon?","","📱","🥄","⚽"],
+    ["Mana yang dipakai untuk menyapu lantai?","","🧹","🥄","✏️"],
+    ["Mana yang dipakai untuk minum?","","🥛","👟","📚"]
+  ];
+
+  BANK["Penalaran sehari-hari"] = [
+    ["Kalau hujan, kita memakai apa?","🌧️","☂️","🧤","🕶️"],
+    ["Kalau matahari sangat terik, kita memakai apa?","☀️","🧢","🧤","🧣"],
+    ["Kalau lapar, kita harus apa?","","Makan","Tidur","Bermain"],
+    ["Kalau haus, kita harus apa?","","Minum","Menggambar","Tidur"],
+    ["Kalau mengantuk, kita harus apa?","😴","Tidur","Berlari","Menyanyi"],
+    ["Kalau tangan kotor, kita harus apa?","","Mencuci tangan","Tidur","Berlari"],
+    ["Kalau lampu lalu lintas merah, kita harus apa?","🔴🚦","Berhenti","Jalan terus","Berlari"],
+    ["Sebelum makan, kita harus apa?","🍚","Mencuci tangan","Berlari","Tidur"],
+    ["Kalau bertemu guru, kita harus apa?","👩‍🏫","Memberi salam","Berteriak","Berlari pergi"],
+    ["Kalau diberi hadiah, kita harus apa?","🎁","Berterima kasih","Marah","Menangis"]
+  ];
+
+  BANK["Kecocokan visual"] = [
+    ["Mana yang sama dengan gambar ini?","🏠","🏠","🚗","🌳"],
+    ["Mana yang sama dengan gambar ini?","🚗","🚗","🏠","✈️"],
+    ["Mana yang sama dengan gambar ini?","🐱","🐱","🐶","🐭"],
+    ["Mana yang sama dengan gambar ini?","🌳","🌳","🌸","🍎"],
+    ["Mana yang sama dengan gambar ini?","⭐","⭐","🌙","❤️"],
+    ["Mana yang sama dengan gambar ini?","🍎","🍎","🍊","🍌"],
+    ["Mana yang sama dengan gambar ini?","⚽","⚽","🏀","🎾"],
+    ["Mana yang berbeda dari yang lain?","🐱 🐱 🐶 🐱","🐶","🐱","🐭"],
+    ["Mana yang berbeda dari yang lain?","🍎 🍎 🍎 🍌","🍌","🍎","🍇"],
+    ["Mana yang berbeda dari yang lain?","🔺 🔺 ⚪ 🔺","⚪","🔺","⬜"]
+  ];
+
+  BANK["Pengetahuan umum"] = [
+    ["Lawan kata dari besar adalah?","","Kecil","Panjang","Merah"],
+    ["Lawan kata dari panas adalah?","","Dingin","Manis","Berat"],
+    ["Apa yang bersinar di langit pada siang hari?","","☀️","🌙","⭐"],
+    ["Kita mendengar dengan apa?","","👂","👁️","👃"],
+    ["Kita melihat dengan apa?","","👁️","👂","🦶"],
+    ["Kita mencium bau dengan apa?","","👃","👁️","🦶"],
+    ["Berapa jumlah mata kita?","👀","2","3","1"],
+    ["Hewan mana yang menggonggong?","","🐶","🐱","🐮"],
+    ["Hewan mana yang mengeong?","","🐱","🐶","🐔"],
+    ["Hewan mana yang bertelur?","","🐔","🐮","🐱"]
+  ];
+
+  /* ===== Bentuk data seragam ===== */
+  var CATS = Object.keys(BANK);
+  var POOL = {}; // aspek -> daftar soal {id, a, t, s, o, key}
+  CATS.forEach(function(cat, ci){
+    POOL[cat] = BANK[cat].map(function(r, i){
+      var id = ci + "-" + i, q;
+      if(Array.isArray(r)){
+        q = {t:r[0], s:r[1], key:r[2], o:[{x:r[2],c:1},{x:r[3]},{x:r[4]}]};
+      } else {
+        q = {t:r.t, s:r.s, o:r.o, key:""};
+        r.o.forEach(function(o){ if(o.c) q.key = o.l; });
+      }
+      q.id = id; q.a = cat;
+      return q;
+    });
+  });
+
+  /* ===== Utilitas ===== */
+  var $ = function(id){return document.getElementById(id)};
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]}); }
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+  var SEEN_KEY = "psikotes_tk_seen";
+  function loadSeen(){
+    try{ return JSON.parse(localStorage.getItem(SEEN_KEY)) || []; }catch(e){ return []; }
+  }
+  function saveSeen(list){
+    try{ localStorage.setItem(SEEN_KEY, JSON.stringify(list)); }catch(e){}
+  }
+
+  /* Pilih 10 soal: satu dari tiap aspek, utamakan yang belum pernah muncul, urutan diacak */
+  function buildTest(){
+    var seen = loadSeen(), picked = [];
+    CATS.forEach(function(cat){
+      var all = POOL[cat];
+      var fresh = all.filter(function(q){ return seen.indexOf(q.id) === -1; });
+      if(!fresh.length){
+        seen = seen.filter(function(id){ return id.split("-")[0] !== String(CATS.indexOf(cat)); });
+        fresh = all;
+      }
+      var q = fresh[Math.floor(Math.random()*fresh.length)];
+      picked.push(q);
+      seen.push(q.id);
+    });
+    saveSeen(seen);
+    return shuffle(picked);
+  }
+
+  /* ===== Alur tes ===== */
+  var test = [], idx = 0, answers = [], nama = "", locked = false;
+
+  function show(id){
+    ["start","quiz","result"].forEach(function(s){ $(s).classList.toggle("hidden", s!==id); });
+    window.scrollTo(0,0);
+  }
+  function renderDots(){
+    var h="";
+    for(var i=0;i<test.length;i++){
+      h += '<span class="dot'+(i<idx?' done':(i===idx?' now':''))+'"></span>';
+    }
+    $("dots").innerHTML = h;
+  }
+  function optHtml(o){
+    if(o.b) return '<span class="bars"><div class="bar" style="width:'+o.b+'%"></div></span><span class="t" style="font-size:18px">'+esc(o.l)+'</span>';
+    var x = o.x;
+    if(/^\d+$/.test(x) || /[^\x00-\x7F]/.test(x)) return '<span class="v">'+esc(x)+'</span>';
+    return '<span class="t">'+esc(x)+'</span>';
+  }
+  function renderQ(){
+    locked = false;
+    var q = test[idx];
+    renderDots();
+    $("count").textContent = "Soal " + (idx+1) + " dari " + test.length;
+    $("qText").textContent = q.t;
+    $("stage").textContent = q.s || "";
+    $("stage").style.display = q.s ? "flex" : "none";
+    var opts = shuffle(q.o), h = "";
+    opts.forEach(function(o,i){
+      h += '<button type="button" class="opt" data-i="'+i+'">'+optHtml(o)+'</button>';
+    });
+    $("opts").innerHTML = h;
+    $("opts").querySelectorAll(".opt").forEach(function(b,i){
+      b.addEventListener("click", function(){ pick(opts[i], b); });
+    });
+  }
+  function pick(o, el){
+    if(locked) return;
+    locked = true;
+    el.classList.add("picked");
+    answers.push({ok: !!o.c});
+    setTimeout(function(){
+      idx++;
+      if(idx < test.length) renderQ(); else finish();
+    }, 450);
+  }
+  function finish(){
+    var score = answers.filter(function(a){return a.ok}).length;
+    var cls, label, desc;
+    if(score >= 8){ cls="b-siap"; label="Siap"; desc="Anak menunjukkan kesiapan yang baik untuk masuk SD/MI."; }
+    else if(score >= 5){ cls="b-cukup"; label="Cukup siap"; desc="Kesiapan cukup baik. Beberapa aspek perlu dilatih lagi di rumah."; }
+    else { cls="b-damping"; label="Perlu pendampingan"; desc="Anak perlu pendampingan dan latihan bertahap sebelum masuk SD/MI."; }
+
+    $("rName").textContent = nama ? "Hasil " + nama : "Hasil Psikotes";
+    $("rScore").textContent = score + " / " + test.length;
+    var b = $("rBadge"); b.textContent = label; b.className = "badge " + cls;
+    $("rDesc").textContent = desc;
+
+    var rows = "";
+    test.forEach(function(q,i){
+      var ok = answers[i].ok;
+      rows += "<tr><td>"+(i+1)+"</td><td>"+esc(q.a)+"</td><td>"+esc(q.t)+(q.s?" "+esc(q.s):"")+"</td><td class='"+(ok?"ok":"no")+"'>"+(ok?"Benar":"Salah")+"</td><td class='key'>"+esc(q.key)+"</td></tr>";
+    });
+    $("rows").innerHTML = rows;
+    show("result");
+  }
+  function start(){
+    nama = $("nama").value.trim();
+    test = buildTest(); idx = 0; answers = [];
+    show("quiz"); renderQ();
+  }
+
+  $("btnMulai").addEventListener("click", start);
+  $("nama").addEventListener("keydown", function(e){ if(e.key==="Enter") start(); });
+  $("btnUlang").addEventListener("click", function(){ $("nama").value=""; show("start"); });
+  $("btnCetak").addEventListener("click", function(){ window.print(); });
+})();
+</script>
+</body>
+</html>
